@@ -17,11 +17,11 @@ RUN apt-get install -y sudo
 RUN yes | ./apt_install_dependency.sh
 RUN ./cmake_configure.sh
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
+FROM emgucv AS base
 WORKDIR /libs
 COPY --from=emgucv /vendor/emgucv/libs .
 ENV LD_LIBRARY_PATH=/libs
-ENV LD_DEBUG=libs
+ENV LD_DEBUG=files
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443

@@ -59,7 +59,7 @@ namespace NVs.OccupancySensor.API.Controllers
 
             var emguCvBuild = CvInvoke.BuildInformation;
 
-            return $"Version: {version}" + Environment.NewLine + hostInfo + Environment.NewLine + emguCvBuild;
+            return $"Version: {version}" + Environment.NewLine + hostInfo + Environment.NewLine + "EmguCV Build information:" + Environment.NewLine + emguCvBuild;
         }
     }
 }
