@@ -4,9 +4,14 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UserSecretsId>5caab80b-6b86-42e5-b230-6ffbf26ddf4c</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <Version>0.0.0</Version>
+    <DockerfileFastModeStage>base</DockerfileFastModeStage>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Emgu.CV" Version="4.4.0.4099" />
+    <PackageReference Include="Emgu.CV.runtime.raspbian" Version="4.4.0.4099" />
+    <PackageReference Include="Emgu.CV.runtime.ubuntu" Version="4.4.0.4099" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
   </ItemGroup>
 
