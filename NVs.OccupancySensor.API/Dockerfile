@@ -21,7 +21,6 @@ FROM emgucv AS base
 WORKDIR /libs
 COPY --from=emgucv /vendor/emgucv/libs .
 ENV LD_LIBRARY_PATH=/libs
-ENV LD_DEBUG=files
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
