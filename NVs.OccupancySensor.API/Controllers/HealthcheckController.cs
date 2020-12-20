@@ -9,21 +9,21 @@ namespace NVs.OccupancySensor.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class HealthcheckController : ControllerBase
+    public sealed class HealthcheckController : ControllerBase
     {
-        private readonly ILogger<HealthcheckController> _logger;
-        private readonly IConfiguration _configuration;
+        private readonly ILogger<HealthcheckController> logger;
+        private readonly IConfiguration configuration;
 
         public HealthcheckController(ILogger<HealthcheckController> logger, IConfiguration configuration)
         {
-            _logger = logger;
-            _configuration = configuration;
+            this.logger = logger;
+            this.configuration = configuration;
         }
 
         [HttpGet]
         public string Get()
         {
-            _logger.Log(LogLevel.Trace, "Healthcheck called");
+            logger.Log(LogLevel.Trace, "Healthcheck called");
 
             return "OK";
         }
@@ -31,9 +31,9 @@ namespace NVs.OccupancySensor.API.Controllers
         [HttpGet("versionadv")]
         public string VersionAdv()
         {
-            _logger.Log(LogLevel.Trace, "VersionAdv called");
+            logger.Log(LogLevel.Trace, "VersionAdv called");
 
-            var version = _configuration["Version"];
+            var version = configuration["Version"];
 
             var psi = new ProcessStartInfo("sh", "-c \"uname -a\"")
             {

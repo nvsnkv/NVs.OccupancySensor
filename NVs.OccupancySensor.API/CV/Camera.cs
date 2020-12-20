@@ -83,9 +83,10 @@ namespace NVs.OccupancySensor.API.CV
                 return;
             }
 
-            IObserver<Mat>[] targets = { };
+            IObserver<Mat>[] targets;
             lock (observersLock)
             {
+                targets = new IObserver<Mat>[observers.Count];
                 observers.CopyTo(targets);
             }
 

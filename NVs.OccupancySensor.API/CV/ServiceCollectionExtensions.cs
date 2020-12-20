@@ -31,5 +31,11 @@ namespace NVs.OccupancySensor.API.CV
                 return new Camera(capture, new CancellationTokenSource(), logger, frameInterval);
             });
         }
+
+        public static IServiceCollection AddRawImageObservers(this IServiceCollection services)
+        {
+            return services.AddScoped<RawImageObserver>(s =>
+                new RawImageObserver(s.GetService<ILogger<RawImageObserver>>()));
+        }
     }
 }
