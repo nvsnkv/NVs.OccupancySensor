@@ -13,6 +13,7 @@
     <PackageReference Include="Emgu.CV.runtime.raspbian" Version="4.4.0.4099" />
     <PackageReference Include="Emgu.CV.runtime.ubuntu" Version="4.4.0.4099" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
+    <PackageReference Include="System.Reactive" Version="5.0.0" />
   </ItemGroup>
 
 
