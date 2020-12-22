@@ -6,9 +6,9 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
 
-namespace NVs.OccupancySensor.API.CV
+namespace NVs.OccupancySensor.CV.Impl
 {
-    sealed class RawImageObserver : IObserver<Mat>
+    sealed class RawImageObserver : IImageObserver
     {
         private readonly ILogger logger;
         private readonly AutoResetEvent captureReceived = new AutoResetEvent(false);

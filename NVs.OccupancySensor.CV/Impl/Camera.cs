@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using Emgu.CV;
 using Microsoft.Extensions.Logging;
 
-namespace NVs.OccupancySensor.API.CV
+namespace NVs.OccupancySensor.CV.Impl
 {
-    sealed class Camera : IObservable<Mat>
+    sealed class Camera : ICamera
     {
         private readonly VideoCapture videoCapture;
         private readonly List<IObserver<Mat>> observers = new List<IObserver<Mat>>();

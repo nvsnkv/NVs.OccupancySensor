@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>NV's Occupancy Sensor Debug Page</title>
+    <style>
+        body {
+            background: black;
+            color: white;
+        }
+
+        li {
+            float: left;
+            display: block;
+            padding: 0 5px;
+        }
+
+        img {
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+    <ul>
+        <li><a href="/capture/frame.jpg" target="_blank">Capture Frame</a></li>
+        <li><a href="/healthcheck" target="_blank">Health Check</a></li>
+        <li><a href="/healthcheck/versionadv" target="_blank">Version Info</a></li>
+    </ul>
+
+    <img src="/capture/stream.mjpeg" />
+</body>
+</html>

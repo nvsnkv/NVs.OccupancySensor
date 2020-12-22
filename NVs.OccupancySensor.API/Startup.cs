@@ -1,10 +1,11 @@
+using System.Threading;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NVs.OccupancySensor.API.CV;
 using NVs.OccupancySensor.API.Formatters;
+using NVs.OccupancySensor.CV;
 
 namespace NVs.OccupancySensor.API
 {
@@ -20,7 +21,7 @@ namespace NVs.OccupancySensor.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCamera()
+            services.AddCamera(new CancellationTokenSource())
                 .AddRawImageObservers()
                 .AddControllers(o => o.OutputFormatters.Add(new RgbImageOutputFormatter()));
         }
@@ -39,6 +40,8 @@ namespace NVs.OccupancySensor.API
 
             app.UseAuthorization();
 
+            app.UseStaticFiles();
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

@@ -4,37 +4,37 @@ using Emgu.CV;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
+using NVs.OccupancySensor.CV.Impl;
 
-namespace NVs.OccupancySensor.API.CV
+namespace NVs.OccupancySensor.CV
 {
-    static class ServiceCollectionExtensions
+    public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddCamera(this IServiceCollection services)
+        public static IServiceCollection AddCamera(this IServiceCollection services, CancellationTokenSource cts)
         {
-            return services.AddSingleton<IObservable<Mat>>(s =>
+            return services.AddSingleton<ICamera>(s =>
             {
                 var logger = s.GetService<ILogger<Camera>>();
                 var config = s.GetService<IConfiguration>();
-                var cvSource = config.GetSection("CV")["Source"];
+                var cvSource = config?.GetSection("CV")?["Source"] ?? DefaultSettings.Source;
 
                 var capture = int.TryParse(cvSource, out int cameraIndex)
                     ? new VideoCapture(cameraIndex)
                     : new VideoCapture(cvSource);
 
-                var cvFrameInterval = config.GetSection("CV")["FrameInterval"];
+                var cvFrameInterval = config?.GetSection("CV")?["FrameInterval"];
                 if (!TimeSpan.TryParse(cvFrameInterval, out var frameInterval))
                 {
-                    frameInterval = TimeSpan.FromMilliseconds(100);
+                    frameInterval = DefaultSettings.FrameInterval;
                 }
-
-                return new Camera(capture, new CancellationTokenSource(), logger, frameInterval);
+               
+                return new Camera(capture, cts, logger, frameInterval);
             });
         }
 
         public static IServiceCollection AddRawImageObservers(this IServiceCollection services)
         {
-            return services.AddScoped<RawImageObserver>(s =>
+            return services.AddScoped<IImageObserver>(s =>
                 new RawImageObserver(s.GetService<ILogger<RawImageObserver>>()));
         }
     }
