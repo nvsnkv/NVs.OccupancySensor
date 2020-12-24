@@ -23,21 +23,19 @@ namespace NVs.OccupancySensor.CV.Tests.Playground
             videoMock = new Mock<VideoCapture>(MockBehavior.Default, 0, VideoCapture.API.Any);
         }
 
-      
-
         [Fact]
         public async Task InvokeSubscribersInParallel()
         {
             videoMock.Setup(v => v.QueryFrame()).Returns(() => new Mat());
-            
+
             /* Here is the expected behaviour:
                QueryFrame cycle submits each 100 msecs. Every Observer "processes" frame in 1 second.
                Observers should be notified independently of each other (while system resources allows that)
             
                With that being said, I'd expect at least 6 frames to be sent by Camera within 2 seconds if we have amount of observers 4 times lesser than amount of processors
-            */ 
-            
-            var observers = Enumerable.Range(0, (int)Math.Floor((double)Environment.ProcessorCount/4))
+            */
+
+            var observers = Enumerable.Range(0, (int)Math.Floor((double)Environment.ProcessorCount / 4))
                 .Select(_ => new HeavyTestMatObserver(TimeSpan.FromMilliseconds(1000)))
                 .ToList();
 
@@ -45,7 +43,7 @@ namespace NVs.OccupancySensor.CV.Tests.Playground
             {
                 Formatter = new TestLogFormatter()
             });
-            
+
             var camera = new Camera(videoMock.Object, new CancellationTokenSource(), logger,
                 TimeSpan.FromMilliseconds(100));
             var unsubscribers = observers.Select(o => camera.Subscribe(o)).ToList();
@@ -62,17 +60,20 @@ namespace NVs.OccupancySensor.CV.Tests.Playground
             for (var i = 0; i < Environment.ProcessorCount; i++)
             {
                 {
-                    Assert.Equal(observers[0].ReceivedItems.Count, observers[1].ReceivedItems.Count);
+                    Assert.True(observers[1].ReceivedItems.Count >= 6);
                 }
 
             }
 
             foreach (var mat in observers[0].ReceivedItems.Keys)
             {
-                for (var i = 1; i < Environment.ProcessorCount; i++)
+                for (var i = 1; i < observers.Count; i++)
                 {
-                    Assert.True(observers[0].ReceivedItems[mat] - observers[1].ReceivedItems[mat] <
-                                TimeSpan.FromMilliseconds(10));
+                    if (observers[i].ReceivedItems.ContainsKey(mat))
+                    {
+                        Assert.True(observers[0].ReceivedItems[mat] - observers[i].ReceivedItems[mat] <
+                                    TimeSpan.FromMilliseconds(10));
+                    }
                 }
             }
         }

@@ -66,19 +66,19 @@ namespace NVs.OccupancySensor.CV.Tests
             loggerMock
                 .Setup(
                     l => l.Log(
-                    LogLevel.Error, 
+                    LogLevel.Error,
                     It.IsAny<EventId>(),
                     It.IsAny<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>>(),
                     It.IsAny<TestException>(),
                     It.IsAny<Func<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>, Exception, string>>()))
                 .Verifiable("Logger was not called!");
-            
+
             using (new Camera(videoMock.Object, new CancellationTokenSource(), loggerMock.Object,
                 TimeSpan.FromMilliseconds(10)).Subscribe(new TestMatObserver()))
             {
                 await Task.Delay(TimeSpan.FromMilliseconds(100));
             }
-            
+
             loggerMock.Verify();
         }
 
@@ -109,8 +109,55 @@ namespace NVs.OccupancySensor.CV.Tests
             {
                 await Task.Delay(TimeSpan.FromMilliseconds(100));
             }
-            
+
             Assert.True(observer.StreamCompleted);
+        }
+
+        [Fact]
+        public async Task CompleteTheStreamIfCancellationRequested()
+        {
+            videoMock.Setup(v => v.QueryFrame()).Returns(() => new Mat());
+
+            var cts = new CancellationTokenSource();
+            var camera = new Camera(videoMock.Object, cts, loggerMock.Object,
+                TimeSpan.FromMilliseconds(10));
+            var observer = new TestMatObserver();
+
+            camera.Subscribe(observer);
+
+            // ReSharper disable MethodSupportsCancellation
+            await Task.Delay(TimeSpan.FromMilliseconds(500));
+
+            cts.Cancel();
+
+            await Task.Delay(TimeSpan.FromMilliseconds(500));
+            // ReSharper restore MethodSupportsCancellation
+
+            Assert.True(observer.StreamCompleted);
+        }
+
+        [Fact]
+        public async Task NotSendNewFramesIfCancellationRequested()
+        {
+            videoMock.Setup(v => v.QueryFrame()).Returns(() => new Mat());
+
+            var cts = new CancellationTokenSource();
+            var camera = new Camera(videoMock.Object, cts, loggerMock.Object,
+                TimeSpan.FromMilliseconds(10));
+            var observer = new TestMatObserver();
+
+            camera.Subscribe(observer);
+
+            // ReSharper disable MethodSupportsCancellation
+            await Task.Delay(TimeSpan.FromMilliseconds(500));
+
+            cts.Cancel();
+            var after = DateTime.Now;
+
+            await Task.Delay(TimeSpan.FromMilliseconds(500));
+            // ReSharper restore MethodSupportsCancellation
+
+            Assert.DoesNotContain(observer.ReceivedItems, x => x.Value > after);
         }
     }
 }
