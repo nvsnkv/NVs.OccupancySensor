@@ -17,7 +17,8 @@ namespace NVs.OccupancySensor.CV.Impl
         private readonly ILogger<Camera> logger;
         private readonly TimeSpan frameInterval;
 
-        private int framesCaptured = 0;
+        private int framesCaptured;
+        
         public Camera(VideoCapture videoCapture, CancellationTokenSource cts, ILogger<Camera> logger, TimeSpan frameInterval)
         {
             this.videoCapture = videoCapture ?? throw new ArgumentNullException(nameof(videoCapture));

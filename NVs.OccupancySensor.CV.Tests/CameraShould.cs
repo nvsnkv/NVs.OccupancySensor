@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Emgu.CV;
@@ -158,6 +159,53 @@ namespace NVs.OccupancySensor.CV.Tests
             // ReSharper restore MethodSupportsCancellation
 
             Assert.DoesNotContain(observer.ReceivedItems, x => x.Value > after);
+        }
+
+        [Fact]
+        public async Task NotifyObserversIndependently()
+        {
+            var cts = new CancellationTokenSource();
+            var invoked = false;
+            videoMock.Setup(v => v.QueryFrame()).Returns(() =>
+            {
+                if (invoked)
+                {
+                    Task.Delay(TimeSpan.MaxValue).Wait(cts.Token);
+                    return null;
+                }
+
+                invoked = true;
+                
+                // ReSharper disable twice MethodSupportsCancellation
+                Task.Delay(TimeSpan.FromMilliseconds(100)).Wait();
+                Task.Run(async () =>
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(100));
+                    cts.Cancel();
+                });
+                
+                return new Mat();
+            });
+
+            var observersCount = Environment.ProcessorCount - 2;
+            var observers = Enumerable.Range(0, observersCount)
+                .Select(_ => new HeavyTestMatObserver(TimeSpan.FromMilliseconds(200)))
+                .ToList();
+
+            var camera = new Camera(videoMock.Object, cts, loggerMock.Object, TimeSpan.FromMilliseconds(100));
+            
+            foreach (var observer in observers)
+            {
+                camera.Subscribe(observer);
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(300));
+
+            for (var i = 1; i < observersCount; i++)
+            {
+                Assert.Single(observers[i].ReceivedItems);
+                Assert.True(observers[0].ReceivedItems.First().Value - observers[i].ReceivedItems.First().Value < TimeSpan.FromMilliseconds(5));
+            }
         }
     }
 }
