@@ -17,6 +17,7 @@ namespace NVs.OccupancySensor.CV.Impl
         private readonly ILogger<Camera> logger;
         private readonly TimeSpan frameInterval;
 
+        private int framesCaptured = 0;
         public Camera(VideoCapture videoCapture, CancellationTokenSource cts, ILogger<Camera> logger, TimeSpan frameInterval)
         {
             this.videoCapture = videoCapture ?? throw new ArgumentNullException(nameof(videoCapture));
@@ -52,10 +53,12 @@ namespace NVs.OccupancySensor.CV.Impl
         {
             while (!cts.IsCancellationRequested)
             {
+                logger.LogInformation($"Capturing frame {framesCaptured + 1}");
                 Mat frame = null;
                 try
                 {
                     frame = videoCapture.QueryFrame();
+                    logger.LogInformation("Got new frame");
                 }
                 catch (Exception e)
                 {
@@ -71,19 +74,32 @@ namespace NVs.OccupancySensor.CV.Impl
                     Notify(o => o.OnNext(frame));
                 }
 
-                if (cts.IsCancellationRequested)
+                
+                ++framesCaptured;
+                logger.LogInformation($"Frame {framesCaptured} processed");
+                
+                if (framesCaptured == int.MaxValue - 1)
                 {
-                    Notify(o => o.OnCompleted(), true);
+                    logger.LogInformation("Resetting captured frames counter since it reached int.MaxValue - 1");
+                    framesCaptured = 0;
                 }
-
-                await Task.Delay(frameInterval);
+                
+                
+                if (!cts.IsCancellationRequested)
+                {
+                    await Task.Delay(frameInterval);
+                }
             }
+
+            logger.LogInformation("Cancellation requested");
+            Notify(o => o.OnCompleted(), true);
         }
 
         private void Notify(Action<IObserver<Mat>> action, bool ignoreCancellation = false)
         {
             if (!ignoreCancellation && cts.IsCancellationRequested)
             {
+                logger.LogInformation("Cancellation requested before observers were notified");
                 return;
             }
 
@@ -94,22 +110,28 @@ namespace NVs.OccupancySensor.CV.Impl
                 observers.CopyTo(targets);
             }
 
-            targets.AsParallel().ForAll(observer =>
+            foreach (var observer in targets)
             {
-                if (!ignoreCancellation && cts.IsCancellationRequested)
+                Task.Run(() =>
                 {
-                    return;
-                }
+                    if (!ignoreCancellation && cts.IsCancellationRequested)
+                    {
+                        logger.LogInformation($"[Observer {observer.GetHashString()}] Cancellation requested before observer was notified");
+                        return;
+                    }
 
-                try
-                {
-                    action(observer);
-                }
-                catch (Exception e)
-                {
-                    logger.LogError(e, "Unable to notify observer!");
-                }
-            });
+                    try
+                    {
+                        action(observer);
+                        logger.LogInformation($"[Observer {observer.GetHashString()}] Notification succeeded");
+                    }
+                    catch (Exception e)
+                    {
+                        logger.LogError(e, $"[Observer {observer.GetHashString()}] Unable to notify observer!");
+                    }
+                });
+            }
+            logger.LogInformation("Notifications submitted");
         }
 
         private sealed class Unsubscriber : IDisposable

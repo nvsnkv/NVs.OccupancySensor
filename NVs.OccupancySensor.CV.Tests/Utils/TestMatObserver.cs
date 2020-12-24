@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Emgu.CV;
-using Moq;
 
-namespace NVs.OccupancySensor.CV.Tests
+namespace NVs.OccupancySensor.CV.Tests.Utils
 {
     class TestMatObserver : IObserver<Mat>
     {
@@ -29,15 +27,6 @@ namespace NVs.OccupancySensor.CV.Tests
         public virtual void OnNext(Mat value)
         {
             ReceivedItems.Add(value, DateTime.Now);
-        }
-    }
-
-    class HeavyTestMatObserver: TestMatObserver
-    {
-        public override void OnNext(Mat value)
-        {
-            base.OnNext(value);
-            Task.Delay(TimeSpan.FromMilliseconds(1000)).Wait();
         }
     }
 }
