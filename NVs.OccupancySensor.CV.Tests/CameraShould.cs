@@ -1,8 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Castle.Core.Logging;
 using Emgu.CV;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -18,14 +18,14 @@ namespace NVs.OccupancySensor.CV.Tests
 
         public CameraShould()
         {
-            videoMock = new Mock<VideoCapture>(MockBehavior.Strict, 0, VideoCapture.API.Any);
-            videoMock.Setup(v => v.QueryFrame()).Returns(() => new Mat());
-            loggerMock = new Mock<ILogger<Camera>>();
+            videoMock = new Mock<VideoCapture>(MockBehavior.Default, 0, VideoCapture.API.Any);
+            loggerMock = new Mock<ILogger<Camera>>(MockBehavior.Loose);
         }
 
         [Fact]
         public async Task ProvideDataForObserver()
         {
+            videoMock.Setup(v => v.QueryFrame()).Returns(() => new Mat());
             var camera = new Camera(videoMock.Object, new CancellationTokenSource(), loggerMock.Object,
                 TimeSpan.FromMilliseconds(10));
             var observer = new TestMatObserver();
@@ -43,6 +43,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public async Task NotProvideDataForUnsubscribedObservers()
         {
+            videoMock.Setup(v => v.QueryFrame()).Returns(() => new Mat());
             var camera = new Camera(videoMock.Object, new CancellationTokenSource(), loggerMock.Object,
                 TimeSpan.FromMilliseconds(10));
             var observer = new TestMatObserver();
@@ -61,6 +62,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public async Task InvokeSubscribersInParallel()
         {
+            videoMock.Setup(v => v.QueryFrame()).Returns(() => new Mat());
             var observers = Enumerable.Range(0, Environment.ProcessorCount).Select(_ => new HeavyTestMatObserver())
                 .ToList();
 
@@ -68,7 +70,7 @@ namespace NVs.OccupancySensor.CV.Tests
                 TimeSpan.FromMilliseconds(10));
             var unsubscribers = observers.Select(o => camera.Subscribe(o)).ToList();
 
-            await Task.Delay(10000);
+            await Task.Delay(5000);
 
             foreach (var unsubscriber in unsubscribers)
             {
@@ -92,6 +94,60 @@ namespace NVs.OccupancySensor.CV.Tests
                                 TimeSpan.FromMilliseconds(10));
                 }
             }
+        }
+
+        [Fact]
+        public async Task LogErrors()
+        {
+            videoMock.Setup(v => v.QueryFrame()).Throws<InvalidOperationException>();
+            loggerMock
+                .Setup(
+                    l => l.Log(
+                    LogLevel.Error, 
+                    It.IsAny<EventId>(),
+                    It.IsAny<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>>(),
+                    It.IsAny<InvalidOperationException>(),
+                    It.IsAny<Func<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>, Exception, string>>()))
+                .Verifiable("Logger was not called!");
+            
+            using (new Camera(videoMock.Object, new CancellationTokenSource(), loggerMock.Object,
+                TimeSpan.FromMilliseconds(10)).Subscribe(new TestMatObserver()))
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(100));
+            }
+            
+            loggerMock.Verify();
+        }
+
+        [Fact]
+        public async Task NotifyObserversAboutErrors()
+        {
+            videoMock.Setup(v => v.QueryFrame()).Throws<InvalidOperationException>();
+            var observer = new TestMatObserver();
+
+            using (new Camera(videoMock.Object, new CancellationTokenSource(), loggerMock.Object,
+                TimeSpan.FromMilliseconds(10)).Subscribe(observer))
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(100));
+            }
+
+            Assert.NotNull(observer.Error);
+            Assert.IsType<InvalidOperationException>(observer.Error);
+        }
+
+        [Fact]
+        public async Task CompletesStreamOnError()
+        {
+            videoMock.Setup(v => v.QueryFrame()).Throws<InvalidOperationException>();
+            var observer = new TestMatObserver();
+
+            using (new Camera(videoMock.Object, new CancellationTokenSource(), loggerMock.Object,
+                TimeSpan.FromMilliseconds(10)).Subscribe(observer))
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(100));
+            }
+            
+            Assert.True(observer.StreamCompleted);
         }
     }
 }

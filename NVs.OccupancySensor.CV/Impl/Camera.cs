@@ -61,6 +61,9 @@ namespace NVs.OccupancySensor.CV.Impl
                 {
                     logger.LogError(e, "Unable to query frame!");
                     Notify(o => o.OnError(e));
+                    Notify(o => o.OnCompleted());
+
+                    return;
                 }
 
                 if (frame != null)
