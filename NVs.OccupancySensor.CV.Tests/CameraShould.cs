@@ -26,7 +26,8 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public async Task ProvideDataForObserver()
         {
-            var camera = new Camera(videoMock.Object, new CancellationTokenSource(), loggerMock.Object, TimeSpan.FromMilliseconds(10));
+            var camera = new Camera(videoMock.Object, new CancellationTokenSource(), loggerMock.Object,
+                TimeSpan.FromMilliseconds(10));
             var observer = new TestMatObserver();
 
             var before = DateTime.Now;
@@ -42,13 +43,15 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public async Task NotProvideDataForUnsubscribedObservers()
         {
-            var camera = new Camera(videoMock.Object, new CancellationTokenSource(), loggerMock.Object, TimeSpan.FromMilliseconds(10));
+            var camera = new Camera(videoMock.Object, new CancellationTokenSource(), loggerMock.Object,
+                TimeSpan.FromMilliseconds(10));
             var observer = new TestMatObserver();
 
             using (camera.Subscribe(observer))
             {
                 await Task.Delay(TimeSpan.FromMilliseconds(1000));
             }
+
             var after = DateTime.Now;
 
             Assert.True(observer.ReceivedItems.Count > 0);
@@ -58,28 +61,36 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public async Task InvokeSubscribersInParallel()
         {
-            var observers = Enumerable.Range(0, Environment.ProcessorCount).Select(_ => new TestMatObserver()).ToList();
+            var observers = Enumerable.Range(0, Environment.ProcessorCount).Select(_ => new HeavyTestMatObserver())
+                .ToList();
 
-            var camera = new Camera(videoMock.Object, new CancellationTokenSource(), loggerMock.Object, TimeSpan.FromMilliseconds(10));
+            var camera = new Camera(videoMock.Object, new CancellationTokenSource(), loggerMock.Object,
+                TimeSpan.FromMilliseconds(10));
             var unsubscribers = observers.Select(o => camera.Subscribe(o)).ToList();
 
-            await Task.Delay(2000);
+            await Task.Delay(10000);
 
             foreach (var unsubscriber in unsubscribers)
             {
                 unsubscriber.Dispose();
             }
-            
+
             Assert.True(observers[0].ReceivedItems.Count > 1);
-            Assert.Equal(observers[0].ReceivedItems.Count, observers[1].ReceivedItems.Count);
-            Assert.Equal(observers[1].ReceivedItems.Count, observers[2].ReceivedItems.Count);
-            Assert.Equal(observers[3].ReceivedItems.Count, observers[4].ReceivedItems.Count);
+            for (var i = 0; i < Environment.ProcessorCount; i++)
+            {
+                {
+                    Assert.Equal(observers[0].ReceivedItems.Count, observers[1].ReceivedItems.Count);
+                }
+
+            }
 
             foreach (var mat in observers[0].ReceivedItems.Keys)
             {
-                Assert.True(observers[0].ReceivedItems[mat] - observers[1].ReceivedItems[mat] < TimeSpan.FromMilliseconds(10));
-                Assert.True(observers[0].ReceivedItems[mat] - observers[2].ReceivedItems[mat] < TimeSpan.FromMilliseconds(10));
-                Assert.True(observers[0].ReceivedItems[mat] - observers[3].ReceivedItems[mat] < TimeSpan.FromMilliseconds(10));
+                for (var i = 1; i < Environment.ProcessorCount; i++)
+                {
+                    Assert.True(observers[0].ReceivedItems[mat] - observers[1].ReceivedItems[mat] <
+                                TimeSpan.FromMilliseconds(10));
+                }
             }
         }
     }

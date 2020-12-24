@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Emgu.CV;
@@ -15,7 +16,7 @@ namespace NVs.OccupancySensor.CV.Impl
         private readonly CancellationTokenSource cts;
         private readonly ILogger<Camera> logger;
         private readonly TimeSpan frameInterval;
-        
+
         public Camera(VideoCapture videoCapture, CancellationTokenSource cts, ILogger<Camera> logger, TimeSpan frameInterval)
         {
             this.videoCapture = videoCapture ?? throw new ArgumentNullException(nameof(videoCapture));
@@ -26,7 +27,7 @@ namespace NVs.OccupancySensor.CV.Impl
             Task.Run(QueryFrames, cts.Token);
         }
 
-        
+
         public IDisposable Subscribe(IObserver<Mat> observer)
         {
             if (observer == null) throw new ArgumentNullException(nameof(observer));
@@ -90,7 +91,7 @@ namespace NVs.OccupancySensor.CV.Impl
                 observers.CopyTo(targets);
             }
 
-            foreach (var observer in targets)
+            targets.AsParallel().ForAll(observer =>
             {
                 if (!ignoreCancellation && cts.IsCancellationRequested)
                 {
@@ -105,7 +106,7 @@ namespace NVs.OccupancySensor.CV.Impl
                 {
                     logger.LogError(e, "Unable to notify observer!");
                 }
-            }
+            });
         }
 
         private sealed class Unsubscriber : IDisposable
