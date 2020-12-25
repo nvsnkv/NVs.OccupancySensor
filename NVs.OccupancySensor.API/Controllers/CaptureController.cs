@@ -14,13 +14,13 @@ namespace NVs.OccupancySensor.API.Controllers
     [Route("[controller]")]
     public sealed class CaptureController : ControllerBase
     {
-        private readonly ICamera camera;
+        private readonly ICameraStream cameraStream;
         private readonly IImageObserver observer;
         private readonly ILogger<CaptureController> logger;
         
-        public CaptureController(ICamera camera, IImageObserver observer, ILogger<CaptureController> logger)
+        public CaptureController(ICameraStream cameraStream, IImageObserver observer, ILogger<CaptureController> logger)
         {
-            this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
+            this.cameraStream = cameraStream ?? throw new ArgumentNullException(nameof(cameraStream));
             this.observer = observer ?? throw new ArgumentNullException(nameof(observer));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -32,7 +32,7 @@ namespace NVs.OccupancySensor.API.Controllers
         {
             logger.LogDebug("GetSingleCapture called");
 
-            using (camera.Subscribe(observer))
+            using (cameraStream.Subscribe(observer))
             {
                 return await observer.GetImage();
             }
@@ -43,7 +43,7 @@ namespace NVs.OccupancySensor.API.Controllers
         public IActionResult GetStream()
         {
             logger.LogDebug("GetStream called");
-            var unsubscriber = camera.Subscribe(observer);
+            var unsubscriber = cameraStream.Subscribe(observer);
             
             return new MjpegStreamContent(
                 async cts => (await observer.GetImage()).ToJpegData(), 

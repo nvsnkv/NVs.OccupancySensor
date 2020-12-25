@@ -12,9 +12,9 @@ namespace NVs.OccupancySensor.CV
     {
         public static IServiceCollection AddCamera(this IServiceCollection services, CancellationTokenSource cts)
         {
-            return services.AddSingleton<ICamera>(s =>
+            return services.AddSingleton<ICameraStream>(s =>
             {
-                var logger = s.GetService<ILogger<Camera>>();
+                var logger = s.GetService<ILogger<CameraStream>>();
                 var config = s.GetService<IConfiguration>();
                 var cvSource = config?.GetSection("CV")?["Source"] ?? DefaultSettings.Source;
 
@@ -28,7 +28,7 @@ namespace NVs.OccupancySensor.CV
                     frameInterval = DefaultSettings.FrameInterval;
                 }
                
-                return new Camera(capture, cts, logger, frameInterval);
+                return new CameraStream(capture, cts.Token, logger, frameInterval);
             });
         }
 

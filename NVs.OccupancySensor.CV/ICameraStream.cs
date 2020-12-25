@@ -3,7 +3,7 @@ using Emgu.CV;
 
 namespace NVs.OccupancySensor.CV
 {
-    public interface ICamera : IObservable<Mat>
+    public interface ICameraStream : IObservable<Mat>
     {
     }
 }

@@ -8,25 +8,31 @@ using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Impl
 {
-    sealed class Camera : ICamera
+    sealed class CameraStream : ICameraStream
     {
         private readonly VideoCapture videoCapture;
         private readonly List<IObserver<Mat>> observers = new List<IObserver<Mat>>();
         private readonly object observersLock = new object();
-        private readonly CancellationTokenSource cts;
-        private readonly ILogger<Camera> logger;
+        private readonly CancellationToken ct;
+        private readonly ILogger<CameraStream> logger;
         private readonly TimeSpan frameInterval;
 
         private int framesCaptured;
         
-        public Camera(VideoCapture videoCapture, CancellationTokenSource cts, ILogger<Camera> logger, TimeSpan frameInterval)
+        public CameraStream(VideoCapture videoCapture, CancellationToken ct, ILogger<CameraStream> logger, TimeSpan frameInterval)
         {
             this.videoCapture = videoCapture ?? throw new ArgumentNullException(nameof(videoCapture));
-            this.cts = cts ?? throw new ArgumentNullException(nameof(cts));
+            this.ct = ct;
             this.logger = logger;
             this.frameInterval = frameInterval;
+            
+            this.ct.Register(() =>
+            {
+                logger.LogInformation("Cancellation requested");
+                Notify(o => o.OnCompleted(), true);
+            });
 
-            Task.Run(QueryFrames, cts.Token);
+            Task.Run(QueryFrames, ct);
         }
 
 
@@ -52,7 +58,7 @@ namespace NVs.OccupancySensor.CV.Impl
 
         private async Task QueryFrames()
         {
-            while (!cts.IsCancellationRequested)
+            while (!ct.IsCancellationRequested)
             {
                 logger.LogInformation($"Capturing frame {framesCaptured + 1}");
                 Mat frame = null;
@@ -85,20 +91,13 @@ namespace NVs.OccupancySensor.CV.Impl
                     framesCaptured = 0;
                 }
                 
-                
-                if (!cts.IsCancellationRequested)
-                {
-                    await Task.Delay(frameInterval);
-                }
+                await Task.Delay(frameInterval, ct);
             }
-
-            logger.LogInformation("Cancellation requested");
-            Notify(o => o.OnCompleted(), true);
         }
 
         private void Notify(Action<IObserver<Mat>> action, bool ignoreCancellation = false)
         {
-            if (!ignoreCancellation && cts.IsCancellationRequested)
+            if (!ignoreCancellation && ct.IsCancellationRequested)
             {
                 logger.LogInformation("Cancellation requested before observers were notified");
                 return;
@@ -115,7 +114,7 @@ namespace NVs.OccupancySensor.CV.Impl
             {
                 Task.Run(() =>
                 {
-                    if (!ignoreCancellation && cts.IsCancellationRequested)
+                    if (!ignoreCancellation && ct.IsCancellationRequested)
                     {
                         logger.LogInformation($"[Observer {observer.GetHashString()}] Cancellation requested before observer was notified");
                         return;
