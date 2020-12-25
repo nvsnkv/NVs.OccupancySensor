@@ -6,10 +6,18 @@ using System.Runtime.CompilerServices;
 
 namespace NVs.OccupancySensor.CV
 {
-    public static class DefaultSettings
+    public sealed class Settings
     {
-        public static string Source { get; } = "0";
+        public Settings(string source, TimeSpan frameInterval)
+        {
+            Source = source;
+            FrameInterval = frameInterval;
+        }
+
+        public string Source { get; }
         
-        public static TimeSpan FrameInterval { get; } = TimeSpan.FromMilliseconds(100);
+        public TimeSpan FrameInterval { get; }
+
+        public static readonly Settings Default = new Settings("0", TimeSpan.FromMilliseconds(100));
     }
 }

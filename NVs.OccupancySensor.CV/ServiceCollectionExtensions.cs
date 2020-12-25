@@ -16,7 +16,7 @@ namespace NVs.OccupancySensor.CV
             {
                 var logger = s.GetService<ILogger<CameraStream>>();
                 var config = s.GetService<IConfiguration>();
-                var cvSource = config?.GetSection("CV")?["Source"] ?? DefaultSettings.Source;
+                var cvSource = config?.GetSection("CV")?["Source"] ?? Settings.Default.Source;
 
                 var capture = int.TryParse(cvSource, out int cameraIndex)
                     ? new VideoCapture(cameraIndex)
@@ -25,7 +25,7 @@ namespace NVs.OccupancySensor.CV
                 var cvFrameInterval = config?.GetSection("CV")?["FrameInterval"];
                 if (!TimeSpan.TryParse(cvFrameInterval, out var frameInterval))
                 {
-                    frameInterval = DefaultSettings.FrameInterval;
+                    frameInterval = Settings.Default.FrameInterval;
                 }
                
                 return new CameraStream(capture, cts.Token, logger, frameInterval);
