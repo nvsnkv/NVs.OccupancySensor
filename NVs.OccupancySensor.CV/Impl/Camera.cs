@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using Emgu.CV;
 using Microsoft.Extensions.Logging;
-using NVs.OccupancySensor.CV.Annotations;
+using JetBrains.Annotations;
 
 namespace NVs.OccupancySensor.CV.Impl
 {
