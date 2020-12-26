@@ -1,7 +1,6 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Emgu.CV;
 using Microsoft.Extensions.Logging;
@@ -14,198 +13,205 @@ namespace NVs.OccupancySensor.CV.Tests
 {
     public sealed class CameraShould
     {
-        private readonly Mock<VideoCapture> videoMock;
-        private readonly Mock<ILogger<CameraStream>> loggerMock;
+        private readonly Mock<ILogger<Camera>> cameraLogger;
+        private readonly Mock<ILogger<CameraStream>> streamLogger;
 
         public CameraShould()
         {
-            videoMock = new Mock<VideoCapture>(MockBehavior.Default, 0, VideoCapture.API.Any);
-            loggerMock = new Mock<ILogger<CameraStream>>(MockBehavior.Loose);
+            cameraLogger = new Mock<ILogger<Camera>>();
+            streamLogger = new Mock<ILogger<CameraStream>>();
         }
 
         [Fact]
-        public async Task ProvideDataForObserver()
+        public void NotifyWhenItWasStarted()
         {
-            videoMock.Setup(v => v.QueryFrame()).Returns(() => new Mat());
-            var camera = new CameraStream(videoMock.Object, CancellationToken.None, loggerMock.Object,
-                TimeSpan.FromMilliseconds(10));
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, Camera.CreateVideoCapture);
+            var logger = new PropertyChangedLogger();
+
+            camera.PropertyChanged += logger.OnPropertyChanged;
+
+            camera.Start();
+
+            Assert.True(camera.IsRunning);
+            Assert.Equal(1, logger.Notifications[camera].Count(x => x.Value == nameof(Camera.IsRunning)));
+        }
+
+        [Fact]
+        public void ProvideNewStreamWhenStarted()
+        {
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, Camera.CreateVideoCapture);
+            var logger = new PropertyChangedLogger();
+
+            camera.PropertyChanged += logger.OnPropertyChanged;
+
+            camera.Start();
+
+            Assert.NotNull(camera.Stream);
+            Assert.Equal(1, logger.Notifications[camera].Count(x => x.Value == nameof(Camera.Stream)));
+        }
+
+        [Fact]
+        public void NotifyWhenItWasStopped()
+        {
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, Camera.CreateVideoCapture);
+            var logger = new PropertyChangedLogger();
+
+            camera.PropertyChanged += logger.OnPropertyChanged;
+
+            camera.Start();
+            camera.Stop();
+
+            Assert.False(camera.IsRunning);
+            Assert.Equal(2, logger.Notifications[camera].Count(x => x.Value == nameof(Camera.IsRunning)));
+        }
+
+        [Fact]
+        public void CompleteStreamWhenStopped()
+        {
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, Camera.CreateVideoCapture);
+            var logger = new PropertyChangedLogger();
             var observer = new TestMatObserver();
 
-            var before = DateTime.Now;
-            using (camera.Subscribe(observer))
+            camera.PropertyChanged += logger.OnPropertyChanged;
+
+            camera.Start();
+            using (camera.Stream.Subscribe(observer))
             {
-                await Task.Delay(TimeSpan.FromMilliseconds(1000));
+                camera.Stop();
             }
 
-            Assert.True(observer.ReceivedItems.Count > 50);
-            Assert.DoesNotContain(observer.ReceivedItems, x => x.Value < before);
+            Assert.Null(camera.Stream);
+            Assert.Equal(2, logger.Notifications[camera].Count(x => x.Value == nameof(Camera.Stream)));
+            
+            Assert.True(observer.StreamCompleted);
         }
 
         [Fact]
-        public async Task NotProvideDataForUnsubscribedObservers()
+        public void PreventParallelAttemptsToStart()
         {
-            videoMock.Setup(v => v.QueryFrame()).Returns(() => new Mat());
-            var camera = new CameraStream(videoMock.Object, CancellationToken.None, loggerMock.Object,
-                TimeSpan.FromMilliseconds(10));
-            var observer = new TestMatObserver();
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, Camera.CreateVideoCapture);
+            var logger = new PropertyChangedLogger();
+            camera.PropertyChanged += logger.OnPropertyChanged;
+            
+            Task.WaitAll(Enumerable.Repeat(Task.Run(() => camera.Start()), Environment.ProcessorCount).ToArray());
 
-            using (camera.Subscribe(observer))
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(1000));
-            }
-
-            var after = DateTime.Now;
-
-            Assert.True(observer.ReceivedItems.Count > 0);
-            Assert.DoesNotContain(observer.ReceivedItems, x => x.Value >= after);
+            Assert.Equal(1, logger.Notifications[camera].Count(x => x.Value == nameof(Camera.Stream)));
         }
 
         [Fact]
-        public async Task LogErrors()
+        public void PreventParallelAttemptsToStop()
         {
-            videoMock.Setup(v => v.QueryFrame()).Throws<TestException>();
-            loggerMock
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, Camera.CreateVideoCapture);
+            var logger = new PropertyChangedLogger();
+            camera.PropertyChanged += logger.OnPropertyChanged;
+
+            camera.Start();
+            Task.WaitAll(Enumerable.Repeat(Task.Run(() => camera.Stop()), Environment.ProcessorCount).ToArray());
+
+            Assert.Equal(2, logger.Notifications[camera].Count(x => x.Value == nameof(Camera.Stream)));
+        }
+
+        [Fact]
+        public void RemainStoppedIfAttemptCreateNewVideoCaptureFailed()
+        {
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, _ => throw new TestException());
+            var logger = new PropertyChangedLogger();
+            camera.PropertyChanged += logger.OnPropertyChanged;
+
+            Assert.Throws<TestException>(() => camera.Start());
+            Assert.False(camera.IsRunning);
+            Assert.Empty(logger.Notifications);
+        }
+
+        [Fact]
+        public void RethrowTheExceptionOccurredDuringVideoCaptureCreation()
+        {
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, _ => throw new TestException());
+
+            Assert.Throws<TestException>(() => camera.Start());
+        }
+
+        [Fact]
+        public void LogTheExceptionOccurredDuringVideoCaptureCreation()
+        {
+            cameraLogger
                 .Setup(
                     l => l.Log(
-                    LogLevel.Error,
-                    It.IsAny<EventId>(),
-                    It.IsAny<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>>(),
-                    It.IsAny<TestException>(),
-                    It.IsAny<Func<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>, Exception, string>>()))
+                        LogLevel.Error,
+                        It.IsAny<EventId>(),
+                        It.IsAny<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>>(),
+                        It.IsAny<TestException>(),
+                        It.IsAny<Func<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>, Exception, string>>()))
                 .Verifiable("Logger was not called!");
+            
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, _ => throw new TestException());
 
-            using (new CameraStream(videoMock.Object, CancellationToken.None, loggerMock.Object,
-                TimeSpan.FromMilliseconds(10)).Subscribe(new TestMatObserver()))
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(100));
-            }
-
-            loggerMock.Verify();
+            Assert.Throws<TestException>(() => camera.Start());
+            cameraLogger.Verify();
         }
 
         [Fact]
-        public async Task NotifyObserversAboutErrors()
+        public async Task StopAutomaticallyIfVideoStreamFails()
         {
-            videoMock.Setup(v => v.QueryFrame()).Throws<TestException>();
-            var observer = new TestMatObserver();
+            var captureMock = new Mock<VideoCapture>(MockBehavior.Default, 0, VideoCapture.API.Any);
+            captureMock.Setup(c => c.QueryFrame()).Throws<TestException>();
 
-            using (new CameraStream(videoMock.Object, CancellationToken.None, loggerMock.Object,
-                TimeSpan.FromMilliseconds(10)).Subscribe(observer))
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, _ => captureMock.Object);
+            var observer = new TestMatObserver();
+            
+            camera.Start();
+            using (camera.Stream.Subscribe(observer))
             {
-                await Task.Delay(TimeSpan.FromMilliseconds(100));
+                await Task.Delay(TimeSpan.FromMilliseconds(500));
             }
 
-            Assert.NotNull(observer.Error);
             Assert.IsType<TestException>(observer.Error);
+            Assert.False(camera.IsRunning);
         }
 
         [Fact]
-        public async Task CompletesStreamOnError()
+        public void UseProvidedSettingsToCreateNewCapture()
         {
-            videoMock.Setup(v => v.QueryFrame()).Throws<TestException>();
-            var observer = new TestMatObserver();
+            Settings capturedSettings = null;
+            Settings expectedSettings = new Settings("Some source", TimeSpan.Zero);
 
-            using (new CameraStream(videoMock.Object, CancellationToken.None, loggerMock.Object,
-                TimeSpan.FromMilliseconds(10)).Subscribe(observer))
+            var captureMock = new Mock<VideoCapture>(MockBehavior.Default, 0, VideoCapture.API.Any);
+            captureMock.Setup(c => c.QueryFrame()).Returns(new Mat());
+
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, s =>
             {
-                await Task.Delay(TimeSpan.FromMilliseconds(100));
-            }
-
-            Assert.True(observer.StreamCompleted);
-        }
-
-        [Fact]
-        public async Task CompleteTheStreamIfCancellationRequested()
-        {
-            videoMock.Setup(v => v.QueryFrame()).Returns(() => new Mat());
-
-            var cts = new CancellationTokenSource();
-            var camera = new CameraStream(videoMock.Object, cts.Token, loggerMock.Object,
-                TimeSpan.FromMilliseconds(10));
-            var observer = new TestMatObserver();
-
-            camera.Subscribe(observer);
-
-            // ReSharper disable MethodSupportsCancellation
-            await Task.Delay(TimeSpan.FromMilliseconds(500));
-
-            cts.Cancel();
-
-            await Task.Delay(TimeSpan.FromMilliseconds(500));
-            // ReSharper restore MethodSupportsCancellation
-
-            Assert.True(observer.StreamCompleted);
-        }
-
-        [Fact]
-        public async Task NotSendNewFramesIfCancellationRequested()
-        {
-            videoMock.Setup(v => v.QueryFrame()).Returns(() => new Mat());
-
-            var cts = new CancellationTokenSource();
-            var camera = new CameraStream(videoMock.Object, cts.Token, loggerMock.Object,
-                TimeSpan.FromMilliseconds(10));
-            var observer = new TestMatObserver();
-
-            camera.Subscribe(observer);
-
-            // ReSharper disable MethodSupportsCancellation
-            await Task.Delay(TimeSpan.FromMilliseconds(500));
-
-            cts.Cancel();
-            var after = DateTime.Now;
-
-            await Task.Delay(TimeSpan.FromMilliseconds(500));
-            // ReSharper restore MethodSupportsCancellation
-
-            Assert.DoesNotContain(observer.ReceivedItems, x => x.Value > after);
-        }
-
-        [Fact]
-        public async Task NotifyObserversIndependently()
-        {
-            var cts = new CancellationTokenSource();
-            var invoked = false;
-            videoMock.Setup(v => v.QueryFrame()).Returns(() =>
-            {
-                if (invoked)
-                {
-                    Task.Delay(TimeSpan.MaxValue, cts.Token).Wait(cts.Token);
-                    return null;
-                }
-
-                invoked = true;
-                
-                // ReSharper disable twice MethodSupportsCancellation
-                Task.Delay(TimeSpan.FromMilliseconds(100)).Wait();
-                Task.Run(async () =>
-                {
-                    await Task.Delay(TimeSpan.FromMilliseconds(100));
-                    cts.Cancel();
-                });
-                
-                return new Mat();
+                capturedSettings = s;
+                return captureMock.Object;
             });
 
-            var observersCount = Environment.ProcessorCount - 2;
-            var observers = Enumerable.Range(0, observersCount)
-                .Select(_ => new HeavyTestMatObserver(TimeSpan.FromMilliseconds(200)))
-                .ToList();
-
-            var camera = new CameraStream(videoMock.Object, cts.Token, loggerMock.Object, TimeSpan.FromMilliseconds(100));
+            camera.Settings = expectedSettings;
             
-            foreach (var observer in observers)
-            {
-                camera.Subscribe(observer);
-            }
+            camera.Start();
+            Assert.Equal(expectedSettings, capturedSettings);
+        }
 
-            await Task.Delay(TimeSpan.FromMilliseconds(300));
+        [Fact]
+        public async Task UseProvidedSettingsToSetFrameInterval()
+        {
+            var settings = new Settings("Some source", TimeSpan.FromMilliseconds(50));
 
-            for (var i = 1; i < observersCount; i++)
+            var captureMock = new Mock<VideoCapture>(MockBehavior.Default, 0, VideoCapture.API.Any);
+            captureMock.Setup(c => c.QueryFrame()).Returns(() => new Mat());
+
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, _ => captureMock.Object);
+            var observer = new TestMatObserver();
+
+            camera.Settings = settings;
+
+            camera.Start();
+            using (camera.Stream.Subscribe(observer))
             {
-                Assert.Single(observers[i].ReceivedItems);
-                Assert.True(observers[0].ReceivedItems.First().Value - observers[i].ReceivedItems.First().Value < TimeSpan.FromMilliseconds(5));
+                await Task.Delay(TimeSpan.FromMilliseconds(500));
+                camera.Stop();
             }
+            
+            Assert.True(11 >= observer.ReceivedItems.Count);
+            Assert.True(9 <= observer.ReceivedItems.Count);
         }
     }
 }
