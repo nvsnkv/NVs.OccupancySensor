@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Net.Http.Headers;
 
@@ -14,6 +9,8 @@ namespace NVs.OccupancySensor.API.Formatters
 {
     sealed class RgbImageOutputFormatter : OutputFormatter
     {
+        private static readonly Image<Rgb, int> EmptyImage = new Image<Rgb, int>(100, 100);
+        
         public RgbImageOutputFormatter()
         {
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("image/jpeg"));
@@ -28,9 +25,8 @@ namespace NVs.OccupancySensor.API.Formatters
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            var image = context.Object as Image<Rgb, int>;
-            if (image == null) throw new ArgumentNullException(nameof(image));
-
+            var image = context.Object as Image<Rgb, int> ?? EmptyImage;
+            
             var bytes = image.ToJpegData();
             
             context.HttpContext.Response.Headers.ContentLength = bytes.LongLength;

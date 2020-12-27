@@ -33,15 +33,22 @@ namespace NVs.OccupancySensor.API.ActionResults
 
             try
             {
-                while (!cancellationToken.IsCancellationRequested)
+                bool streamEnded = false;
+                while (!cancellationToken.IsCancellationRequested && !streamEnded)
                 {
                     var imageBytes = await onNextImage(cancellationToken);
-
-                    var header = $"--{Boundary}\r\nContent-Type: image/jpeg\r\nContent-Length: {imageBytes.Length}\r\n\r\n";
-                    var headerData = Encoding.UTF8.GetBytes(header);
-                    await outputStream.WriteAsync(headerData, 0, headerData.Length, cancellationToken);
-                    await outputStream.WriteAsync(imageBytes, 0, imageBytes.Length, cancellationToken);
-                    await outputStream.WriteAsync(NewLine, 0, NewLine.Length, cancellationToken);
+                    if (imageBytes != null)
+                    {
+                        var header = $"--{Boundary}\r\nContent-Type: image/jpeg\r\nContent-Length: {imageBytes.Length}\r\n\r\n";
+                        var headerData = Encoding.UTF8.GetBytes(header);
+                        await outputStream.WriteAsync(headerData, 0, headerData.Length, cancellationToken);
+                        await outputStream.WriteAsync(imageBytes, 0, imageBytes.Length, cancellationToken);
+                        await outputStream.WriteAsync(NewLine, 0, NewLine.Length, cancellationToken);
+                    }
+                    else
+                    {
+                        streamEnded = true;
+                    }
                 }
             }
             catch (TaskCanceledException)
