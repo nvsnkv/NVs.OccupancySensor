@@ -1,143 +1,197 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Threading.Tasks;
 using Emgu.CV;
 using Microsoft.Extensions.Logging;
+using JetBrains.Annotations;
 
 namespace NVs.OccupancySensor.CV.Impl
 {
-    sealed class Camera : ICamera
+    class Camera : ICamera
     {
-        private readonly VideoCapture videoCapture;
-        private readonly List<IObserver<Mat>> observers = new List<IObserver<Mat>>();
-        private readonly object observersLock = new object();
-        private readonly CancellationTokenSource cts;
+        private readonly object thisLock = new object();
+
         private readonly ILogger<Camera> logger;
-        private readonly TimeSpan frameInterval;
-        
-        public Camera(VideoCapture videoCapture, CancellationTokenSource cts, ILogger<Camera> logger, TimeSpan frameInterval)
+        private readonly ILogger<CameraStream> streamLogger;
+        private readonly Func<Settings, VideoCapture> createVideoCaptureFunc;
+        private readonly ErrorObserver errorObserver;
+
+        private VideoCapture capture;
+        private CancellationTokenSource cts;
+
+        private ICameraStream stream;
+        private volatile bool isRunning;
+        private Settings settings;
+
+        public Camera(ILogger<Camera> logger, ILogger<CameraStream> streamLogger, Settings settings, Func<Settings, VideoCapture> createVideoCaptureFunc)
         {
-            this.videoCapture = videoCapture ?? throw new ArgumentNullException(nameof(videoCapture));
-            this.cts = cts ?? throw new ArgumentNullException(nameof(cts));
             this.logger = logger;
-            this.frameInterval = frameInterval;
-
-            Task.Run(QueryFrames, cts.Token);
+            this.streamLogger = streamLogger;
+            this.settings = settings;
+            this.createVideoCaptureFunc = createVideoCaptureFunc;
+            this.errorObserver = new ErrorObserver(this);
         }
 
-        
-        public IDisposable Subscribe(IObserver<Mat> observer)
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public ICameraStream Stream => stream;
+
+        public bool IsRunning => isRunning;
+
+        public Settings Settings
         {
-            if (observer == null) throw new ArgumentNullException(nameof(observer));
-
-            // ReSharper disable InconsistentlySynchronizedField
-            if (!observers.Contains(observer))
+            get => settings;
+            set
             {
-                lock (observersLock)
-                {
-                    if (!observers.Contains(observer))
-                    {
-                        observers.Add(observer);
-                    }
-                }
-            }
-
-            return new Unsubscriber(observers, observersLock, observer);
-            // ReSharper restore InconsistentlySynchronizedField
-        }
-
-        private async Task QueryFrames()
-        {
-            while (!cts.IsCancellationRequested)
-            {
-                Mat frame = null;
-                try
-                {
-                    frame = videoCapture.QueryFrame();
-                }
-                catch (Exception e)
-                {
-                    logger.LogError(e, "Unable to query frame!");
-                    Notify(o => o.OnError(e));
-                }
-
-                if (frame != null)
-                {
-                    Notify(o => o.OnNext(frame));
-                }
-
-                if (cts.IsCancellationRequested)
-                {
-                    Notify(o => o.OnCompleted(), true);
-                }
-
-                await Task.Delay(frameInterval);
+                if (Equals(value, settings)) return;
+                settings = value;
+                OnPropertyChanged();
             }
         }
 
-        private void Notify(Action<IObserver<Mat>> action, bool ignoreCancellation = false)
+        public void Start()
         {
-            if (!ignoreCancellation && cts.IsCancellationRequested)
+            logger.LogInformation("Attempting to start camera...");
+            SetIsRunning();
+
+            try
             {
-                return;
+                SetupStream();
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "An error occurred while setting up new stream!");
+                CompleteStream();
+                isRunning = false;
+
+                throw;
             }
 
-            IObserver<Mat>[] targets;
-            lock (observersLock)
+            logger.LogInformation("Camera is now running.");
+
+            OnPropertyChanged(nameof(Stream));
+            OnPropertyChanged(nameof(IsRunning));
+            logger.LogInformation("Change notification complete");
+        }
+
+        public void Stop()
+        {
+            logger.LogInformation("Attempting to stop camera...");
+            UnsetIsRunning();
+
+            CompleteStream();
+
+            logger.LogInformation("Camera is now stopped");
+
+            OnPropertyChanged(nameof(Stream));
+            OnPropertyChanged(nameof(IsRunning));
+            logger.LogInformation("Change notification complete");
+        }
+
+        private void UnsetIsRunning()
+        {
+            if (!isRunning)
             {
-                targets = new IObserver<Mat>[observers.Count];
-                observers.CopyTo(targets);
+                logger.LogWarning("The camera is already stopped, no action will be taken.");
             }
 
-            foreach (var observer in targets)
+            lock (thisLock)
             {
-                if (!ignoreCancellation && cts.IsCancellationRequested)
+                if (!isRunning)
                 {
-                    return;
+                    logger.LogWarning("The camera is already stopped, no action will be taken.");
                 }
 
-                try
-                {
-                    action(observer);
-                }
-                catch (Exception e)
-                {
-                    logger.LogError(e, "Unable to notify observer!");
-                }
+                isRunning = false;
             }
         }
 
-        private sealed class Unsubscriber : IDisposable
+        private void CompleteStream()
         {
-            private readonly List<IObserver<Mat>> observers;
-            private readonly object observersLock;
-            private readonly IObserver<Mat> target;
-
-            public Unsubscriber(List<IObserver<Mat>> observers, object observersLock, IObserver<Mat> target)
+            logger.LogInformation("Finalizing current stream and releasing resources...");
+            try
             {
-                this.observers = observers ?? throw new ArgumentNullException(nameof(observers));
-                this.target = target ?? throw new ArgumentNullException(nameof(target));
-                this.observersLock = observersLock;
+                cts?.Cancel();
+                capture?.Dispose();
+
+                stream = null;
+                capture = null;
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Failed to finalize current stream!");
+                throw;
             }
 
-            public void Dispose()
+            logger.LogInformation("Stream finalization is completed.");
+        }
+
+        private void SetupStream()
+        {
+            logger.LogInformation("Setting up new stream...");
+            cts = new CancellationTokenSource();
+
+            capture = createVideoCaptureFunc(Settings);
+
+            stream = new CameraStream(capture, cts.Token, streamLogger, Settings.FrameInterval);
+            stream.Subscribe(errorObserver);
+            logger.LogInformation("Stream has been created");
+        }
+
+        private void SetIsRunning()
+        {
+            if (isRunning)
             {
-                if (!observers.Contains(target))
-                {
-                    return;
-                }
-
-                lock (observersLock)
-                {
-                    if (!observers.Contains(target))
-                    {
-                        return;
-                    }
-
-                    observers.Remove(target);
-                }
+                logger.LogWarning("The camera is already running, no action will be taken.");
             }
+
+            lock (thisLock)
+            {
+                if (isRunning)
+                {
+                    logger.LogWarning("The camera is already running, no action will be taken.");
+                }
+
+                isRunning = true;
+            }
+        }
+
+        private class ErrorObserver : IObserver<Mat>
+        {
+            private readonly Camera camera;
+
+            public ErrorObserver([NotNull] Camera camera)
+            {
+                this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
+            }
+
+            public void OnCompleted()
+            {
+            }
+
+            public void OnError(Exception error)
+            {
+                camera.logger.LogError(error, "Received an error from CameraStream. Camera will be stopped");
+                camera.Stop();
+            }
+
+            public void OnNext(Mat value)
+            {
+            }
+        }
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public static VideoCapture CreateVideoCapture(Settings settings)
+        {
+            return int.TryParse(settings.Source, out var camIndex)
+                ? new VideoCapture(camIndex)
+                : new VideoCapture(settings.Source);
         }
     }
 }

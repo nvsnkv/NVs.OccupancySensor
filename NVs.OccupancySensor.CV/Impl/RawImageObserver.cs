@@ -10,14 +10,14 @@ namespace NVs.OccupancySensor.CV.Impl
 {
     sealed class RawImageObserver : IImageObserver
     {
-        private readonly ILogger logger;
+        private readonly ILogger<RawImageObserver> logger;
         private readonly AutoResetEvent captureReceived = new AutoResetEvent(false);
 
         private volatile Mat capture;
         private volatile Exception exception;
         private volatile bool completed;
 
-        public RawImageObserver(ILogger logger)
+        public RawImageObserver(ILogger<RawImageObserver> logger)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -49,6 +49,7 @@ namespace NVs.OccupancySensor.CV.Impl
                 {
                     var e = exception;
                     exception = null;
+                    logger.LogError(e, "Error received instead of frame!");
                     throw new IOException("Failed to receive frame!", e);
                 }
 
@@ -60,10 +61,20 @@ namespace NVs.OccupancySensor.CV.Impl
 
                 if (capture == null)
                 {
-                    throw  new InvalidOperationException("Capture was not provided by observable, but neither OnError nor OnComplete were called. Unable to provide a JPEG data");
+                    logger.LogError("null Mat object received");
+                    throw new InvalidOperationException("Capture was not provided by observable, but neither OnError nor OnComplete were called.");
+                    
                 }
 
-                return capture.ToImage<Rgb, int>();
+                try
+                {
+                    return capture.ToImage<Rgb, int>();
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "Failed to convert Mat to Image");
+                    throw;
+                }
             });
 
             task.Start();

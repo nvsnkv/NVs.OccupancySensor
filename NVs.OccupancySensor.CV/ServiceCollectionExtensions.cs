@@ -10,32 +10,36 @@ namespace NVs.OccupancySensor.CV
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddCamera(this IServiceCollection services, CancellationTokenSource cts)
+        public static IServiceCollection AddCamera(this IServiceCollection services)
         {
-            return services.AddSingleton<ICamera>(s =>
-            {
-                var logger = s.GetService<ILogger<Camera>>();
-                var config = s.GetService<IConfiguration>();
-                var cvSource = config?.GetSection("CV")?["Source"] ?? DefaultSettings.Source;
-
-                var capture = int.TryParse(cvSource, out int cameraIndex)
-                    ? new VideoCapture(cameraIndex)
-                    : new VideoCapture(cvSource);
-
-                var cvFrameInterval = config?.GetSection("CV")?["FrameInterval"];
-                if (!TimeSpan.TryParse(cvFrameInterval, out var frameInterval))
-                {
-                    frameInterval = DefaultSettings.FrameInterval;
-                }
-               
-                return new Camera(capture, cts, logger, frameInterval);
-            });
+            return services.AddSingleton<ICamera>(
+                s => new Camera(
+                    s.GetService<ILogger<Camera>>(),
+                    s.GetService<ILogger<CameraStream>>(),
+                    s.GetService<IConfiguration>().GetCvSettings(),
+                    Camera.CreateVideoCapture));
         }
 
         public static IServiceCollection AddRawImageObservers(this IServiceCollection services)
         {
             return services.AddScoped<IImageObserver>(s =>
-                new RawImageObserver(s.GetService<ILogger<RawImageObserver>>()));
+            {
+                var observer = new RawImageObserver(s.GetService<ILogger<RawImageObserver>>());
+                return observer;
+            });
+        }
+    
+        private static Settings GetCvSettings(this IConfiguration config)
+        {
+            var cvSource = config?.GetSection("CV")?["Source"] ?? Settings.Default.Source;
+            var cvFrameInterval = config?.GetSection("CV")?["FrameInterval"];
+
+            if (!TimeSpan.TryParse(cvFrameInterval, out TimeSpan frameInterval))
+            {
+                frameInterval = Settings.Default.FrameInterval;
+            }
+
+            return new Settings(cvSource, frameInterval);
         }
     }
 }
