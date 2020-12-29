@@ -5,7 +5,7 @@ using Emgu.CV.Structure;
 
 namespace NVs.OccupancySensor.CV
 {
-    public interface IImageObserver : IObserver<Mat>
+    public interface IImageObserver : IObserver<Image<Rgb, int>>
     {
         Task<Image<Rgb, int>> GetImage();
     }

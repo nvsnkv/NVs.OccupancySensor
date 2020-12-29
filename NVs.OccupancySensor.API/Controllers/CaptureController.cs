@@ -17,12 +17,15 @@ namespace NVs.OccupancySensor.API.Controllers
     {
         private readonly ICamera camera;
         private readonly IImageObserver observer;
+
+        private readonly IMatConverter matConverter;
         private readonly ILogger<CaptureController> logger;
         
-        public CaptureController([NotNull] ICamera camera, IImageObserver observer, ILogger<CaptureController> logger)
+        public CaptureController([NotNull] ICamera camera, [NotNull] IImageObserver observer, [NotNull] IMatConverter converter, [NotNull] ILogger<CaptureController> logger)
         {
             this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
             this.observer = observer ?? throw new ArgumentNullException(nameof(observer));
+            this.matConverter = converter ?? throw new ArgumentException(nameof(converter));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -38,7 +41,7 @@ namespace NVs.OccupancySensor.API.Controllers
                 return null;
             }
             
-            using (camera.Stream.Subscribe(observer))
+            using (camera.Stream.Select(f => matConverter.Convert(f)).Subscribe(observer))
             {
                 return await observer.GetImage();
             }
@@ -50,7 +53,7 @@ namespace NVs.OccupancySensor.API.Controllers
         {
             logger.LogDebug("GetStream called");
 
-            var unsubscriber = camera.Stream?.Subscribe(observer);
+            var unsubscriber = camera.Stream?.Select(f => matConverter.Convert(f))?.Subscribe(observer);
 
             if (!camera.IsRunning || unsubscriber == null)
             {

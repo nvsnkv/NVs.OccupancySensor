@@ -13,7 +13,7 @@ namespace NVs.OccupancySensor.CV.Impl
         private readonly ILogger<RawImageObserver> logger;
         private readonly AutoResetEvent captureReceived = new AutoResetEvent(false);
 
-        private volatile Mat capture;
+        private volatile Image<Rgb, int> capture;
         private volatile Exception exception;
         private volatile bool completed;
 
@@ -34,7 +34,7 @@ namespace NVs.OccupancySensor.CV.Impl
             SetFlag();
         }
 
-        public void OnNext(Mat value)
+        public void OnNext(Image<Rgb, int> value)
         {
             capture = value;
             SetFlag();
@@ -61,20 +61,12 @@ namespace NVs.OccupancySensor.CV.Impl
 
                 if (capture == null)
                 {
-                    logger.LogError("null Mat object received");
+                    logger.LogError("null image received");
                     throw new InvalidOperationException("Capture was not provided by observable, but neither OnError nor OnComplete were called.");
                     
                 }
 
-                try
-                {
-                    return capture.ToImage<Rgb, int>();
-                }
-                catch (Exception e)
-                {
-                    logger.LogError(e, "Failed to convert Mat to Image");
-                    throw;
-                }
+                return capture;
             });
 
             task.Start();

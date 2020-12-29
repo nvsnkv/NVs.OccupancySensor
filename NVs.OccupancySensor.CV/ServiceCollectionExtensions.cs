@@ -28,6 +28,12 @@ namespace NVs.OccupancySensor.CV
                 return observer;
             });
         }
+
+        public static IServiceCollection AddMatConverter(this IServiceCollection services) 
+        {
+            services.AddSingleton<IMatConverter>(s => new MatConverter(s.GetService<ILogger<MatConverter>>()));
+            return services;    
+        }
     
         private static Settings GetCvSettings(this IConfiguration config)
         {
