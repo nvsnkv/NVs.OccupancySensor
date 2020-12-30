@@ -25,6 +25,7 @@ namespace NVs.OccupancySensor.API
         {
             services.AddCamera()
                 .AddRawImageObservers()
+                .AddMatConverter()
                 .AddControllers(o => o.OutputFormatters.Add(new RgbImageOutputFormatter()));
 
             services.AddSwaggerGen();
