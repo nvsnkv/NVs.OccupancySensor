@@ -86,6 +86,11 @@ namespace NVs.OccupancySensor.CV.Impl.HOG
             return result;
         }
 
+        public void Reset()
+        {
+            PeopleDetected = null;
+        }
+
         private void ReleaseProcessingLock()
         {
             processing = false;

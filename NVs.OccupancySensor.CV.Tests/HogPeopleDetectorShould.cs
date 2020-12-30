@@ -159,7 +159,7 @@ namespace NVs.OccupancySensor.CV.Tests
         }
 
         [Fact]
-        public void SNotifyPeopleDetectedChangedWhenDetectionReturnedEmptyResult()
+        public void NotifyPeopleDetectedChangedWhenDetectionReturnedEmptyResult()
         {
             string changedPropertyName = null;
             var descriptor = new Mock<IHOGDescriptorWrapper>();
@@ -172,6 +172,22 @@ namespace NVs.OccupancySensor.CV.Tests
 
             detector.Detect(TestImage);
             Assert.Equal(nameof(HogPeopleDetector.PeopleDetected), changedPropertyName);
+        }
+
+        [Fact]
+        public void SetPeopleDetectedToNullAfterReset()
+        {
+            var descriptor = new Mock<IHOGDescriptorWrapper>();
+            descriptor
+                .Setup(d => d.DetectMultiScale(It.IsAny<Image<Rgb, int>>()))
+                .Returns(() => new MCvObjectDetection[] { });
+
+            var detector = new HogPeopleDetector(logger.Object, () => descriptor.Object);
+            
+            detector.Detect(TestImage);
+            detector.Reset();
+
+            Assert.Null(detector.PeopleDetected);
         }
     }
 }

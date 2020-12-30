@@ -9,5 +9,7 @@ namespace NVs.OccupancySensor.CV
         Image<Rgb, int> Detect(Image<Rgb, int> source);
         
         bool? PeopleDetected { get; }
+
+        void Reset();
     }
 }
