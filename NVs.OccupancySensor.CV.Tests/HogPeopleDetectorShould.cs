@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NVs.OccupancySensor.CV.Impl;
+using NVs.OccupancySensor.CV.Impl.HOG;
 using NVs.OccupancySensor.CV.Tests.Utils;
 using Xunit;
 
@@ -26,7 +25,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void DisposeDescriptorWhenDisposed()
         {
-            var descriptorMock = new Mock<HOGDescriptor>();
+            var descriptorMock = new Mock<IHOGDescriptorWrapper>();
             descriptorMock.Setup(d => d.Dispose()).Verifiable("Dispose was not called!");
             
             var detector = new HogPeopleDetector(logger.Object, () => descriptorMock.Object);
@@ -38,9 +37,9 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void ThrowErrorsHappenedDuringDetection()
         {
-            var descriptorMock = new Mock<HOGDescriptor>();
+            var descriptorMock = new Mock<IHOGDescriptorWrapper>();
             descriptorMock
-                .Setup(d => d.DetectMultiScale(It.IsAny<Image<Rgb, int>>(), 0D, default, default, 1.05D, 2D, false))
+                .Setup(d => d.DetectMultiScale(It.IsAny<Image<Rgb, int>>()))
                 .Throws<TestException>();
 
             var image = new Image<Rgb, int>(100, 100);
@@ -62,9 +61,9 @@ namespace NVs.OccupancySensor.CV.Tests
                         It.IsAny<Func<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>, Exception, string>>()))
                 .Verifiable("Logger was not called!");
             
-            var descriptor = new Mock<HOGDescriptor>();
+            var descriptor = new Mock<IHOGDescriptorWrapper>();
             descriptor
-                .Setup(d => d.DetectMultiScale(It.IsAny<Image<Rgb, int>>(), 0D, default, default, 1.05D, 2D, false))
+                .Setup(d => d.DetectMultiScale(It.IsAny<Image<Rgb, int>>()))
                 .Throws<TestException>();
 
             var detector = new HogPeopleDetector(logger.Object, () => descriptor.Object);
@@ -77,9 +76,14 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void PreventsParallelDetection()
         {
-            var descriptor = new Mock<HOGDescriptor>();
+            if (Environment.ProcessorCount == 1) 
+            {
+                return;
+            }
+
+            var descriptor = new Mock<IHOGDescriptorWrapper>();
             descriptor
-                .Setup(d => d.DetectMultiScale(It.IsAny<Image<Rgb, int>>(), 0D, default, default, 1.05D, 2D, false))
+                .Setup(d => d.DetectMultiScale(It.IsAny<Image<Rgb, int>>()))
                 .Returns(() =>
                 {
                     Task.Delay(TimeSpan.FromMilliseconds(500)).Wait();
@@ -89,18 +93,17 @@ namespace NVs.OccupancySensor.CV.Tests
 
             var detector = new HogPeopleDetector(logger.Object, () => descriptor.Object);
 
-            detector.Detect(TestImage);
-            detector.Detect(TestImage);
+            Task.WaitAll(new Task[] { Task.Run(() => detector.Detect(TestImage)), Task.Run(() => detector.Detect(TestImage)) });
             
-            descriptor.Verify(d => d.DetectMultiScale(It.IsAny<Image<Rgb, int>>(), 0D, default, default, 1.05D, 2D, false), Times.Once);
+            descriptor.Verify(d => d.DetectMultiScale(It.IsAny<Image<Rgb, int>>()), Times.Once);
         }
 
         [Fact]
         public void SetPeopleDetectedToTrueIfDetectionReturnedSomeAreas()
         {
-            var descriptor = new Mock<HOGDescriptor>();
+            var descriptor = new Mock<IHOGDescriptorWrapper>();
             descriptor
-                .Setup(d => d.DetectMultiScale(It.IsAny<Image<Rgb, int>>(), 0D, default, default, 1.05D, 2D, false))
+                .Setup(d => d.DetectMultiScale(It.IsAny<Image<Rgb, int>>()))
                 .Returns(() => new[] {new MCvObjectDetection()});
 
             var detector = new HogPeopleDetector(logger.Object, () => descriptor.Object);
@@ -112,9 +115,9 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void SetPeopleDetectedToFalseIfDetectionReturnedEmptyResult()
         {
-            var descriptor = new Mock<HOGDescriptor>();
+            var descriptor = new Mock<IHOGDescriptorWrapper>();
             descriptor
-                .Setup(d => d.DetectMultiScale(It.IsAny<Image<Rgb, int>>(), 0D, default, default, 1.05D, 2D, false))
+                .Setup(d => d.DetectMultiScale(It.IsAny<Image<Rgb, int>>()))
                 .Returns(() => new MCvObjectDetection[] { });
 
             var detector = new HogPeopleDetector(logger.Object, () => descriptor.Object);
@@ -126,9 +129,9 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void SetPeopleDetectedToNullIfDetectionFailed()
         {
-            var descriptor = new Mock<HOGDescriptor>();
+            var descriptor = new Mock<IHOGDescriptorWrapper>();
             descriptor
-                .Setup(d => d.DetectMultiScale(It.IsAny<Image<Rgb, int>>(), 0D, default, default, 1.05D, 2D, false))
+                .Setup(d => d.DetectMultiScale(It.IsAny<Image<Rgb, int>>()))
                 .Throws<TestException>();
             
             var detector = new HogPeopleDetector(logger.Object, () => descriptor.Object);
@@ -143,9 +146,9 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             string changedPropertyName = null;
             
-            var descriptor = new Mock<HOGDescriptor>();
+            var descriptor = new Mock<IHOGDescriptorWrapper>();
             descriptor
-                .Setup(d => d.DetectMultiScale(It.IsAny<Image<Rgb, int>>(), 0D, default, default, 1.05D, 2D, false))
+                .Setup(d => d.DetectMultiScale(It.IsAny<Image<Rgb, int>>()))
                 .Returns(() => new[] { new MCvObjectDetection() });
 
             var detector = new HogPeopleDetector(logger.Object, () => descriptor.Object);
@@ -159,9 +162,9 @@ namespace NVs.OccupancySensor.CV.Tests
         public void SNotifyPeopleDetectedChangedWhenDetectionReturnedEmptyResult()
         {
             string changedPropertyName = null;
-            var descriptor = new Mock<HOGDescriptor>();
+            var descriptor = new Mock<IHOGDescriptorWrapper>();
             descriptor
-                .Setup(d => d.DetectMultiScale(It.IsAny<Image<Rgb, int>>(), 0D, default, default, 1.05D, 2D, false))
+                .Setup(d => d.DetectMultiScale(It.IsAny<Image<Rgb, int>>()))
                 .Returns(() => new MCvObjectDetection[] { });
 
             var detector = new HogPeopleDetector(logger.Object, () => descriptor.Object);

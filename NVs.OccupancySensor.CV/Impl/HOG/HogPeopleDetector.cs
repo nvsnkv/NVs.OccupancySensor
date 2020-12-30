@@ -8,18 +8,18 @@ using Emgu.CV.Structure;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
-namespace NVs.OccupancySensor.CV.Impl
+namespace NVs.OccupancySensor.CV.Impl.HOG
 {
-    sealed class HogPeopleDetector : IHogPeopleDetector, IDisposable
+    sealed class HogPeopleDetector : IPeopleDetector, IDisposable
     {
         private readonly ILogger<HogPeopleDetector> logger;
-        private readonly HOGDescriptor descriptor;
+        private readonly IHOGDescriptorWrapper descriptor;
         private readonly object thisLock = new object();
         
         private bool? peopleDetected;
         private volatile bool processing;
         
-        public HogPeopleDetector(ILogger<HogPeopleDetector> logger, Func<HOGDescriptor> createDescriptor)
+        public HogPeopleDetector(ILogger<HogPeopleDetector> logger, Func<IHOGDescriptorWrapper> createDescriptor)
         {
             this.logger = logger;
             descriptor = createDescriptor();
