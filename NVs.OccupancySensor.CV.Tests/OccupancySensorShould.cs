@@ -13,9 +13,9 @@ namespace NVs.OccupancySensor.CV.Tests
 {
     public sealed class OccupancySensorShould
     {
-        private readonly Mock<ICamera> camera = new Mock<ICamera>(MockBehavior.Loose);
-        private readonly Mock<IMatConverter> converter = new Mock<IMatConverter>(MockBehavior.Loose);
-        private readonly Mock<IPeopleDetector> detector = new Mock<IPeopleDetector>(MockBehavior.Loose);
+        private readonly Mock<ICamera> camera = new Mock<ICamera>();
+        private readonly Mock<IMatConverter> converter = new Mock<IMatConverter>();
+        private readonly Mock<IPeopleDetector> detector = new Mock<IPeopleDetector>();
 
         private readonly Mock<ILogger<Impl.OccupancySensor>> logger = new Mock<ILogger<Impl.OccupancySensor>>(); 
 
@@ -77,6 +77,7 @@ namespace NVs.OccupancySensor.CV.Tests
             camera.Raise(c => c.PropertyChanged += null, new PropertyChangedEventArgs(nameof(ICamera.IsRunning)));
             Assert.NotNull(sensor.Stream);
 
+    
             await Task.Delay(TimeSpan.FromMilliseconds(200));
             converter.Verify();
             detector.Verify();
@@ -89,7 +90,7 @@ namespace NVs.OccupancySensor.CV.Tests
             var sensor = new Impl.OccupancySensor(camera.Object, converter.Object, detector.Object, logger.Object);
             sensor.PropertyChanged += (_, e) => propertyName = e.PropertyName;
 
-            detector.Raise(c => c.PropertyChanged += null, new PropertyChangedEventArgs(nameof(IPeopleDetector.PeopleDetected)));
+            detector.Raise(d => d.PropertyChanged += null, new PropertyChangedEventArgs(nameof(IPeopleDetector.PeopleDetected)));
             Assert.Equal(nameof(Impl.OccupancySensor.PresenceDetected), propertyName);           
         }
 
@@ -113,7 +114,7 @@ namespace NVs.OccupancySensor.CV.Tests
             camera.SetupGet(c => c.IsRunning).Returns(expected);
             var sensor = new Impl.OccupancySensor(camera.Object, converter.Object, detector.Object, logger.Object);
 
-            Assert.Equal(expected, sensor.PresenceDetected);
+            Assert.Equal(expected, sensor.IsRunning);
         }
     }
 }
