@@ -191,6 +191,7 @@ namespace NVs.OccupancySensor.CV.Tests
         }
 
         [Fact]
+        //TODO: redesign blinking test
         public async Task UseProvidedSettingsToSetFrameInterval()
         {
             var settings = new Settings("Some source", TimeSpan.FromMilliseconds(50));
