@@ -12,6 +12,6 @@ namespace NVs.OccupancySensor.CV
 
         void Stop();
 
-        Settings Settings { get; set; }
+        ICameraSettings Settings { get; set; }
     }
 }

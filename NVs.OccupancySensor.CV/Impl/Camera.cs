@@ -8,13 +8,13 @@ using JetBrains.Annotations;
 
 namespace NVs.OccupancySensor.CV.Impl
 {
-    class Camera : ICamera
+    sealed class Camera : ICamera
     {
         private readonly object thisLock = new object();
 
         private readonly ILogger<Camera> logger;
         private readonly ILogger<CameraStream> streamLogger;
-        private readonly Func<Settings, VideoCapture> createVideoCaptureFunc;
+        private readonly Func<ICameraSettings, VideoCapture> createVideoCaptureFunc;
         private readonly ErrorObserver errorObserver;
 
         private VideoCapture capture;
@@ -22,9 +22,9 @@ namespace NVs.OccupancySensor.CV.Impl
 
         private ICameraStream stream;
         private volatile bool isRunning;
-        private Settings settings;
+        private ICameraSettings settings;
 
-        public Camera(ILogger<Camera> logger, ILogger<CameraStream> streamLogger, Settings settings, Func<Settings, VideoCapture> createVideoCaptureFunc)
+        public Camera(ILogger<Camera> logger, ILogger<CameraStream> streamLogger, Settings settings, Func<ICameraSettings, VideoCapture> createVideoCaptureFunc)
         {
             this.logger = logger;
             this.streamLogger = streamLogger;
@@ -39,7 +39,7 @@ namespace NVs.OccupancySensor.CV.Impl
 
         public bool IsRunning => isRunning;
 
-        public Settings Settings
+        public ICameraSettings Settings
         {
             get => settings;
             set
@@ -182,12 +182,12 @@ namespace NVs.OccupancySensor.CV.Impl
         }
 
         [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public static VideoCapture CreateVideoCapture(Settings settings)
+        public static VideoCapture CreateVideoCapture(ICameraSettings settings)
         {
             return int.TryParse(settings.Source, out var camIndex)
                 ? new VideoCapture(camIndex)

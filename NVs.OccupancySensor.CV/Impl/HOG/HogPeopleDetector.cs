@@ -38,7 +38,7 @@ namespace NVs.OccupancySensor.CV.Impl.HOG
             }
         }
 
-        public Image<Rgb, int> Detect(Image<Rgb, int> source)
+        public Image<Rgb, float> Detect(Image<Rgb, float> source)
         {
             logger.LogInformation("Processing new image...");
             var result = source.Copy();

@@ -172,8 +172,8 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void UseProvidedSettingsToCreateNewCapture()
         {
-            Settings capturedSettings = null;
-            Settings expectedSettings = new Settings("Some source", TimeSpan.Zero);
+            ICameraSettings capturedSettings = null;
+            ICameraSettings expectedSettings = new Settings("Some source", TimeSpan.Zero, 640, 480);
 
             var captureMock = new Mock<VideoCapture>(MockBehavior.Default, 0, VideoCapture.API.Any);
             captureMock.Setup(c => c.QueryFrame()).Returns(new Mat());
@@ -194,7 +194,7 @@ namespace NVs.OccupancySensor.CV.Tests
         //TODO: redesign blinking test
         public async Task UseProvidedSettingsToSetFrameInterval()
         {
-            var settings = new Settings("Some source", TimeSpan.FromMilliseconds(50));
+            var settings = new Settings("Some source", TimeSpan.FromMilliseconds(50), 640, 360);
 
             var captureMock = new Mock<VideoCapture>(MockBehavior.Default, 0, VideoCapture.API.Any);
             captureMock.Setup(c => c.QueryFrame()).Returns(() => new Mat());

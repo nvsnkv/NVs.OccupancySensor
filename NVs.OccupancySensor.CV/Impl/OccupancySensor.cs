@@ -16,7 +16,7 @@ namespace NVs.OccupancySensor.CV.Impl
         private readonly IMatConverter converter;
         private readonly IPeopleDetector detector;
         private readonly ILogger<OccupancySensor> logger;
-        private IObservable<Image<Rgb, int>> stream;
+        private IObservable<Image<Rgb, float>> stream;
 
         private IDisposable subscription;
         
@@ -38,7 +38,7 @@ namespace NVs.OccupancySensor.CV.Impl
 
         public bool IsRunning => camera.IsRunning;
 
-        public IObservable<Image<Rgb, int>> Stream
+        public IObservable<Image<Rgb, float>> Stream
         {
             get => stream;
             private set
@@ -90,7 +90,7 @@ namespace NVs.OccupancySensor.CV.Impl
                     if (camera.IsRunning)
                     {
                         Stream = camera.Stream.Select(f => converter.Convert(f)).Select(i => detector.Detect(i));
-                        subscription = Stream.Subscribe(Observer.ToObserver<Image<Rgb,int>>((_) => {}));
+                        subscription = Stream.Subscribe(Observer.ToObserver<Image<Rgb, float>>((_) => {}));
                     }
                     else
                     {

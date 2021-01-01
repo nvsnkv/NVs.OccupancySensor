@@ -34,7 +34,7 @@ namespace NVs.OccupancySensor.API.Controllers
         [HttpGet]
         [Produces("image/jpeg")]
         [Route("frame-raw.jpg")]
-        public async Task<Image<Rgb,int>> GetRawFrame()
+        public async Task<Image<Rgb, float>> GetRawFrame()
         {
             logger.LogDebug("GetRawFrame called");
 
@@ -70,7 +70,7 @@ namespace NVs.OccupancySensor.API.Controllers
         [HttpGet]
         [Produces("image/jpeg")]
         [Route("frame.jpg")]
-        public async Task<Image<Rgb, int>> GetFrame()
+        public async Task<Image<Rgb, float>> GetFrame()
         {
             logger.LogDebug("GetRawFrame called");
 

@@ -6,18 +6,24 @@ using System.Runtime.CompilerServices;
 
 namespace NVs.OccupancySensor.CV
 {
-    public sealed class Settings
+    public sealed class Settings : ICameraSettings, IResizeSettings
     {
-        public Settings(string source, TimeSpan frameInterval)
+        public Settings(string source, TimeSpan frameInterval, int targetWidth, int targetHeight)
         {
             Source = source;
             FrameInterval = frameInterval;
+            TargetWidth = targetWidth;
+            TargetHeight = targetHeight;
         }
 
         public string Source { get; }
         
         public TimeSpan FrameInterval { get; }
+        
+        public int TargetWidth { get; }
 
-        public static readonly Settings Default = new Settings("0", TimeSpan.FromMilliseconds(100));
+        public int TargetHeight { get; }
+        
+        public static readonly Settings Default = new Settings("0", TimeSpan.FromMilliseconds(100), 640, 360);
     }
 }

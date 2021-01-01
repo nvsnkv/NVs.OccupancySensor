@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Threading;
-using Emgu.CV;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -31,23 +29,35 @@ namespace NVs.OccupancySensor.CV
                     s.GetService<IMatConverter>(),
                     s.GetService<IPeopleDetector>(),
                     s.GetService<ILogger<Impl.OccupancySensor>>()));
-            
+
             services.AddScoped<IImageObserver>(s => new RawImageObserver(s.GetService<ILogger<RawImageObserver>>()));
 
             return services;
         }
-        
+
         private static Settings GetCvSettings(this IConfiguration config)
         {
             var cvSource = config?.GetSection("CV")?["Source"] ?? Settings.Default.Source;
             var cvFrameInterval = config?.GetSection("CV")?["FrameInterval"];
+            var cvTargetWidth = config?.GetSection("CV")?["TargetWidth"];
+            var cvTargetHeight = config?.GetSection("CV")?["TargetWidth"];
 
             if (!TimeSpan.TryParse(cvFrameInterval, out TimeSpan frameInterval))
             {
                 frameInterval = Settings.Default.FrameInterval;
             }
 
-            return new Settings(cvSource, frameInterval);
+            if (!int.TryParse(cvTargetHeight, out int targetHeight))
+            {
+                targetHeight = Settings.Default.TargetHeight;
+            }
+
+            if (!int.TryParse(cvTargetWidth, out int targetWidth))
+            {
+                targetWidth = Settings.Default.TargetWidth;
+            }
+
+            return new Settings(cvSource, frameInterval, targetWidth, targetHeight);
         }
     }
 }
