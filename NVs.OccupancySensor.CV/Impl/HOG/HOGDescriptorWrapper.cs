@@ -7,7 +7,7 @@ namespace NVs.OccupancySensor.CV.Impl.HOG
     {
         private readonly HOGDescriptor descriptor;
 
-        public HOGDescriptorWrapper() 
+        private HOGDescriptorWrapper() 
         {
             descriptor = new HOGDescriptor();
         }

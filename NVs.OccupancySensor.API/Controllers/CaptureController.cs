@@ -72,14 +72,14 @@ namespace NVs.OccupancySensor.API.Controllers
         [Route("frame.jpg")]
         public async Task<Image<Rgb, float>> GetFrame()
         {
-            logger.LogDebug("GetRawFrame called");
+            logger.LogDebug("GetFrame called");
 
-            if (!camera.IsRunning)
+            if (!sensor.IsRunning)
             {
                 return null;
             }
 
-            using (camera.Stream.Select(f => matConverter.Convert(f)).Subscribe(observer))
+            using (sensor.Stream.Subscribe(observer))
             {
                 return await observer.GetImage();
             }
@@ -89,11 +89,11 @@ namespace NVs.OccupancySensor.API.Controllers
         [Route("stream.mjpeg")]
         public IActionResult GetStream()
         {
-            logger.LogDebug("GetRawStream called");
+            logger.LogDebug("GetStream called");
 
-            var unsubscriber = camera.Stream?.Select(f => matConverter.Convert(f))?.Subscribe(observer);
+            var unsubscriber = sensor.Stream?.Subscribe(observer);
 
-            if (!camera.IsRunning || unsubscriber == null)
+            if (!sensor.IsRunning || unsubscriber == null)
             {
                 return NoContent();
             }
