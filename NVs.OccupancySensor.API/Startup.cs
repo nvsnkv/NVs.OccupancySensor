@@ -23,9 +23,8 @@ namespace NVs.OccupancySensor.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCamera()
-                .AddRawImageObservers()
-                .AddMatConverter()
+            services
+                .AddPresenceDetection()
                 .AddControllers(o => o.OutputFormatters.Add(new RgbImageOutputFormatter()));
 
             services.AddSwaggerGen();

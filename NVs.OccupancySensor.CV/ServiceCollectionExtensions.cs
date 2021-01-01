@@ -5,36 +5,38 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.Impl;
+using NVs.OccupancySensor.CV.Impl.HOG;
 
 namespace NVs.OccupancySensor.CV
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddCamera(this IServiceCollection services)
+
+        public static IServiceCollection AddPresenceDetection(this IServiceCollection services)
         {
-            return services.AddSingleton<ICamera>(
+            services.AddSingleton<ICamera>(
                 s => new Camera(
                     s.GetService<ILogger<Camera>>(),
                     s.GetService<ILogger<CameraStream>>(),
                     s.GetService<IConfiguration>().GetCvSettings(),
                     Camera.CreateVideoCapture));
-        }
 
-        public static IServiceCollection AddRawImageObservers(this IServiceCollection services)
-        {
-            return services.AddScoped<IImageObserver>(s =>
-            {
-                var observer = new RawImageObserver(s.GetService<ILogger<RawImageObserver>>());
-                return observer;
-            });
-        }
-
-        public static IServiceCollection AddMatConverter(this IServiceCollection services) 
-        {
             services.AddSingleton<IMatConverter>(s => new MatConverter(s.GetService<ILogger<MatConverter>>()));
-            return services;    
+
+            services.AddSingleton<IPeopleDetector>(s => new HogPeopleDetector(s.GetService<ILogger<HogPeopleDetector>>(), HOGDescriptorWrapper.Create));
+
+            services.AddSingleton<IOccupancySensor>(
+                s => new Impl.OccupancySensor(
+                    s.GetService<ICamera>(),
+                    s.GetService<IMatConverter>(),
+                    s.GetService<IPeopleDetector>(),
+                    s.GetService<ILogger<Impl.OccupancySensor>>()));
+            
+            services.AddScoped<IImageObserver>(s => new RawImageObserver(s.GetService<ILogger<RawImageObserver>>()));
+
+            return services;
         }
-    
+        
         private static Settings GetCvSettings(this IConfiguration config)
         {
             var cvSource = config?.GetSection("CV")?["Source"] ?? Settings.Default.Source;

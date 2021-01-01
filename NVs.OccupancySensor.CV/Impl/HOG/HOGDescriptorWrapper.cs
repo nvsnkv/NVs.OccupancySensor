@@ -21,7 +21,7 @@ namespace NVs.OccupancySensor.CV.Impl.HOG
             descriptor?.Dispose();
         }
 
-        static HOGDescriptorWrapper Create() 
+        public static HOGDescriptorWrapper Create() 
         {
             return new HOGDescriptorWrapper();
         }
