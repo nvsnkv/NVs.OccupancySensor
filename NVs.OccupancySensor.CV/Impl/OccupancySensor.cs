@@ -13,23 +13,23 @@ namespace NVs.OccupancySensor.CV.Impl
     sealed class OccupancySensor : IOccupancySensor, IDisposable
     {
         private readonly ICamera camera;
-        private readonly IMatConverter converter;
-        private readonly IImageResizer resizer;
+        private readonly IMatConverter matConverter;
+        private readonly IImageConverter imageConverter;
         private readonly IPeopleDetector detector;
         private readonly ILogger<OccupancySensor> logger;
-        private IObservable<Image<Rgb, float>> stream;
-
-        private IDisposable subscription;
+        private readonly IObserver<Image<Rgb, float>> dummyObserver = Observer.ToObserver<Image<Rgb, float>>((_) => {});
         
+        private IObservable<Image<Rgb, float>> stream;
+        private IDisposable subscription;
         private bool isDisposed;
 
-        public OccupancySensor([NotNull] ICamera camera, [NotNull] IMatConverter converter, [NotNull] IImageResizer resizer, [NotNull] IPeopleDetector detector, [NotNull] ILogger<OccupancySensor> logger)
+        public OccupancySensor([NotNull] ICamera camera, [NotNull] IMatConverter matConverter, [NotNull] IImageConverter imageConverter, [NotNull] IPeopleDetector detector, [NotNull] ILogger<OccupancySensor> logger)
         {
             this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
             this.camera.PropertyChanged += OnCameraPropertyChanged;
 
-            this.converter = converter ?? throw new ArgumentNullException(nameof(converter));
-            this.resizer = resizer ?? throw new ArgumentNullException(nameof(resizer));
+            this.matConverter = matConverter ?? throw new ArgumentNullException(nameof(matConverter));
+            this.imageConverter = imageConverter ?? throw new ArgumentNullException(nameof(imageConverter));
             this.detector = detector ?? throw new ArgumentNullException(nameof(detector));
             this.detector.PropertyChanged += OnDetectorPropertyChanged;
 
@@ -79,7 +79,6 @@ namespace NVs.OccupancySensor.CV.Impl
         public void Dispose()
         {
             Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
 
         private void OnCameraPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -92,10 +91,10 @@ namespace NVs.OccupancySensor.CV.Impl
                     if (camera.IsRunning)
                     {
                         Stream = camera.Stream
-                            .Select(f => converter.Convert(f))
-                            .Select(i => resizer.Resize(i))
+                            .Select(f => matConverter.Convert(f))
+                            .Select(i => imageConverter.Convert(i))
                             .Select(i => detector.Detect(i));
-                        subscription = Stream.Subscribe(Observer.ToObserver<Image<Rgb, float>>((_) => {}));
+                        subscription = Stream.Subscribe(dummyObserver);
                     }
                     else
                     {
@@ -103,9 +102,6 @@ namespace NVs.OccupancySensor.CV.Impl
                         Stream = null;
                         detector.Reset();
                     }
-                    break;
-
-                default:
                     break;
             }
         }
@@ -117,9 +113,6 @@ namespace NVs.OccupancySensor.CV.Impl
                 case nameof(IPeopleDetector.PeopleDetected):
                     logger.LogInformation($"Detector.PeopleDetected changed to {detector.PeopleDetected?.ToString() ?? "null"}");
                     OnPropertyChanged(nameof(PresenceDetected));
-                    break;
-
-                default:
                     break;
             }
         }

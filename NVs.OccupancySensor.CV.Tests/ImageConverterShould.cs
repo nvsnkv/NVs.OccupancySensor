@@ -5,14 +5,14 @@ using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NVs.OccupancySensor.CV.Impl;
+using NVs.OccupancySensor.CV.Settings;
 using Xunit;
 
 namespace NVs.OccupancySensor.CV.Tests
 {
-    public sealed  class ImageResizerShould
+    public sealed  class ImageConverterShould
     {
-        private readonly Mock<ILogger<ImageResizer>> logger = new Mock<ILogger<ImageResizer>>();
-        private readonly Mock<IResizeSettings> settings = new Mock<IResizeSettings>();
+        private readonly Mock<ILogger<ImageConverter>> logger = new Mock<ILogger<ImageConverter>>();
         
         [Theory]
         [InlineData(1920,1080)]
@@ -21,14 +21,13 @@ namespace NVs.OccupancySensor.CV.Tests
         public void ResizeValidImageToTargetSize(int originalWidth, int originalHeight)
         {
             var expectedWidth = 640;
-            settings.SetupGet(s => s.TargetWidth).Returns(expectedWidth);
             var expectedHeight = 360;
-            settings.SetupGet(s => s.TargetHeight).Returns(expectedHeight);
-
+            var settings = new ConversionSettings(new Size(expectedWidth, expectedHeight), false);
+            
             var image = new Image<Rgb, float>(originalWidth, originalHeight, new Rgb(Color.Aqua));
-            var resizer = new ImageResizer(settings.Object, logger.Object);
+            var resizer = new ImageConverter(settings, logger.Object);
 
-            var result = resizer.Resize(image);
+            var result = resizer.Convert(image);
             Assert.Equal(expectedWidth, result.Width);
             Assert.Equal(expectedHeight, result.Height);
         }
@@ -36,16 +35,16 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void ThrowArgumentNullExceptionIfInputIsNull()
         {
-            var resizer = new ImageResizer(settings.Object, logger.Object);
-            Assert.Throws<ArgumentNullException>(() => resizer.Resize(null!));
+            var resizer = new ImageConverter(ConversionSettings.Default, logger.Object);
+            Assert.Throws<ArgumentNullException>(() => resizer.Convert(null!));
         }
         
         [Fact]
         public void ThrowArgumentNullExceptionIfSettingsAreNull()
         {
-            var resizer = new ImageResizer(settings.Object, logger.Object);
+            var resizer = new ImageConverter(ConversionSettings.Default, logger.Object);
             Assert.Throws<ArgumentNullException>(() => resizer.Settings =null!);
-            Assert.Throws<ArgumentNullException>(() => new ImageResizer(null, logger.Object));
+            Assert.Throws<ArgumentNullException>(() => new ImageConverter(null, logger.Object));
         }
 
         [Theory]
@@ -56,14 +55,13 @@ namespace NVs.OccupancySensor.CV.Tests
         public void BypassImageIfItsLessThenTargetSize(int originalWidth, int originalHeight)
         {
             var expectedWidth = 640;
-            settings.SetupGet(s => s.TargetWidth).Returns(expectedWidth);
             var expectedHeight = 360;
-            settings.SetupGet(s => s.TargetHeight).Returns(expectedHeight);
+            var settings = new ConversionSettings(new Size(expectedWidth, expectedHeight), false);
 
             var image = new Image<Rgb, float>(originalWidth, originalHeight, new Rgb(Color.Aqua));
-            var resizer = new ImageResizer(settings.Object, logger.Object);
+            var resizer = new ImageConverter(settings, logger.Object);
 
-            var result = resizer.Resize(image);
+            var result = resizer.Convert(image);
             Assert.Same(image,result);
         }
         

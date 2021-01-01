@@ -6,6 +6,7 @@ using Emgu.CV;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NVs.OccupancySensor.CV.Impl;
+using NVs.OccupancySensor.CV.Settings;
 using NVs.OccupancySensor.CV.Tests.Utils;
 using Xunit;
 
@@ -25,7 +26,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void NotifyWhenItWasStarted()
         {
-            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, Camera.CreateVideoCapture);
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, CameraSettings.Default, Camera.CreateVideoCapture);
             var logger = new PropertyChangedLogger();
 
             camera.PropertyChanged += logger.OnPropertyChanged;
@@ -39,7 +40,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void ProvideNewStreamWhenStarted()
         {
-            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, Camera.CreateVideoCapture);
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, CameraSettings.Default, Camera.CreateVideoCapture);
             var logger = new PropertyChangedLogger();
 
             camera.PropertyChanged += logger.OnPropertyChanged;
@@ -53,7 +54,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void NotifyWhenItWasStopped()
         {
-            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, Camera.CreateVideoCapture);
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, CameraSettings.Default, Camera.CreateVideoCapture);
             var logger = new PropertyChangedLogger();
 
             camera.PropertyChanged += logger.OnPropertyChanged;
@@ -68,7 +69,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void CompleteStreamWhenStopped()
         {
-            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, Camera.CreateVideoCapture);
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, CameraSettings.Default, Camera.CreateVideoCapture);
             var logger = new PropertyChangedLogger();
             var observer = new TestMatObserver();
 
@@ -89,7 +90,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void PreventParallelAttemptsToStart()
         {
-            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, Camera.CreateVideoCapture);
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, CameraSettings.Default, Camera.CreateVideoCapture);
             var logger = new PropertyChangedLogger();
             camera.PropertyChanged += logger.OnPropertyChanged;
             
@@ -101,7 +102,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void PreventParallelAttemptsToStop()
         {
-            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, Camera.CreateVideoCapture);
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, CameraSettings.Default, Camera.CreateVideoCapture);
             var logger = new PropertyChangedLogger();
             camera.PropertyChanged += logger.OnPropertyChanged;
 
@@ -114,7 +115,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void RemainStoppedIfAttemptCreateNewVideoCaptureFailed()
         {
-            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, _ => throw new TestException());
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, CameraSettings.Default, _ => throw new TestException());
             var logger = new PropertyChangedLogger();
             camera.PropertyChanged += logger.OnPropertyChanged;
 
@@ -126,7 +127,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void RethrowTheExceptionOccurredDuringVideoCaptureCreation()
         {
-            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, _ => throw new TestException());
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, CameraSettings.Default, _ => throw new TestException());
 
             Assert.Throws<TestException>(() => camera.Start());
         }
@@ -144,7 +145,7 @@ namespace NVs.OccupancySensor.CV.Tests
                         It.IsAny<Func<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>, Exception, string>>()))
                 .Verifiable("Logger was not called!");
             
-            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, _ => throw new TestException());
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, CameraSettings.Default, _ => throw new TestException());
 
             Assert.Throws<TestException>(() => camera.Start());
             cameraLogger.Verify();
@@ -156,7 +157,7 @@ namespace NVs.OccupancySensor.CV.Tests
             var captureMock = new Mock<VideoCapture>(MockBehavior.Default, 0, VideoCapture.API.Any);
             captureMock.Setup(c => c.QueryFrame()).Throws<TestException>();
 
-            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, _ => captureMock.Object);
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, CameraSettings.Default, _ => captureMock.Object);
             var observer = new TestMatObserver();
             
             camera.Start();
@@ -172,13 +173,13 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void UseProvidedSettingsToCreateNewCapture()
         {
-            ICameraSettings capturedSettings = null;
-            ICameraSettings expectedSettings = new Settings("Some source", TimeSpan.Zero, 640, 480);
+            CameraSettings capturedSettings = null;
+            CameraSettings expectedSettings = new CameraSettings("Some source", TimeSpan.Zero);
 
             var captureMock = new Mock<VideoCapture>(MockBehavior.Default, 0, VideoCapture.API.Any);
             captureMock.Setup(c => c.QueryFrame()).Returns(new Mat());
 
-            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, s =>
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, CameraSettings.Default, s =>
             {
                 capturedSettings = s;
                 return captureMock.Object;
@@ -194,12 +195,12 @@ namespace NVs.OccupancySensor.CV.Tests
         //TODO: redesign blinking test
         public async Task UseProvidedSettingsToSetFrameInterval()
         {
-            var settings = new Settings("Some source", TimeSpan.FromMilliseconds(50), 640, 360);
+            var settings = new CameraSettings("Some source", TimeSpan.FromMilliseconds(50));
 
             var captureMock = new Mock<VideoCapture>(MockBehavior.Default, 0, VideoCapture.API.Any);
             captureMock.Setup(c => c.QueryFrame()).Returns(() => new Mat());
 
-            var camera = new Camera(cameraLogger.Object, streamLogger.Object, Settings.Default, _ => captureMock.Object);
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, CameraSettings.Default, _ => captureMock.Object);
             var observer = new TestMatObserver();
 
             camera.Settings = settings;
