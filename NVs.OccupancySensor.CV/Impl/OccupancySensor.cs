@@ -94,7 +94,7 @@ namespace NVs.OccupancySensor.CV.Impl
                     }
                     else
                     {
-                        subscription.Dispose();
+                        subscription?.Dispose();
                         Stream = null;
                         detector.Reset();
                     }

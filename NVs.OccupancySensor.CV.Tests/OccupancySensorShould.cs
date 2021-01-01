@@ -77,7 +77,7 @@ namespace NVs.OccupancySensor.CV.Tests
             camera.Raise(c => c.PropertyChanged += null, new PropertyChangedEventArgs(nameof(ICamera.IsRunning)));
             Assert.NotNull(sensor.Stream);
 
-    
+
             await Task.Delay(TimeSpan.FromMilliseconds(200));
             converter.Verify();
             detector.Verify();
@@ -115,6 +115,32 @@ namespace NVs.OccupancySensor.CV.Tests
             var sensor = new Impl.OccupancySensor(camera.Object, converter.Object, detector.Object, logger.Object);
 
             Assert.Equal(expected, sensor.IsRunning);
+        }
+
+        [Fact]
+        public void UnsubscribeItselfFromCameraAfterDispose() 
+        {
+            bool propertyChangedRaised = false;
+            var sensor = new Impl.OccupancySensor(camera.Object, converter.Object, detector.Object, logger.Object);
+            sensor.PropertyChanged += (_,__) => propertyChangedRaised = true;
+
+            sensor.Dispose();
+            camera.Raise(c => c.PropertyChanged += null, new PropertyChangedEventArgs(nameof(ICamera.IsRunning)));
+
+            Assert.False(propertyChangedRaised);
+        }
+
+        [Fact]
+        public void UnsubscribeItselfFromDetectorAfterDispose() 
+        {
+            bool propertyChangedRaised = false;
+            var sensor = new Impl.OccupancySensor(camera.Object, converter.Object, detector.Object, logger.Object);
+            sensor.PropertyChanged += (_,__) => propertyChangedRaised = true;
+
+            sensor.Dispose();
+            detector.Raise(d => d.PropertyChanged += null, new PropertyChangedEventArgs(nameof(IPeopleDetector.PeopleDetected)));
+
+            Assert.False(propertyChangedRaised);
         }
     }
 }
