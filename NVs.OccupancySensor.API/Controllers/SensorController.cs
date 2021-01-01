@@ -7,34 +7,42 @@ namespace NVs.OccupancySensor.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public sealed class CameraController : ControllerBase
+    public sealed class SensorController : ControllerBase
     {
-        private readonly ICamera camera;
+        private readonly IOccupancySensor sensor;
 
-        public CameraController([NotNull] ICamera camera)
+        public SensorController([NotNull] IOccupancySensor sensor)
         {
-            this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
+            this.sensor = sensor ?? throw new ArgumentNullException(nameof(sensor));
         }
-        
+
+
         [HttpGet]
         [Route("[action]")]
         public bool IsRunning()
         {
-            return camera.IsRunning;
+            return sensor.IsRunning;
+        }
+
+        [HttpGet]
+        [Route("[action]")]
+        public bool? PresenceDetected()
+        {
+            return sensor.PresenceDetected;
         }
 
         [HttpPost]
         [Route("[action]")]
         public void Start()
         {
-            camera.Start();
+            sensor.Start();
         }
 
         [HttpPost]
         [Route("[action]")]
         public void Stop()
         {
-            camera.Stop();
+            sensor.Stop();
         }
     }
 }

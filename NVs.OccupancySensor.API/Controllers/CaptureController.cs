@@ -16,25 +16,27 @@ namespace NVs.OccupancySensor.API.Controllers
     public sealed class CaptureController : ControllerBase
     {
         private readonly ICamera camera;
+        private readonly IOccupancySensor sensor;
         private readonly IImageObserver observer;
 
         private readonly IMatConverter matConverter;
         private readonly ILogger<CaptureController> logger;
         
-        public CaptureController([NotNull] ICamera camera, [NotNull] IImageObserver observer, [NotNull] IMatConverter converter, [NotNull] ILogger<CaptureController> logger)
+        public CaptureController([NotNull] ICamera camera, [NotNull] IOccupancySensor sensor, [NotNull] IImageObserver observer, [NotNull] IMatConverter converter, [NotNull] ILogger<CaptureController> logger)
         {
             this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
             this.observer = observer ?? throw new ArgumentNullException(nameof(observer));
             this.matConverter = converter ?? throw new ArgumentException(nameof(converter));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.sensor = sensor ?? throw new ArgumentNullException(nameof(sensor));
         }
 
         [HttpGet]
         [Produces("image/jpeg")]
-        [Route("frame.jpg")]
-        public async Task<Image<Rgb,int>> GetSingleCapture()
+        [Route("frame-raw.jpg")]
+        public async Task<Image<Rgb,int>> GetRawFrame()
         {
-            logger.LogDebug("GetSingleCapture called");
+            logger.LogDebug("GetRawFrame called");
 
             if (!camera.IsRunning)
             {
@@ -48,10 +50,10 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
-        [Route("stream.mjpeg")]
-        public IActionResult GetStream()
+        [Route("stream-raw.mjpeg")]
+        public IActionResult GetRawStream()
         {
-            logger.LogDebug("GetStream called");
+            logger.LogDebug("GetRawStream called");
 
             var unsubscriber = camera.Stream?.Select(f => matConverter.Convert(f))?.Subscribe(observer);
 
@@ -62,6 +64,42 @@ namespace NVs.OccupancySensor.API.Controllers
 
             return new MjpegStreamContent(
                 async cts => (await observer.GetImage())?.ToJpegData(), 
+                () => unsubscriber.Dispose());
+        }
+
+        [HttpGet]
+        [Produces("image/jpeg")]
+        [Route("frame.jpg")]
+        public async Task<Image<Rgb, int>> GetFrame()
+        {
+            logger.LogDebug("GetRawFrame called");
+
+            if (!camera.IsRunning)
+            {
+                return null;
+            }
+
+            using (camera.Stream.Select(f => matConverter.Convert(f)).Subscribe(observer))
+            {
+                return await observer.GetImage();
+            }
+        }
+
+        [HttpGet]
+        [Route("stream.mjpeg")]
+        public IActionResult GetStream()
+        {
+            logger.LogDebug("GetRawStream called");
+
+            var unsubscriber = camera.Stream?.Select(f => matConverter.Convert(f))?.Subscribe(observer);
+
+            if (!camera.IsRunning || unsubscriber == null)
+            {
+                return NoContent();
+            }
+
+            return new MjpegStreamContent(
+                async cts => (await observer.GetImage())?.ToJpegData(),
                 () => unsubscriber.Dispose());
         }
     }
