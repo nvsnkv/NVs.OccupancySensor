@@ -1,15 +1,16 @@
 using System;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Impl
 {
     sealed class MatConverter : IMatConverter
     {
-        ILogger<MatConverter> logger;
+        private readonly ILogger<MatConverter> logger;
 
-        public MatConverter(ILogger<MatConverter> logger) => this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        public MatConverter([NotNull] ILogger<MatConverter> logger) => this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         public Image<Rgb, float> Convert(Mat input) 
         {

@@ -19,9 +19,9 @@ namespace NVs.OccupancySensor.CV.Impl.HOG
         private bool? peopleDetected;
         private volatile bool processing;
         
-        public HogPeopleDetector(ILogger<HogPeopleDetector> logger, Func<IHOGDescriptorWrapper> createDescriptor)
+        public HogPeopleDetector([NotNull] ILogger<HogPeopleDetector> logger, [NotNull] Func<IHOGDescriptorWrapper> createDescriptor)
         {
-            this.logger = logger;
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             descriptor = createDescriptor();
         }
 
@@ -118,14 +118,6 @@ namespace NVs.OccupancySensor.CV.Impl.HOG
         public void Dispose()
         {
             descriptor?.Dispose();
-        }
-
-        static HOGDescriptor CreateDescriptor()
-        {
-            var descriptor = new HOGDescriptor();
-            descriptor.SetSVMDetector(HOGDescriptor.GetDefaultPeopleDetector());
-
-            return descriptor;
         }
 
         [NotifyPropertyChangedInvocator]

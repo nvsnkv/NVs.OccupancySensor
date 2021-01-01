@@ -24,12 +24,12 @@ namespace NVs.OccupancySensor.CV.Impl
         private volatile bool isRunning;
         private ICameraSettings settings;
 
-        public Camera(ILogger<Camera> logger, ILogger<CameraStream> streamLogger, Settings settings, Func<ICameraSettings, VideoCapture> createVideoCaptureFunc)
+        public Camera([NotNull] ILogger<Camera> logger, [NotNull] ILogger<CameraStream> streamLogger, [NotNull] Settings settings, [NotNull] Func<ICameraSettings, VideoCapture> createVideoCaptureFunc)
         {
-            this.logger = logger;
-            this.streamLogger = streamLogger;
-            this.settings = settings;
-            this.createVideoCaptureFunc = createVideoCaptureFunc;
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.streamLogger = streamLogger ?? throw new ArgumentNullException(nameof(streamLogger));
+            this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            this.createVideoCaptureFunc = createVideoCaptureFunc ?? throw new ArgumentNullException(nameof(createVideoCaptureFunc));
             this.errorObserver = new ErrorObserver(this);
         }
 

@@ -14,6 +14,7 @@ namespace NVs.OccupancySensor.CV.Impl
     {
         private readonly ICamera camera;
         private readonly IMatConverter converter;
+        private readonly IImageResizer resizer;
         private readonly IPeopleDetector detector;
         private readonly ILogger<OccupancySensor> logger;
         private IObservable<Image<Rgb, float>> stream;
@@ -22,12 +23,13 @@ namespace NVs.OccupancySensor.CV.Impl
         
         private bool isDisposed;
 
-        public OccupancySensor(ICamera camera, IMatConverter converter, IPeopleDetector detector, ILogger<OccupancySensor> logger)
+        public OccupancySensor([NotNull] ICamera camera, [NotNull] IMatConverter converter, [NotNull] IImageResizer resizer, [NotNull] IPeopleDetector detector, [NotNull] ILogger<OccupancySensor> logger)
         {
             this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
             this.camera.PropertyChanged += OnCameraPropertyChanged;
 
             this.converter = converter ?? throw new ArgumentNullException(nameof(converter));
+            this.resizer = resizer ?? throw new ArgumentNullException(nameof(resizer));
             this.detector = detector ?? throw new ArgumentNullException(nameof(detector));
             this.detector.PropertyChanged += OnDetectorPropertyChanged;
 
@@ -89,7 +91,10 @@ namespace NVs.OccupancySensor.CV.Impl
                     OnPropertyChanged(nameof(IsRunning));
                     if (camera.IsRunning)
                     {
-                        Stream = camera.Stream.Select(f => converter.Convert(f)).Select(i => detector.Detect(i));
+                        Stream = camera.Stream
+                            .Select(f => converter.Convert(f))
+                            .Select(i => resizer.Resize(i))
+                            .Select(i => detector.Detect(i));
                         subscription = Stream.Subscribe(Observer.ToObserver<Image<Rgb, float>>((_) => {}));
                     }
                     else

@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Impl
@@ -17,7 +18,7 @@ namespace NVs.OccupancySensor.CV.Impl
         private volatile Exception exception;
         private volatile bool completed;
 
-        public RawImageObserver(ILogger<RawImageObserver> logger)
+        public RawImageObserver([NotNull] ILogger<RawImageObserver> logger)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }

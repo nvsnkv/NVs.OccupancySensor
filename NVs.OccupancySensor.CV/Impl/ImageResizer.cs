@@ -12,7 +12,7 @@ namespace NVs.OccupancySensor.CV.Impl
         private readonly ILogger<ImageResizer> logger;
         private IResizeSettings settings;
 
-        public ImageResizer(IResizeSettings settings, ILogger<ImageResizer> logger)
+        public ImageResizer([NotNull] IResizeSettings settings, [NotNull] ILogger<ImageResizer> logger)
         {
             this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
             if (logger != null) this.logger = logger;
