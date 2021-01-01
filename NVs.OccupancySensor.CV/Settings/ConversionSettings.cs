@@ -20,6 +20,6 @@ namespace NVs.OccupancySensor.CV.Settings
         
         public bool GrayScale { get; }
 
-        public static ConversionSettings Default = new ConversionSettings(new Size(640, 360), true);
+        public static ConversionSettings Default { get; } = new ConversionSettings(new Size(640, 360), true);
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
+using System.Threading;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
@@ -52,7 +54,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [InlineData(640, 200)]
         [InlineData(200, 360)]
         [InlineData(200, 200)]
-        public void BypassImageIfItsLessThenTargetSize(int originalWidth, int originalHeight)
+        public void BypassImageIfItsLessThenTargetSizeAndGrayScaleConversionIsDisabled(int originalWidth, int originalHeight)
         {
             var expectedWidth = 640;
             var expectedHeight = 360;
@@ -64,6 +66,18 @@ namespace NVs.OccupancySensor.CV.Tests
             var result = resizer.Convert(image);
             Assert.Same(image,result);
         }
-        
+
+        [Fact]
+        public void ConvertImageToGrayscaleIfGrayScaleConversionIsEnabled()
+        {
+            var input = new Image<Rgb, float>(100, 100, new Rgb(Color.Red));
+            var expectedResult = new Image<Rgb, float>(100, 100, new Rgb(76.2449951, 76.2449951, 76.2449951));
+
+            var converter = new ImageConverter(new ConversionSettings(null, true), logger.Object);
+            var actualResult = converter.Convert(input);
+
+            var diff = actualResult.AbsDiff(expectedResult);
+            Assert.True(diff.CountNonzero().All(i => i == 0));
+        }
     }
 }
