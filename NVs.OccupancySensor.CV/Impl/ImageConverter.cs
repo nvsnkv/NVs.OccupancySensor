@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
@@ -30,7 +31,32 @@ namespace NVs.OccupancySensor.CV.Impl
 
             result = ConvertColor(result);
 
+            result = Rotate(result);
+            
             logger.LogInformation("Image successfully converted!");
+            return result;
+        }
+
+        private Image<Rgb, float> Rotate(Image<Rgb, float> input)
+        {
+            if (Settings.RotationAngle == 0)
+            {
+                logger.LogInformation("Image rotation was not requested, bypassing existing image");
+                return input;
+            }
+
+            Image<Rgb, float> result;
+            try
+            {
+                result = input.Rotate(Settings.RotationAngle, new Rgb(Color.Black), false);
+                logger.LogInformation("Image successfully rotated!");
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Failed to rotate image!");
+                throw;
+            }
+
             return result;
         }
 

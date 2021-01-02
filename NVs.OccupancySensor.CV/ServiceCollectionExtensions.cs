@@ -26,7 +26,7 @@ namespace NVs.OccupancySensor.CV
 
             services.AddSingleton<IMatConverter>(s => new MatConverter(s.GetService<ILogger<MatConverter>>() ?? throw new InvalidOperationException("MatConverter logger dependency was not resolved")));
 
-            services.AddSingleton<IPeopleDetector>(s => new HogPeopleDetector(s.GetService<ILogger<HogPeopleDetector>>() ?? throw new InvalidOperationException("HogPeopleDetector logger dependency was not resolved"), HOGDescriptorWrapper.Create));
+            services.AddSingleton<IPeopleDetector>(s => new HaarPeopleDetector(s.GetService<ILogger<HaarPeopleDetector>>() ?? throw new InvalidOperationException("HogPeopleDetector logger dependency was not resolved")));
 
             services.AddSingleton<IImageConverter>(s => new ImageConverter(s.GetService<IConfiguration>()?.GetConversionSettings() ?? throw new InvalidOperationException("Settings were not resolved"),
                 s.GetService<ILogger<ImageConverter>>() ?? throw new InvalidOperationException("ImageConverter logger dependency was not resolved")));
@@ -58,6 +58,7 @@ namespace NVs.OccupancySensor.CV
                 var tHeight = conversionSection["TargetHeight"];
                 var tWidth = conversionSection["TargetWidth"];
                 var tGrayScale = conversionSection["GrayScale"];
+                var tRotationAngle = conversionSection["RotationAngle"];
 
                 var size = (int.TryParse(tHeight, out int height) && int.TryParse(tWidth, out int width))
                     ? (Size?)new Size(width, height)
@@ -68,7 +69,12 @@ namespace NVs.OccupancySensor.CV
                     grayScale = false;
                 }
 
-                conversionSettings = new ConversionSettings(size, grayScale);
+                if (!double.TryParse(tRotationAngle, out double rotationAngle))
+                {
+                    rotationAngle = 0;
+                }
+
+                conversionSettings = new ConversionSettings(size, grayScale, rotationAngle);
             }
 
             return conversionSettings;

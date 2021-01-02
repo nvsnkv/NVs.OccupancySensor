@@ -1,21 +1,39 @@
 ﻿using System.ComponentModel;
+using System.Drawing;
+using System.Reflection;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Impl
 {
-    sealed class HaarPeopleDetector : IPeopleDetector
+    sealed class HaarPeopleDetector : PeopleDetectorBase
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        public Image<Rgb, float> Detect(Image<Rgb, float> source)
+        private readonly CascadeClassifier classifier;
+        
+        public HaarPeopleDetector([NotNull] ILogger<PeopleDetectorBase> logger) : base(logger)
         {
-            throw new System.NotImplementedException();
+            var path = GetPathToCascade();
+            classifier = new CascadeClassifier(path);
         }
 
-        public bool? PeopleDetected { get; }
-        public void Reset()
+        private static  string GetPathToCascade()
         {
-            throw new System.NotImplementedException();
+            var assembly = Assembly.GetAssembly(typeof(HaarPeopleDetector));
+            var location = assembly.Location;
+            return location.Replace(assembly.ManifestModule.Name, "haarcascade_upperbody.xml");
+        }
+
+        protected override Rectangle[] PerformDetection(Image<Rgb, float> source)
+        {
+            var image = source.Convert<Bgr, byte>();
+            return classifier.DetectMultiScale(image);
+        }
+
+        protected override void DoDispose(ILogger<PeopleDetectorBase> logger)
+        {
+            classifier?.Dispose();
         }
     }
 }

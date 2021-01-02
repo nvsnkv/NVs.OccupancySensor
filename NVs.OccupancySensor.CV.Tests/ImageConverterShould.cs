@@ -24,7 +24,7 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var expectedWidth = 640;
             var expectedHeight = 360;
-            var settings = new ConversionSettings(new Size(expectedWidth, expectedHeight), false);
+            var settings = new ConversionSettings(new Size(expectedWidth, expectedHeight), false, 0);
             
             var image = new Image<Rgb, float>(originalWidth, originalHeight, new Rgb(Color.Aqua));
             var resizer = new ImageConverter(settings, logger.Object);
@@ -58,7 +58,7 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var expectedWidth = 640;
             var expectedHeight = 360;
-            var settings = new ConversionSettings(new Size(expectedWidth, expectedHeight), false);
+            var settings = new ConversionSettings(new Size(expectedWidth, expectedHeight), false, 0);
 
             var image = new Image<Rgb, float>(originalWidth, originalHeight, new Rgb(Color.Aqua));
             var resizer = new ImageConverter(settings, logger.Object);
@@ -73,11 +73,23 @@ namespace NVs.OccupancySensor.CV.Tests
             var input = new Image<Rgb, float>(100, 100, new Rgb(Color.Red));
             var expectedResult = new Image<Rgb, float>(100, 100, new Rgb(76.2449951, 76.2449951, 76.2449951));
 
-            var converter = new ImageConverter(new ConversionSettings(null, true), logger.Object);
+            var converter = new ImageConverter(new ConversionSettings(null, true, 0), logger.Object);
             var actualResult = converter.Convert(input);
 
             var diff = actualResult.AbsDiff(expectedResult);
             Assert.True(diff.CountNonzero().All(i => i == 0));
+        }
+        
+        [Fact]
+        public void RotateImageIfRotationAngleIsNonZero()
+        {
+            var input = new Image<Rgb, float>(100, 200, new Rgb(Color.Red));
+            
+            var converter = new ImageConverter(new ConversionSettings(null, true, 90), logger.Object);
+            var actualResult = converter.Convert(input);
+
+            Assert.Equal(input.Height, actualResult.Width);
+            Assert.Equal(input.Width, actualResult.Height);
         }
     }
 }
