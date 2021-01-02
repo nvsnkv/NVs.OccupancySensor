@@ -35,7 +35,7 @@ namespace NVs.OccupancySensor.CV
                 s => new Impl.OccupancySensor(
                     s.GetService<ICamera>() ?? throw new InvalidOperationException("Camera dependency was not resolved"),
                     s.GetService<IMatConverter>() ?? throw new InvalidOperationException("MatConverter dependency was not resolved"),
-                    s.GetService<ImageConverter>() ?? throw new InvalidOperationException("ImageConverter dependency was not resolved"),
+                    s.GetService<IImageConverter>() ?? throw new InvalidOperationException("ImageConverter dependency was not resolved"),
                     s.GetService<IPeopleDetector>() ?? throw new InvalidOperationException("PeopleDetector dependency was not resolved"),
                     s.GetService<ILogger<Impl.OccupancySensor>>() ?? throw new InvalidOperationException("OccupancySensor logger dependency was not resolved")));
 
@@ -46,7 +46,7 @@ namespace NVs.OccupancySensor.CV
 
         private static ConversionSettings GetConversionSettings([NotNull] this IConfiguration config)
         {
-            var conversionSection = config.GetSection("CV.Conversion");
+            var conversionSection = config.GetSection("CV:Conversion");
             ConversionSettings conversionSettings;
             
             if (conversionSection == null)
@@ -76,8 +76,8 @@ namespace NVs.OccupancySensor.CV
 
         private static CameraSettings GetCameraSettings(this IConfiguration config)
         {
-            var cvSource = config.GetSection("CV.Camera")?["Source"] ?? CameraSettings.Default.Source;
-            var cvFrameInterval = config.GetSection("CV.Camera")?["FrameInterval"];
+            var cvSource = config.GetSection("CV:Camera")?["Source"] ?? CameraSettings.Default.Source;
+            var cvFrameInterval = config.GetSection("CV:Camera")?["FrameInterval"] ?? string.Empty;
 
             if (!TimeSpan.TryParse(cvFrameInterval, out TimeSpan frameInterval))
             {
