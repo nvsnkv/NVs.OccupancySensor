@@ -1,4 +1,4 @@
-﻿namespace NVs.OccupancySensor.CV.Impl
+﻿namespace NVs.OccupancySensor.CV.Utils
 {
     static class LogUtils
     {

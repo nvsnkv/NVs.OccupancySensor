@@ -1,36 +1,35 @@
 using System;
 using System.ComponentModel;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
+using NVs.OccupancySensor.CV.Capture;
+using NVs.OccupancySensor.CV.Detection;
+using NVs.OccupancySensor.CV.Transformation;
 
-namespace NVs.OccupancySensor.CV.Impl
+namespace NVs.OccupancySensor.CV.Sense
 {
     sealed class OccupancySensor : IOccupancySensor, IDisposable
     {
         private readonly ICamera camera;
-        private readonly IMatConverter matConverter;
-        private readonly IImageConverter imageConverter;
         private readonly IPeopleDetector detector;
+        private readonly IImageTransformer transformer;
         private readonly ILogger<OccupancySensor> logger;
-        private readonly IObserver<Image<Rgb,byte>> dummyObserver = Observer.ToObserver<Image<Rgb,byte>>((_) => {});
         
         private IObservable<Image<Rgb,byte>> stream;
         private IDisposable subscription;
         private bool isDisposed;
 
-        public OccupancySensor([NotNull] ICamera camera, [NotNull] IMatConverter matConverter, [NotNull] IImageConverter imageConverter, [NotNull] IPeopleDetector detector, [NotNull] ILogger<OccupancySensor> logger)
+        public OccupancySensor([NotNull] ICamera camera, [NotNull] IPeopleDetector detector, [NotNull] IImageTransformer transformer, [NotNull] ILogger<OccupancySensor> logger)
         {
             this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
             this.camera.PropertyChanged += OnCameraPropertyChanged;
 
-            this.matConverter = matConverter ?? throw new ArgumentNullException(nameof(matConverter));
-            this.imageConverter = imageConverter ?? throw new ArgumentNullException(nameof(imageConverter));
             this.detector = detector ?? throw new ArgumentNullException(nameof(detector));
+            this.transformer = transformer ?? throw new ArgumentNullException(nameof(transformer));
             this.detector.PropertyChanged += OnDetectorPropertyChanged;
 
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -39,18 +38,6 @@ namespace NVs.OccupancySensor.CV.Impl
         public bool? PresenceDetected => detector.PeopleDetected;
 
         public bool IsRunning => camera.IsRunning;
-
-        public IObservable<Image<Rgb,byte>> Stream
-        {
-            get => stream;
-            private set
-            {
-                if (isDisposed) throw new ObjectDisposedException(nameof(OccupancySensor));
-                if (Equals(stream, value)) return;
-                stream = value;
-                OnPropertyChanged();
-            }
-        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -90,16 +77,13 @@ namespace NVs.OccupancySensor.CV.Impl
                     OnPropertyChanged(nameof(IsRunning));
                     if (camera.IsRunning)
                     {
-                        Stream = camera.Stream
-                            .Select(f => matConverter.Convert(f))
-                            .Select(i => imageConverter.Convert(i))
-                            .Select(i => detector.Detect(i));
-                        subscription = Stream.Subscribe(dummyObserver);
+                        stream = camera.Stream.Select(transformer.Transform);
+                        subscription = stream.Subscribe(detector);
                     }
                     else
                     {
                         subscription?.Dispose();
-                        Stream = null;
+                        stream = null;
                         detector.Reset();
                     }
                     break;

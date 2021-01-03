@@ -3,11 +3,12 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Emgu.CV;
-using Microsoft.Extensions.Logging;
+using Emgu.CV.Structure;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.Settings;
 
-namespace NVs.OccupancySensor.CV.Impl
+namespace NVs.OccupancySensor.CV.Capture
 {
     sealed class Camera : ICamera
     {
@@ -158,7 +159,7 @@ namespace NVs.OccupancySensor.CV.Impl
             }
         }
 
-        private class ErrorObserver : IObserver<Mat>
+        private class ErrorObserver : IObserver<Image<Rgb, byte>>
         {
             private readonly Camera camera;
 
@@ -177,7 +178,7 @@ namespace NVs.OccupancySensor.CV.Impl
                 camera.Stop();
             }
 
-            public void OnNext(Mat value)
+            public void OnNext(Image<Rgb, byte> value)
             {
             }
         }

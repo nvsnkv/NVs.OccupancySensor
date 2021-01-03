@@ -2,6 +2,7 @@
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using NVs.OccupancySensor.CV;
+using NVs.OccupancySensor.CV.Sense;
 
 namespace NVs.OccupancySensor.API.Controllers
 {

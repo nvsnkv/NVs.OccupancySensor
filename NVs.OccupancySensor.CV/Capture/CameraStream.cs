@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Emgu.CV;
+using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
+using NVs.OccupancySensor.CV.Utils;
 
-namespace NVs.OccupancySensor.CV.Impl
+namespace NVs.OccupancySensor.CV.Capture
 {
     sealed class CameraStream : ICameraStream
     {
         private readonly VideoCapture videoCapture;
-        private readonly List<IObserver<Mat>> observers = new List<IObserver<Mat>>();
+        private readonly List<IObserver<Image<Rgb, byte>>> observers = new List<IObserver<Image<Rgb, byte>>>();
         private readonly object observersLock = new object();
         private readonly CancellationToken ct;
         private readonly ILogger<CameraStream> logger;
@@ -34,9 +35,8 @@ namespace NVs.OccupancySensor.CV.Impl
 
             Task.Run(QueryFrames, ct);
         }
-
-
-        public IDisposable Subscribe(IObserver<Mat> observer)
+        
+        public IDisposable Subscribe(IObserver<Image<Rgb, byte>> observer)
         {
             if (observer == null) throw new ArgumentNullException(nameof(observer));
 
@@ -55,13 +55,13 @@ namespace NVs.OccupancySensor.CV.Impl
             return new Unsubscriber(observers, observersLock, observer);
             // ReSharper restore InconsistentlySynchronizedField
         }
-
+        
         private async Task QueryFrames()
         {
             while (!ct.IsCancellationRequested)
             {
                 logger.LogInformation($"Capturing frame {framesCaptured + 1}");
-                Mat frame = null;
+                Mat frame;
                 try
                 {
                     frame = videoCapture.QueryFrame();
@@ -78,7 +78,22 @@ namespace NVs.OccupancySensor.CV.Impl
 
                 if (frame != null)
                 {
-                    Notify(o => o.OnNext(frame));
+                    Image<Rgb, byte> image;
+                    try
+                    {
+                        image = frame.ToImage<Rgb, byte>();
+                        logger.LogInformation("Frame successfully converted to image!");
+                    }
+                    catch (Exception e)
+                    {
+                        logger.LogError(e, "Failed to convert frame to image!");
+                        throw;
+                    }
+                    Notify(o => o.OnNext(image));
+                }
+                else
+                {
+                    logger.LogWarning("null frame received");
                 }
 
                 
@@ -95,7 +110,7 @@ namespace NVs.OccupancySensor.CV.Impl
             }
         }
 
-        private void Notify(Action<IObserver<Mat>> action, bool ignoreCancellation = false)
+        private void Notify(Action<IObserver<Image<Rgb, byte>>> action, bool ignoreCancellation = false)
         {
             if (!ignoreCancellation && ct.IsCancellationRequested)
             {
@@ -103,15 +118,16 @@ namespace NVs.OccupancySensor.CV.Impl
                 return;
             }
 
-            IObserver<Mat>[] targets;
+            IObserver<Image<Rgb, byte>>[] targets;
             lock (observersLock)
             {
-                targets = new IObserver<Mat>[observers.Count];
+                targets = new IObserver<Image<Rgb, byte>>[observers.Count];
                 observers.CopyTo(targets);
             }
 
             foreach (var observer in targets)
             {
+                // ReSharper disable once MethodSupportsCancellation - cancellation will be checked inside actions
                 Task.Run(() =>
                 {
                     if (!ignoreCancellation && ct.IsCancellationRequested)
@@ -136,11 +152,11 @@ namespace NVs.OccupancySensor.CV.Impl
 
         private sealed class Unsubscriber : IDisposable
         {
-            private readonly List<IObserver<Mat>> observers;
+            private readonly List<IObserver<Image<Rgb, byte>>> observers;
             private readonly object observersLock;
-            private readonly IObserver<Mat> target;
+            private readonly IObserver<Image<Rgb, byte>> target;
 
-            public Unsubscriber(List<IObserver<Mat>> observers, object observersLock, IObserver<Mat> target)
+            public Unsubscriber(List<IObserver<Image<Rgb, byte>>> observers, object observersLock, IObserver<Image<Rgb, byte>> target)
             {
                 this.observers = observers ?? throw new ArgumentNullException(nameof(observers));
                 this.target = target ?? throw new ArgumentNullException(nameof(target));

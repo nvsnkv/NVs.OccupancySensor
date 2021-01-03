@@ -1,9 +1,6 @@
-using System;
 using System.ComponentModel;
-using Emgu.CV;
-using Emgu.CV.Structure;
 
-namespace NVs.OccupancySensor.CV
+namespace NVs.OccupancySensor.CV.Sense
 {
     public interface IOccupancySensor : INotifyPropertyChanged
     {
@@ -14,7 +11,5 @@ namespace NVs.OccupancySensor.CV
         void Start();
 
         void Stop();
-
-        IObservable<Image<Rgb,byte>> Stream { get; }
     }
 }

@@ -8,6 +8,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using NVs.OccupancySensor.API.Formatters;
 using NVs.OccupancySensor.CV;
+using NVs.OccupancySensor.CV.Sense;
+using NVs.OccupancySensor.CV.Utils;
 
 namespace NVs.OccupancySensor.API
 {

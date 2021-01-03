@@ -9,7 +9,7 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NVs.OccupancySensor.CV.Impl;
+using NVs.OccupancySensor.CV.Observervation;
 using NVs.OccupancySensor.CV.Tests.Utils;
 using Xunit;
 

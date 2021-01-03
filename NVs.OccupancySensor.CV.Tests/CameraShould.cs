@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Emgu.CV;
+using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NVs.OccupancySensor.CV.Impl;
+using NVs.OccupancySensor.CV.Capture;
 using NVs.OccupancySensor.CV.Settings;
 using NVs.OccupancySensor.CV.Tests.Utils;
 using Xunit;
@@ -71,7 +72,7 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var camera = new Camera(cameraLogger.Object, streamLogger.Object, CameraSettings.Default, Camera.CreateVideoCapture);
             var logger = new PropertyChangedLogger();
-            var observer = new TestMatObserver();
+            var observer = new TestImageObserver();
 
             camera.PropertyChanged += logger.OnPropertyChanged;
 
@@ -158,7 +159,7 @@ namespace NVs.OccupancySensor.CV.Tests
             captureMock.Setup(c => c.QueryFrame()).Throws<TestException>();
 
             var camera = new Camera(cameraLogger.Object, streamLogger.Object, CameraSettings.Default, _ => captureMock.Object);
-            var observer = new TestMatObserver();
+            var observer = new TestImageObserver();
             
             camera.Start();
             using (camera.Stream.Subscribe(observer))
@@ -198,10 +199,10 @@ namespace NVs.OccupancySensor.CV.Tests
             var settings = new CameraSettings("Some source", TimeSpan.FromMilliseconds(50));
 
             var captureMock = new Mock<VideoCapture>(MockBehavior.Default, 0, VideoCapture.API.Any);
-            captureMock.Setup(c => c.QueryFrame()).Returns(() => new Mat());
+            captureMock.Setup(c => c.QueryFrame()).Returns(() => new Image<Rgb, byte>(100,100).Mat);
 
             var camera = new Camera(cameraLogger.Object, streamLogger.Object, CameraSettings.Default, _ => captureMock.Object);
-            var observer = new TestMatObserver();
+            var observer = new TestImageObserver();
 
             camera.Settings = settings;
 
