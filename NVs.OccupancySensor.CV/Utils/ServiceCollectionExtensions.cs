@@ -1,5 +1,6 @@
 ﻿using System;
 using Emgu.CV;
+using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,9 +29,18 @@ namespace NVs.OccupancySensor.CV.Utils
 
             services.AddSingleton<IImageTransformer>(s =>
                 new ImageTransformBuilder(s.GetService<ILogger<ImageTransformer>>)
-                    .Append((Image<Rgb, byte> i) => i)
+                    .Append((Image<Rgb, byte> i) => i.Resize(0.5, Inter.Linear))
+                    .Append((Image<Rgb, byte> i) => i.Convert<Gray, byte>())
+                    .Append((Image<Gray, byte> i) =>
+                    {
+                        Image<Gray, byte> denoised = new Image<Gray, byte>(i.Width, i.Height);
+                        CvInvoke.FastNlMeansDenoising(i, denoised);
+                        return denoised;
+                    })
+                    .Append((Image<Gray, byte> i) => i.Convert<Rgb, byte>())
                     .ToTransformer());
-            
+
+            services.AddSingleton<IPeopleDetector>(new DummyPeopleDetector());
             
             services.AddSingleton<IOccupancySensor>(
                 s => new Sense.OccupancySensor(

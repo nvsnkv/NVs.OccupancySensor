@@ -29,6 +29,13 @@ namespace NVs.OccupancySensor.CV.Transformation
             if (transformFunc == null) throw new ArgumentNullException(nameof(transformFunc));
             var transform = new Transform<TColorIn, TDepthIn, TColorOut, TDepthOut>(transformFunc);
 
+            return Append(transform);
+        }
+
+        public ImageTransformBuilder Append([NotNull] ITypedTransform transform)
+        {
+            if (transform == null) throw new ArgumentNullException(nameof(transform));
+            
             var previousTransform = transforms.LastOrDefault();
             if ((previousTransform?.OutType ?? transform.InType) == transform.InType)
             {
@@ -41,8 +48,8 @@ namespace NVs.OccupancySensor.CV.Transformation
                 {
                     Data =
                     {
-                        { "Current result type", previousTransform?.OutType },
-                        { "Requested input type", transform.InType }
+                        {"Current result type", previousTransform?.OutType},
+                        {"Requested input type", transform.InType}
                     }
                 };
             }

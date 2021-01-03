@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using NVs.OccupancySensor.API.Formatters;
 using NVs.OccupancySensor.CV;
+using NVs.OccupancySensor.CV.Capture;
 using NVs.OccupancySensor.CV.Sense;
 using NVs.OccupancySensor.CV.Utils;
 
@@ -59,10 +60,10 @@ namespace NVs.OccupancySensor.API
                 endpoints.MapControllers();
             });
 
-            if (bool.TryParse(Configuration["CV:StartSensor"], out var startSensor) && startSensor)
+            if (bool.TryParse(Configuration["CV:StartCamera"], out var startSensor) && startSensor)
             {
-                var sensor = app.ApplicationServices.GetService<IOccupancySensor>() ?? throw new InvalidOperationException("Unable to resolve OccupancySensor!");
-                sensor.Start();
+                var camera = app.ApplicationServices.GetService<ICamera>() ?? throw new InvalidOperationException("Unable to resolve Camera!");
+                camera.Start();
             }
         }
     }
