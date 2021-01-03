@@ -4,23 +4,27 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Emgu.CV;
+using Emgu.CV.BgSegm;
 using Emgu.CV.Structure;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Impl.Detectors
 {
-    internal abstract class PeopleDetectorBase : IPeopleDetector, IDisposable
+    sealed class BackgroundSubtractionDetector : IPeopleDetector, IDisposable
     {
-        private readonly ILogger<PeopleDetectorBase> logger;
+        private readonly ILogger<BackgroundSubtractionDetector> logger;
+        private readonly BackgroundSubtractorCNT subtractor;
         private readonly object thisLock = new object();
         private bool? peopleDetected;
         private volatile bool processing;
         private volatile bool disposed;
         private volatile Image<Rgb,byte> lastProcessedImage;
-        protected PeopleDetectorBase([NotNull] ILogger<PeopleDetectorBase> logger)
+        
+        public BackgroundSubtractionDetector([NotNull] ILogger<BackgroundSubtractionDetector> logger)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.subtractor = new BackgroundSubtractorCNT();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -39,34 +43,31 @@ namespace NVs.OccupancySensor.CV.Impl.Detectors
 
         public Image<Rgb,byte> Detect([NotNull] Image<Rgb,byte> source)
         {
-            
             logger.LogInformation("Processing new image...");
             if (disposed) throw new ObjectDisposedException(nameof(IPeopleDetector));
             if (source == null) throw new ArgumentNullException(nameof(source));
             
-            var result = source.Copy();
-
             if (!AcquireProcessingLock())
             {
                 if (lastProcessedImage == null)
                 {
                     logger.LogWarning("Previous image is still processing and there were no computed results so far, received frame will be bypassed.");
-                    return result;
+                    return source.Copy();
                 }
                 logger.LogWarning("Previous image is still processing, last processed frame will be returned.");
                 return lastProcessedImage;
 
             }
 
-            Rectangle[] regions;
+            Image<Rgb,byte> mask = new Image<Rgb,byte>(source.Width, source.Height);
             try
             {
-                regions = PerformDetection(source);
-                logger.LogInformation("Detection complete");
+                subtractor.Apply(source, mask);
+                logger.LogInformation("Subtraction complete");
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Failed to run detection!");
+                logger.LogError(e, "Failed to subtract background!");
                 PeopleDetected = null;
                 throw;
             }
@@ -75,28 +76,10 @@ namespace NVs.OccupancySensor.CV.Impl.Detectors
                 ReleaseProcessingLock();
             }
 
-            PeopleDetected = regions.Any();
-            logger.LogInformation("PeopleDetected updated");
-
-            try
-            {
-                foreach (var detection in regions)
-                {
-                    result.Draw(detection, new Rgb(Color.Magenta));
-                }
-                logger.LogInformation("Detected objects highlighted.");
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Failed to draw rectangles!");
-                throw;
-            }
-
-            lastProcessedImage = result;
-            return result;
+            
+            lastProcessedImage = mask;
+            return mask;
         }
-
-        protected abstract Rectangle[] PerformDetection(Image<Rgb,byte> source);
 
         public void Reset()
         {
@@ -133,13 +116,13 @@ namespace NVs.OccupancySensor.CV.Impl.Detectors
         {
             if (disposed) return;
             logger.LogInformation("Dispose requested");
-            DoDispose(logger);
+            
+            
+            
             logger.LogInformation("Dispose complete");
             disposed = true;
         }
         
-        protected abstract void DoDispose(ILogger<PeopleDetectorBase> logger);
-
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {

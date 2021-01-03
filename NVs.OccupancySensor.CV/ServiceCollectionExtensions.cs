@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.Impl;
+using NVs.OccupancySensor.CV.Impl.Detectors;
 using NVs.OccupancySensor.CV.Impl.Detectors.HOG;
 using NVs.OccupancySensor.CV.Settings;
 
@@ -26,7 +27,7 @@ namespace NVs.OccupancySensor.CV
 
             services.AddSingleton<IMatConverter>(s => new MatConverter(s.GetService<ILogger<MatConverter>>() ?? throw new InvalidOperationException("MatConverter logger dependency was not resolved")));
 
-            services.AddSingleton<IPeopleDetector>(s => new HogPeopleDetector(s.GetService<ILogger<HogPeopleDetector>>() ?? throw new InvalidOperationException("HogPeopleDetector logger dependency was not resolved"), HOGDescriptorWrapper.Create));
+            services.AddSingleton<IPeopleDetector>(s => new BackgroundSubtractionDetector(s.GetService<ILogger<BackgroundSubtractionDetector>>() ?? throw new InvalidOperationException("BackgroundSubtractionDetector logger dependency was not resolved")));
             
             services.AddSingleton<IImageConverter>(s => new ImageConverter(s.GetService<IConfiguration>()?.GetConversionSettings() ?? throw new InvalidOperationException("Settings were not resolved"),
                 s.GetService<ILogger<ImageConverter>>() ?? throw new InvalidOperationException("ImageConverter logger dependency was not resolved")));

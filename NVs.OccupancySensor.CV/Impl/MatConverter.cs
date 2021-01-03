@@ -12,7 +12,7 @@ namespace NVs.OccupancySensor.CV.Impl
 
         public MatConverter([NotNull] ILogger<MatConverter> logger) => this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-        public Image<Rgb, float> Convert(Mat input) 
+        public Image<Rgb,byte> Convert(Mat input) 
         {
             if (input == null) 
             {
@@ -22,10 +22,10 @@ namespace NVs.OccupancySensor.CV.Impl
 
             logger.LogInformation("Attempting to convert received input...");
 
-            Image<Rgb, float> result;
+            Image<Rgb,byte> result;
             try 
             {
-                result = input.ToImage<Rgb, float>();
+                result = input.ToImage<Rgb,byte>();
                 logger.LogInformation("Successfully converted image");
             }
             catch (Exception e) 

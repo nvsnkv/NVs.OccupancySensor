@@ -71,9 +71,9 @@ namespace NVs.OccupancySensor.CV.Tests
             camera.SetupGet(c => c.IsRunning).Returns(true);
             camera.SetupGet(c => c.Stream).Returns(new CameraStream(capture.Object, CancellationToken.None, new Mock<ILogger<CameraStream>>().Object, TimeSpan.FromMilliseconds(100)));
             
-            converter.Setup(c => c.Convert(It.IsAny<Mat>())).Returns(() => new Image<Rgb, float>(100,100)).Verifiable("Convert was not called!");
-            resizer.Setup(r => r.Convert(It.IsAny<Image<Rgb,float>>())).Returns(() => new Image<Rgb, float>(100, 100)).Verifiable("Resizer was not called");
-            detector.Setup(d => d.Detect(It.IsAny<Image<Rgb, float>>())).Returns<Image<Rgb, float>>(x => x).Verifiable("Detect was not called!");
+            converter.Setup(c => c.Convert(It.IsAny<Mat>())).Returns(() => new Image<Rgb,byte>(100,100)).Verifiable("Convert was not called!");
+            resizer.Setup(r => r.Convert(It.IsAny<Image<Rgb,byte>>())).Returns(() => new Image<Rgb,byte>(100, 100)).Verifiable("Resizer was not called");
+            detector.Setup(d => d.Detect(It.IsAny<Image<Rgb,byte>>())).Returns<Image<Rgb,byte>>(x => x).Verifiable("Detect was not called!");
             var sensor = new Impl.OccupancySensor(camera.Object, converter.Object, resizer.Object, detector.Object, logger.Object);
             
             camera.Raise(c => c.PropertyChanged += null, new PropertyChangedEventArgs(nameof(ICamera.IsRunning)));

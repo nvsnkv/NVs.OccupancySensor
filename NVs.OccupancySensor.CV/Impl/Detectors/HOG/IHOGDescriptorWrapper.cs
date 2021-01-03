@@ -6,6 +6,6 @@ namespace NVs.OccupancySensor.CV.Impl.Detectors.HOG
 {
     interface IHOGDescriptorWrapper : IDisposable 
     {
-        MCvObjectDetection[] DetectMultiScale(Image<Rgb, float> source);
+        MCvObjectDetection[] DetectMultiScale(Image<Rgb,byte> source);
     }
 }

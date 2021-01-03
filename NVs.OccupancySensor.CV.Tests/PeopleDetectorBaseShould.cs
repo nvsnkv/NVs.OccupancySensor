@@ -14,7 +14,7 @@ namespace NVs.OccupancySensor.CV.Tests
 {
     public sealed class PeopleDetectorShould
     {
-        private static readonly Image<Rgb, float> TestImage = new Image<Rgb, float>(100, 100);
+        private static readonly Image<Rgb,byte> TestImage = new Image<Rgb,byte>(100, 100);
         private readonly Mock<ILogger<TestPeopleDetector>> logger = new Mock<ILogger<TestPeopleDetector>>();
 
         [Fact]

@@ -28,7 +28,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public async Task ReturnImageOnceItWasObserved()
         {
             var expectedFrame = new Mat(new Size(100, 100), DepthType.Cv32F, 3);
-            Image<Rgb, float> expectedImage = expectedFrame.ToImage<Rgb, float>();
+            Image<Rgb,byte> expectedImage = expectedFrame.ToImage<Rgb,byte>();
             var expectedJpeg = expectedImage.ToJpegData();
             
             var observer = new RawImageObserver(logger.Object);

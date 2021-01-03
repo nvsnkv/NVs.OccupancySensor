@@ -15,6 +15,6 @@ namespace NVs.OccupancySensor.CV
 
         void Stop();
 
-        IObservable<Image<Rgb, float>> Stream { get; }
+        IObservable<Image<Rgb,byte>> Stream { get; }
     }
 }

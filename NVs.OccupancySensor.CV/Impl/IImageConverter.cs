@@ -6,7 +6,7 @@ namespace NVs.OccupancySensor.CV.Impl
 {
     public interface IImageConverter
     {
-        Image<Rgb, float> Convert(Image<Rgb, float> input);
+        Image<Rgb,byte> Convert(Image<Rgb,byte> input);
         
         ConversionSettings Settings { get; set; }
     }

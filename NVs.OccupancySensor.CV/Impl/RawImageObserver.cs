@@ -14,7 +14,7 @@ namespace NVs.OccupancySensor.CV.Impl
         private readonly ILogger<RawImageObserver> logger;
         private readonly AutoResetEvent captureReceived = new AutoResetEvent(false);
 
-        private volatile Image<Rgb, float> capture;
+        private volatile Image<Rgb,byte> capture;
         private volatile Exception exception;
         private volatile bool completed;
 
@@ -35,15 +35,15 @@ namespace NVs.OccupancySensor.CV.Impl
             SetFlag();
         }
 
-        public void OnNext(Image<Rgb, float> value)
+        public void OnNext(Image<Rgb,byte> value)
         {
             capture = value;
             SetFlag();
         }
 
-        public Task<Image<Rgb, float>> GetImage()
+        public Task<Image<Rgb,byte>> GetImage()
         {
-            var task = new Task<Image<Rgb, float>>(() =>
+            var task = new Task<Image<Rgb,byte>>(() =>
             {
                 captureReceived.WaitOne();
                 if (exception != null)

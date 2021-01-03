@@ -17,9 +17,9 @@ namespace NVs.OccupancySensor.CV.Impl
         private readonly IImageConverter imageConverter;
         private readonly IPeopleDetector detector;
         private readonly ILogger<OccupancySensor> logger;
-        private readonly IObserver<Image<Rgb, float>> dummyObserver = Observer.ToObserver<Image<Rgb, float>>((_) => {});
+        private readonly IObserver<Image<Rgb,byte>> dummyObserver = Observer.ToObserver<Image<Rgb,byte>>((_) => {});
         
-        private IObservable<Image<Rgb, float>> stream;
+        private IObservable<Image<Rgb,byte>> stream;
         private IDisposable subscription;
         private bool isDisposed;
 
@@ -40,7 +40,7 @@ namespace NVs.OccupancySensor.CV.Impl
 
         public bool IsRunning => camera.IsRunning;
 
-        public IObservable<Image<Rgb, float>> Stream
+        public IObservable<Image<Rgb,byte>> Stream
         {
             get => stream;
             private set

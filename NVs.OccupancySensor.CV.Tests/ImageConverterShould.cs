@@ -26,7 +26,7 @@ namespace NVs.OccupancySensor.CV.Tests
             var expectedHeight = 360;
             var settings = new ConversionSettings(new Size(expectedWidth, expectedHeight), false, 0);
             
-            var image = new Image<Rgb, float>(originalWidth, originalHeight, new Rgb(Color.Aqua));
+            var image = new Image<Rgb,byte>(originalWidth, originalHeight, new Rgb(Color.Aqua));
             var resizer = new ImageConverter(settings, logger.Object);
 
             var result = resizer.Convert(image);
@@ -60,7 +60,7 @@ namespace NVs.OccupancySensor.CV.Tests
             var expectedHeight = 360;
             var settings = new ConversionSettings(new Size(expectedWidth, expectedHeight), false, 0);
 
-            var image = new Image<Rgb, float>(originalWidth, originalHeight, new Rgb(Color.Aqua));
+            var image = new Image<Rgb,byte>(originalWidth, originalHeight, new Rgb(Color.Aqua));
             var resizer = new ImageConverter(settings, logger.Object);
 
             var result = resizer.Convert(image);
@@ -70,8 +70,8 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void ConvertImageToGrayscaleIfGrayScaleConversionIsEnabled()
         {
-            var input = new Image<Rgb, float>(100, 100, new Rgb(Color.Red));
-            var expectedResult = new Image<Rgb, float>(100, 100, new Rgb(76.2449951, 76.2449951, 76.2449951));
+            var input = new Image<Rgb,byte>(100, 100, new Rgb(Color.Red));
+            var expectedResult = new Image<Rgb,byte>(100, 100, new Rgb(76.2449951, 76.2449951, 76.2449951));
 
             var converter = new ImageConverter(new ConversionSettings(null, true, 0), logger.Object);
             var actualResult = converter.Convert(input);
@@ -90,7 +90,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void RotateImageIfRotationAngleIsNonZero()
         {
-            var input = new Image<Rgb, float>(100, 200, new Rgb(Color.Red));
+            var input = new Image<Rgb,byte>(100, 200, new Rgb(Color.Red));
             
             var converter = new ImageConverter(new ConversionSettings(null, true, 90), logger.Object);
             var actualResult = converter.Convert(input);

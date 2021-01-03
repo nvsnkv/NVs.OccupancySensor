@@ -6,7 +6,7 @@ namespace NVs.OccupancySensor.CV
 {
     public interface IPeopleDetector : INotifyPropertyChanged
     {
-        Image<Rgb, float> Detect(Image<Rgb, float> source);
+        Image<Rgb,byte> Detect(Image<Rgb,byte> source);
         
         bool? PeopleDetected { get; }
 

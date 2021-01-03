@@ -25,7 +25,7 @@ namespace NVs.OccupancySensor.CV.Impl.Detectors
             return location.Replace(assembly.ManifestModule.Name, "haarcascade_upperbody.xml");
         }
 
-        protected override Rectangle[] PerformDetection(Image<Rgb, float> source)
+        protected override Rectangle[] PerformDetection(Image<Rgb,byte> source)
         {
             var image = source.Convert<Bgr, byte>();
             return classifier.DetectMultiScale(image);

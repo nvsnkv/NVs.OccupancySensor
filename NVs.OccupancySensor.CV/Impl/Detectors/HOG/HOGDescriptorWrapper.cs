@@ -11,7 +11,7 @@ namespace NVs.OccupancySensor.CV.Impl.Detectors.HOG
         {
             descriptor = new HOGDescriptor();
         }
-        public MCvObjectDetection[] DetectMultiScale(Image<Rgb, float> source)
+        public MCvObjectDetection[] DetectMultiScale(Image<Rgb,byte> source)
         {
             return descriptor.DetectMultiScale(source);
         }

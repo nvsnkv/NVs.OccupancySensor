@@ -13,16 +13,16 @@ namespace NVs.OccupancySensor.CV.Tests.Utils
 {
     sealed class TestPeopleDetector : PeopleDetectorBase
     {
-        private readonly Func<Image<Rgb, float>, Rectangle[]> performDetection;
+        private readonly Func<Image<Rgb,byte>, Rectangle[]> performDetection;
         private readonly Action<ILogger<PeopleDetectorBase>> doDispose;
         
-        public TestPeopleDetector([NotNull] ILogger<PeopleDetectorBase> logger, Func<Image<Rgb, float>, Rectangle[]> performDetection, Action<ILogger<PeopleDetectorBase>> doDispose) : base(logger)
+        public TestPeopleDetector([NotNull] ILogger<PeopleDetectorBase> logger, Func<Image<Rgb,byte>, Rectangle[]> performDetection, Action<ILogger<PeopleDetectorBase>> doDispose) : base(logger)
         {
             this.performDetection = performDetection;
             this.doDispose = doDispose;
         }
 
-        protected override Rectangle[] PerformDetection(Image<Rgb, float> source)
+        protected override Rectangle[] PerformDetection(Image<Rgb,byte> source)
         {
             return performDetection(source);
         }

@@ -20,12 +20,12 @@ namespace NVs.OccupancySensor.CV.Impl
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public Image<Rgb, float> Convert([NotNull] Image<Rgb, float> input)
+        public Image<Rgb,byte> Convert([NotNull] Image<Rgb,byte> input)
         {
             logger.LogInformation("Attempting to convert image...");
             if (input == null) throw new ArgumentNullException(nameof(input));
 
-            Image<Rgb, float> result = input;
+            Image<Rgb,byte> result = input;
             
             result = Resize(result);
 
@@ -37,7 +37,7 @@ namespace NVs.OccupancySensor.CV.Impl
             return result;
         }
 
-        private Image<Rgb, float> Rotate(Image<Rgb, float> input)
+        private Image<Rgb,byte> Rotate(Image<Rgb,byte> input)
         {
             if (Settings.RotationAngle == 0)
             {
@@ -45,7 +45,7 @@ namespace NVs.OccupancySensor.CV.Impl
                 return input;
             }
 
-            Image<Rgb, float> result;
+            Image<Rgb,byte> result;
             try
             {
                 result = input.Rotate(Settings.RotationAngle, new Rgb(Color.Black), false);
@@ -60,7 +60,7 @@ namespace NVs.OccupancySensor.CV.Impl
             return result;
         }
 
-        private Image<Rgb, float> Resize(Image<Rgb, float> input)
+        private Image<Rgb,byte> Resize(Image<Rgb,byte> input)
         {
             if (!settings.Resize)
             {
@@ -76,7 +76,7 @@ namespace NVs.OccupancySensor.CV.Impl
                 return input;
             }
 
-            Image<Rgb, float> result;
+            Image<Rgb,byte> result;
             
             try
             {
@@ -92,7 +92,7 @@ namespace NVs.OccupancySensor.CV.Impl
             return result;
         }
 
-        private Image<Rgb, float> ConvertColor(Image<Rgb, float> input)
+        private Image<Rgb,byte> ConvertColor(Image<Rgb,byte> input)
         {
             if (!Settings.GrayScale)
             {
@@ -100,13 +100,13 @@ namespace NVs.OccupancySensor.CV.Impl
                 return input;
             }
 
-            Image<Rgb, float> result;
+            Image<Rgb,byte> result;
             try
             {
                 var grey = input.Convert<Gray, byte>();
                 var denoised = new Image<Bgr, byte>(grey.Size);
                 CvInvoke.FastNlMeansDenoising(grey, denoised);
-                result = denoised.Convert<Rgb, float>();
+                result = denoised.Convert<Rgb, byte>();
                 logger.LogInformation("Image successfully converted to grayscale!");
             }
             catch (Exception e)

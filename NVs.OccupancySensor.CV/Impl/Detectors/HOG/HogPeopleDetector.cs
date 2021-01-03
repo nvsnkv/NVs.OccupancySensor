@@ -18,7 +18,7 @@ namespace NVs.OccupancySensor.CV.Impl.Detectors.HOG
             descriptor = createDescriptor();
         }
 
-        protected override Rectangle[] PerformDetection(Image<Rgb, float> source)
+        protected override Rectangle[] PerformDetection(Image<Rgb,byte> source)
         {
             var results = descriptor.DetectMultiScale(source);
             return results.Select(r => r.Rect).ToArray();
