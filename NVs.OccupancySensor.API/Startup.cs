@@ -56,6 +56,12 @@ namespace NVs.OccupancySensor.API
             {
                 endpoints.MapControllers();
             });
+
+            if (bool.TryParse(Configuration["CV:StartSensor"], out var startSensor) && startSensor)
+            {
+                var sensor = app.ApplicationServices.GetService<IOccupancySensor>() ?? throw new InvalidOperationException("Unable to resolve OccupancySensor!");
+                sensor.Start();
+            }
         }
     }
 }

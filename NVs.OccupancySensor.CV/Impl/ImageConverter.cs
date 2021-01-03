@@ -103,7 +103,10 @@ namespace NVs.OccupancySensor.CV.Impl
             Image<Rgb, float> result;
             try
             {
-                result = input.Convert<Gray, float>().Convert<Rgb, float>();
+                var grey = input.Convert<Gray, byte>();
+                var denoised = new Image<Bgr, byte>(grey.Size);
+                CvInvoke.FastNlMeansDenoising(grey, denoised);
+                result = denoised.Convert<Rgb, float>();
                 logger.LogInformation("Image successfully converted to grayscale!");
             }
             catch (Exception e)
