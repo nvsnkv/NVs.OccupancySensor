@@ -7,7 +7,7 @@ using Emgu.CV.Structure;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
-namespace NVs.OccupancySensor.CV.Impl.HOG
+namespace NVs.OccupancySensor.CV.Impl.Detectors.HOG
 {
     sealed class HogPeopleDetector : PeopleDetectorBase
     {

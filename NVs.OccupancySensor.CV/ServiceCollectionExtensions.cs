@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.Impl;
-using NVs.OccupancySensor.CV.Impl.HOG;
+using NVs.OccupancySensor.CV.Impl.Detectors.HOG;
 using NVs.OccupancySensor.CV.Settings;
 
 namespace NVs.OccupancySensor.CV

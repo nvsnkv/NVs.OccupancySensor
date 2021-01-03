@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Moq;
-using NVs.OccupancySensor.CV.Impl.HOG;
+using NVs.OccupancySensor.CV.Impl.Detectors.HOG;
 using Xunit;
 
 namespace NVs.OccupancySensor.CV.Tests

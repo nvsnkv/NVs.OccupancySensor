@@ -6,7 +6,7 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NVs.OccupancySensor.CV.Impl.HOG;
+using NVs.OccupancySensor.CV.Impl.Detectors;
 using NVs.OccupancySensor.CV.Tests.Utils;
 using Xunit;
 
@@ -103,7 +103,7 @@ namespace NVs.OccupancySensor.CV.Tests
             detector.PropertyChanged += (_, e) => changedPropertyName = e.PropertyName;
 
             detector.Detect(TestImage);
-            Assert.Equal(nameof(HogPeopleDetector.PeopleDetected), changedPropertyName);
+            Assert.Equal(nameof(PeopleDetectorBase.PeopleDetected), changedPropertyName);
         }
 
         [Fact]
@@ -114,7 +114,7 @@ namespace NVs.OccupancySensor.CV.Tests
             detector.PropertyChanged += (_, e) => changedPropertyName = e.PropertyName;
 
             detector.Detect(TestImage);
-            Assert.Equal(nameof(HogPeopleDetector.PeopleDetected), changedPropertyName);
+            Assert.Equal(nameof(PeopleDetectorBase.PeopleDetected), changedPropertyName);
         }
 
         [Fact]

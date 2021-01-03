@@ -76,8 +76,15 @@ namespace NVs.OccupancySensor.CV.Tests
             var converter = new ImageConverter(new ConversionSettings(null, true, 0), logger.Object);
             var actualResult = converter.Convert(input);
 
-            var diff = actualResult.AbsDiff(expectedResult);
-            Assert.True(diff.CountNonzero().All(i => i == 0));
+            var color = actualResult[0,0];
+            Assert.Equal(color.Red, color.Blue);
+            Assert.Equal(color.Red, color.Green);
+            Assert.True(color.Red > 75);
+            Assert.True(color.Red < 100);
+
+            for(var i=0; i<100; i++)
+            for(var j=0; j<100; j++)
+            Assert.True(color.Equals(actualResult[i,j]));
         }
         
         [Fact]

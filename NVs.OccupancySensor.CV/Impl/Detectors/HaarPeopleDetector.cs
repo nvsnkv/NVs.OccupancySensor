@@ -6,7 +6,7 @@ using Emgu.CV.Structure;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
-namespace NVs.OccupancySensor.CV.Impl
+namespace NVs.OccupancySensor.CV.Impl.Detectors
 {
     sealed class HaarPeopleDetector : PeopleDetectorBase
     {
