@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Emgu.CV;
+using Emgu.CV.Structure;
 using NVs.OccupancySensor.CV.Transformation;
 
 namespace NVs.OccupancySensor.CV.Tests.Utils
@@ -25,6 +27,9 @@ namespace NVs.OccupancySensor.CV.Tests.Utils
         {
             ApplyInvokedOn = DateTime.Now;
             Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
+            if (!(input is Image<Gray, byte>)) {
+                return (input as Image<Rgb, byte>).Convert<Gray, byte>();
+            }
             return input;
         }
 

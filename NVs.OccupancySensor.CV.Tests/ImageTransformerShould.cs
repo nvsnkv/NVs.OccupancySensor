@@ -79,7 +79,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public void ThrowInvalidOperationExceptionIfLastTransformReturnedSomethingDifferentFromImageRgbByte()
         {
             var a = new Mock<ITransform>();
-            a.Setup(t => t.Apply(It.IsAny<object>())).Returns(new Image<Gray, byte>(1, 1));
+            a.Setup(t => t.Apply(It.IsAny<object>())).Returns(new Image<Rgb, byte>(1, 1));
 
             var transformer = new ImageTransformer(logger.Object, new[] { a.Object });
             Assert.Throws<InvalidOperationException>(() => { transformer.Transform(new Image<Rgb, byte>(100, 100)); });

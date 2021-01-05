@@ -83,6 +83,7 @@ namespace NVs.OccupancySensor.CV.Sense
                     else
                     {
                         subscription?.Dispose();
+                        detector.Reset();
                         stream = null;
                     }
                     break;

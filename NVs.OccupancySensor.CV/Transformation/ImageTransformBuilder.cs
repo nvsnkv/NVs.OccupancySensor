@@ -72,9 +72,9 @@ namespace NVs.OccupancySensor.CV.Transformation
         public IImageTransformer ToTransformer()
         {
             var outType = transforms.LastOrDefault()?.OutType;
-            if (outType != typeof(Image<Rgb, byte>))
+            if (outType != typeof(Image<Gray, byte>))
             {
-                throw new InvalidOperationException($"Current result type does differs from {typeof(Image<Rgb, int>)}!")
+                throw new InvalidOperationException($"Current result type does differs from {typeof(Image<Gray, int>)}!")
                 {
                     Data = { { "OutType", outType } }
                 };

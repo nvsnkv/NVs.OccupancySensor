@@ -28,11 +28,11 @@ namespace NVs.OccupancySensor.CV.Tests
                 .Append((Image<Rgb, byte> _) =>
                 {
                     invokedA = DateTime.Now;
-                    return new Image<Gray, byte>(100, 100);
-                }).Append((Image<Gray, byte> _) =>
+                    return new Image<Rgba, byte>(100, 100);
+                }).Append((Image<Rgba, byte> _) =>
                 {
                     invokedB = DateTime.Now;
-                    return new Image<Rgb, byte>(100, 100);
+                    return new Image<Gray, byte>(100, 100);
                 }).ToTransformer();
 
             transformer.Transform(new Image<Rgb, byte>(100, 100));
@@ -59,10 +59,10 @@ namespace NVs.OccupancySensor.CV.Tests
         public void AddSynchronizationWhenRequested()
         {
 
-            Image<Rgb, byte> LongRunningTransform(Image<Rgb, byte> src)
+            Image<Gray, byte> LongRunningTransform(Image<Rgb, byte> src)
             {
                 Task.Delay(200).Wait();
-                var image = new Image<Rgb, byte>(10, 10)
+                var image = new Image<Gray, byte>(10, 10)
                 {
                     Data = { [0, 0, 0] = (byte)Interlocked.Increment(ref seq) }
                 };
@@ -70,7 +70,7 @@ namespace NVs.OccupancySensor.CV.Tests
                 return image;
             }
 
-            var builder = new ImageTransformBuilder(GetLogger).Append((Func<Image<Rgb, byte>, Image<Rgb, byte>>)LongRunningTransform).Synchronized();
+            var builder = new ImageTransformBuilder(GetLogger).Append((Func<Image<Rgb, byte>, Image<Gray, byte>>)LongRunningTransform).Synchronized();
             var transformer = builder.ToTransformer();
 
             var results = Enumerable.Range(0, 3)
