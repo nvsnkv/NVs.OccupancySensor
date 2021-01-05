@@ -57,6 +57,18 @@ namespace NVs.OccupancySensor.CV.Transformation
             return this;
         }
 
+        public ImageTransformBuilder Synchronized()
+        {
+            if (transforms.Count == 0)
+            {
+                throw new InvalidOperationException("There is no transform to wrap in synchronized transformation!");
+            }
+
+            transforms[transforms.Count - 1] = new SynchronizedTransform(transforms[transforms.Count - 1]);
+
+            return this;
+        }
+
         public IImageTransformer ToTransformer()
         {
             var outType = transforms.LastOrDefault()?.OutType;

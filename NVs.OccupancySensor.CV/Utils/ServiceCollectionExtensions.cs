@@ -11,6 +11,7 @@ using NVs.OccupancySensor.CV.Observervation;
 using NVs.OccupancySensor.CV.Sense;
 using NVs.OccupancySensor.CV.Settings;
 using NVs.OccupancySensor.CV.Transformation;
+using NVs.OccupancySensor.CV.Transformation.Background;
 
 namespace NVs.OccupancySensor.CV.Utils
 {
@@ -26,17 +27,21 @@ namespace NVs.OccupancySensor.CV.Utils
                     s.GetService<IConfiguration>()?.GetCameraSettings() ?? throw new InvalidOperationException("CameraSettings were not resolved"),
                     Camera.CreateVideoCapture));
 
+            services.AddSingleton(s => new BackgroundSubtraction(s.GetService<ILogger<BackgroundSubtraction>>() ?? throw new InvalidOperationException("BackgroundSubtraction logger dependency was not resolved!")));
+            services.AddSingleton<IBackgroundSubtraction>(s => s.GetService<BackgroundSubtraction>());
 
             services.AddSingleton<IImageTransformer>(s =>
                 new ImageTransformBuilder(s.GetService<ILogger<ImageTransformer>>)
-                    .Append((Image<Rgb, byte> i) => i.Resize(0.5, Inter.Linear))
+                    .Append(((Image<Rgb, byte> i) => i.Resize(0.5, Inter.Linear)))
                     .Append((Image<Rgb, byte> i) => i.Convert<Gray, byte>())
                     .Append((Image<Gray, byte> i) =>
                     {
                         Image<Gray, byte> denoised = new Image<Gray, byte>(i.Width, i.Height);
-                        CvInvoke.FastNlMeansDenoising(i, denoised);
+                        CvInvoke.MedianBlur(i, denoised, 7);
                         return denoised;
                     })
+                    .Append(s.GetService<BackgroundSubtraction>() ?? throw new InvalidOperationException("BackgroundSubtraction  dependency was not resolved"))
+                    .Synchronized()
                     .Append((Image<Gray, byte> i) => i.Convert<Rgb, byte>())
                     .ToTransformer());
 
