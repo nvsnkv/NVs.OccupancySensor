@@ -7,7 +7,7 @@ namespace NVs.OccupancySensor.CV.Transformation
     public interface IImageTransformer : IDisposable
 
     {
-    Image<Rgb, byte> Transform(Image<Rgb, byte> input);
+    Image<Gray, byte> Transform(Image<Rgb, byte> input);
 
     IImageTransformer GetPreviousTransformer();
     }

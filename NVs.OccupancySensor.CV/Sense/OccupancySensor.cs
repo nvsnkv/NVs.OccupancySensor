@@ -19,7 +19,7 @@ namespace NVs.OccupancySensor.CV.Sense
         private readonly IImageTransformer transformer;
         private readonly ILogger<OccupancySensor> logger;
         
-        private IObservable<Image<Rgb,byte>> stream;
+        private IObservable<Image<Gray,byte>> stream;
         private IDisposable subscription;
         private bool isDisposed;
 
@@ -84,7 +84,6 @@ namespace NVs.OccupancySensor.CV.Sense
                     {
                         subscription?.Dispose();
                         stream = null;
-                        detector.Reset();
                     }
                     break;
             }

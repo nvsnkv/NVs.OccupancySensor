@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.API.ActionResults;
 using NVs.OccupancySensor.CV.Capture;
-using NVs.OccupancySensor.CV.Observervation;
+using NVs.OccupancySensor.CV.Observation;
 using NVs.OccupancySensor.CV.Transformation;
 
 namespace NVs.OccupancySensor.API.Controllers
@@ -19,12 +19,13 @@ namespace NVs.OccupancySensor.API.Controllers
     public sealed class CaptureController : ControllerBase
     {
         private readonly ICamera camera;
-        private readonly IImageObserver observer;
+        private readonly IImageObserver<Rgb> rgbObserver;
+        private readonly IImageObserver<Gray> grayObserver;
         private readonly IList<IImageTransformer> transformers;
 
         private readonly ILogger<CaptureController> logger;
         
-        public CaptureController([NotNull] ICamera camera, [NotNull] IImageObserver observer, [NotNull] IImageTransformer transformer, [NotNull] ILogger<CaptureController> logger)
+        public CaptureController([NotNull] ICamera camera, [NotNull] IImageObserver<Rgb> rgbObserver, [NotNull] IImageObserver<Gray> grayObserver, [NotNull] IImageTransformer transformer, [NotNull] ILogger<CaptureController> logger)
         {
             if (transformer == null) throw new ArgumentNullException(nameof(transformer));
 
@@ -37,9 +38,9 @@ namespace NVs.OccupancySensor.API.Controllers
             }
             
             this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
-            this.observer = observer ?? throw new ArgumentNullException(nameof(observer));
+            this.rgbObserver = rgbObserver ?? throw new ArgumentNullException(nameof(rgbObserver));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            
+            this.grayObserver = grayObserver ?? throw new ArgumentNullException(nameof(grayObserver));
         }
 
         [HttpGet]
@@ -54,9 +55,9 @@ namespace NVs.OccupancySensor.API.Controllers
                 return null;
             }
             
-            using (camera.Stream.Subscribe(observer))
+            using (camera.Stream.Subscribe(rgbObserver))
             {
-                return await observer.GetImage();
+                return await rgbObserver.GetImage();
             }
         }
 
@@ -67,7 +68,7 @@ namespace NVs.OccupancySensor.API.Controllers
             logger.LogDebug("GetRawStream called");
 
             var stream = camera.Stream;
-            return GetMjpegStreamContent(stream);
+            return GetMjpegRgbStreamContent(stream);
         }
 
         [HttpGet]
@@ -84,12 +85,12 @@ namespace NVs.OccupancySensor.API.Controllers
             logger.LogDebug($"GetStream({index}) called");
 
             var stream = camera.Stream?.Select(transformers[index].Transform);
-            return GetMjpegStreamContent(stream);
+            return GetMjpegGrayStreamContent(stream);
         }
 
-        private IActionResult GetMjpegStreamContent(IObservable<Image<Rgb,byte>> stream)
+        private IActionResult GetMjpegRgbStreamContent(IObservable<Image<Rgb,byte>> stream)
         {
-            var unsubscriber = stream?.Subscribe(observer);
+            var unsubscriber = stream?.Subscribe(rgbObserver);
 
             if (!camera.IsRunning || unsubscriber == null)
             {
@@ -97,7 +98,21 @@ namespace NVs.OccupancySensor.API.Controllers
             }
 
             return new MjpegStreamContent(
-                async cts => (await observer.GetImage())?.ToJpegData(),
+                async cts => (await rgbObserver.GetImage())?.ToJpegData(),
+                () => unsubscriber.Dispose());
+        }
+        
+        private IActionResult GetMjpegGrayStreamContent(IObservable<Image<Gray,byte>> stream)
+        {
+            var unsubscriber = stream?.Subscribe(grayObserver);
+
+            if (!camera.IsRunning || unsubscriber == null)
+            {
+                return NoContent();
+            }
+
+            return new MjpegStreamContent(
+                async cts => (await rgbObserver.GetImage())?.ToJpegData(),
                 () => unsubscriber.Dispose());
         }
     }

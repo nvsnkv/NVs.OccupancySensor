@@ -2,9 +2,9 @@
 
 namespace NVs.OccupancySensor.CV.Settings
 {
-    public sealed class CameraSettings
+    public sealed class CaptureSettings
     {
-        public CameraSettings(string source, TimeSpan frameInterval)
+        public CaptureSettings(string source, TimeSpan frameInterval)
         {
             Source = source;
             FrameInterval = frameInterval;
@@ -14,6 +14,6 @@ namespace NVs.OccupancySensor.CV.Settings
 
         public TimeSpan FrameInterval { get; }
 
-        public static CameraSettings Default { get; } = new CameraSettings("0", TimeSpan.FromMilliseconds(100));
+        public static CaptureSettings Default { get; } = new CaptureSettings("0", TimeSpan.FromMilliseconds(100));
     }
 }

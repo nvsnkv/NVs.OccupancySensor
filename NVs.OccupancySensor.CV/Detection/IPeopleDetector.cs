@@ -6,10 +6,8 @@ using Emgu.CV.Structure;
 
 namespace NVs.OccupancySensor.CV.Detection
 {
-    public interface IPeopleDetector : IObserver<Image<Rgb, byte>>, INotifyPropertyChanged
+    public interface IPeopleDetector : IObserver<Image<Gray, byte>>, INotifyPropertyChanged
     {
-        void Detect(Image<Rgb, byte> source);
-        
         bool? PeopleDetected { get; }
 
         void Reset();

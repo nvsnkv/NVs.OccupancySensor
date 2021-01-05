@@ -3,22 +3,22 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Emgu.CV;
-using Emgu.CV.Structure;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
-namespace NVs.OccupancySensor.CV.Observervation
+namespace NVs.OccupancySensor.CV.Observation
 {
-    sealed class RawImageObserver : IImageObserver
+    sealed class RawImageObserver<TColor> : IImageObserver<TColor>
+    where TColor: struct, IColor
     {
-        private readonly ILogger<RawImageObserver> logger;
+        private readonly ILogger<RawImageObserver<TColor>> logger;
         private readonly AutoResetEvent captureReceived = new AutoResetEvent(false);
 
-        private volatile Image<Rgb,byte> capture;
+        private volatile Image<TColor,byte> capture;
         private volatile Exception exception;
         private volatile bool completed;
 
-        public RawImageObserver([NotNull] ILogger<RawImageObserver> logger)
+        public RawImageObserver([NotNull] ILogger<RawImageObserver<TColor>> logger)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -35,15 +35,15 @@ namespace NVs.OccupancySensor.CV.Observervation
             SetFlag();
         }
 
-        public void OnNext(Image<Rgb,byte> value)
+        public void OnNext(Image<TColor,byte> value)
         {
             capture = value;
             SetFlag();
         }
 
-        public Task<Image<Rgb,byte>> GetImage()
+        public Task<Image<TColor,byte>> GetImage()
         {
-            var task = new Task<Image<Rgb,byte>>(() =>
+            var task = new Task<Image<TColor,byte>>(() =>
             {
                 captureReceived.WaitOne();
                 if (exception != null)

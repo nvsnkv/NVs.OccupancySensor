@@ -19,7 +19,7 @@ namespace NVs.OccupancySensor.CV.Transformation
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.operations = operations ?? throw new ArgumentNullException(nameof(operations));
         }
-        public Image<Rgb, byte> Transform([NotNull] Image<Rgb, byte> input)
+        public Image<Gray, byte> Transform([NotNull] Image<Rgb, byte> input)
         {
             logger.LogInformation("Attempting to transform image...");
             if (input == null) throw new ArgumentNullException(nameof(input));
@@ -41,7 +41,7 @@ namespace NVs.OccupancySensor.CV.Transformation
 
             switch (data)
             {
-                case Image<Rgb, byte> result:
+                case Image<Gray, byte> result:
                     return result;
                 
                 case null:
@@ -50,8 +50,8 @@ namespace NVs.OccupancySensor.CV.Transformation
                 
                 default:
                     logger.LogError(
-                        $"Last transform returned something different from {typeof(Image<Rgb, byte>)}. {data.GetType()} received");
-                    throw new InvalidOperationException($"Last transform returned something different from {typeof(Image<Rgb, byte>)}")
+                        $"Last transform returned something different from {typeof(Image<Gray, byte>)}. {data.GetType()} received");
+                    throw new InvalidOperationException($"Last transform returned something different from {typeof(Image<Gray, byte>)}")
                     {
                         Data = {{"Actual type", data.GetType()}}
                     };

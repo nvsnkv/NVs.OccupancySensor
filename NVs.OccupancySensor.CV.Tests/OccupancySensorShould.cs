@@ -72,8 +72,8 @@ namespace NVs.OccupancySensor.CV.Tests
             camera.SetupGet(c => c.IsRunning).Returns(true);
             camera.SetupGet(c => c.Stream).Returns(new CameraStream(capture.Object, CancellationToken.None, new Mock<ILogger<CameraStream>>().Object, TimeSpan.FromMilliseconds(100)));
             
-            transformer.Setup(r => r.Transform(It.IsAny<Image<Rgb,byte>>())).Returns(() => new Image<Rgb,byte>(100, 100)).Verifiable("Resizer was not called");
-            detector.Setup(d => d.OnNext(It.IsAny<Image<Rgb,byte>>())).Verifiable("Detect was not called!");
+            transformer.Setup(r => r.Transform(It.IsAny<Image<Rgb,byte>>())).Returns(() => new Image<Gray,byte>(100, 100)).Verifiable("Resizer was not called");
+            detector.Setup(d => d.OnNext(It.IsAny<Image<Gray,byte>>())).Verifiable("Detect was not called!");
             var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, transformer.Object, logger.Object);
             
             camera.Raise(c => c.PropertyChanged += null, new PropertyChangedEventArgs(nameof(ICamera.IsRunning)));
