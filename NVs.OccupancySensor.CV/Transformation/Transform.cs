@@ -26,7 +26,7 @@ namespace NVs.OccupancySensor.CV.Transformation
             return transform((Image<TColorIn, TDepthIn>)input);
         }
 
-        public ITransform Copy()
+        public ITransform Clone()
         {
             return new Transform<TColorIn, TDepthIn, TColorOut, TDepthOut>(transform);
         }

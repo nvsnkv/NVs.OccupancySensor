@@ -33,7 +33,7 @@ namespace NVs.OccupancySensor.CV.Tests.Utils
             return input;
         }
 
-        public ITransform Copy()
+        public ITransform Clone()
         {
             return copyFunc(this);
         }

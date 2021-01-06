@@ -93,7 +93,7 @@ namespace NVs.OccupancySensor.CV.Transformation
             return true;
         }
 
-        public ITransform Copy()
+        public ITransform Clone()
         {
             return new SynchronizedTransform(transform);
         }

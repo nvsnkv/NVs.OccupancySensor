@@ -28,28 +28,29 @@ namespace NVs.OccupancySensor.CV.Utils
                     s.GetService<IConfiguration>()?.GetCameraSettings() ?? throw new InvalidOperationException("CaptureSettings were not resolved"),
                     Camera.CreateVideoCapture));
 
-            services.AddSingleton(s => new BackgroundSubtraction(s.GetService<ILogger<BackgroundSubtraction>>() ?? throw new InvalidOperationException("BackgroundSubtraction logger dependency was not resolved!")));
+            services.AddSingleton<IAlgorithmModelStorage>(s => new FileBasedAlgorithmStorage(s.GetService<IConfiguration>()?.GetAlgorithmsDir() ?? throw new InvalidOperationException("DetectionSettings were not resolved")));
+
+            services.AddSingleton(s => new BackgroundSubtraction(
+                       s.GetService<IAlgorithmModelStorage>() ?? throw new InvalidOperationException(),
+                s.GetService<ILogger<BackgroundSubtraction>>() ?? throw new InvalidOperationException("BackgroundSubtraction logger dependency was not resolved!")));
+            
             services.AddSingleton<IBackgroundSubtraction>(s => s.GetService<BackgroundSubtraction>());
 
-            services.AddSingleton<IImageTransformer>(s =>
+            services.AddSingleton(s =>
                 new ImageTransformBuilder(s.GetService<ILogger<ImageTransformer>>)
                     .Append(((Image<Rgb, byte> i) => i.Resize(0.5, Inter.Linear)))
                     .Append((Image<Rgb, byte> i) => i.Convert<Gray, byte>())
-                    .Append((Image<Gray, byte> i) =>
-                    {
-                        Image<Gray, byte> denoised = new Image<Gray, byte>(i.Width, i.Height);
-                        CvInvoke.MedianBlur(i, denoised, 7);
-                        return denoised;
-                    })
+                    .Append(Transforms.MedianBlur(7))
                     .Append(s.GetService<BackgroundSubtraction>() ?? throw new InvalidOperationException("BackgroundSubtraction  dependency was not resolved"))
                     .Synchronized()
+                    .Append(Transforms.MedianBlur(5))
                     .Append((Image<Gray, byte> i) => i.Convert<Rgb, byte>())
                     .ToTransformer());
 
             services.AddSingleton<IPeopleDetector>(s => new ForegroundMaskBasedPeopleDetector(
-                s.GetService<ILogger<ForegroundMaskBasedPeopleDetector>>() ?? throw new InvalidOperationException( "FgmaskBasedPeopleDetector logger dependency was not resolved!"),
-                s.GetService<IConfiguration>()?.GetDetectorThreshold()?? throw new InvalidOperationException("DetectionSettings were not resolved")));
-            
+                s.GetService<ILogger<ForegroundMaskBasedPeopleDetector>>() ?? throw new InvalidOperationException("FgmaskBasedPeopleDetector logger dependency was not resolved!"),
+                s.GetService<IConfiguration>()?.GetDetectorThreshold() ?? throw new InvalidOperationException("DetectionSettings were not resolved")));
+
             services.AddSingleton<IOccupancySensor>(
                 s => new Sense.OccupancySensor(
                     s.GetService<ICamera>() ?? throw new InvalidOperationException("Camera dependency was not resolved"),
@@ -86,6 +87,14 @@ namespace NVs.OccupancySensor.CV.Utils
             return double.TryParse(threshold, out var result)
                 ? result
                 : DetectionSettings.Default.Threshold;
+        }
+
+        private static string GetAlgorithmsDir([NotNull] this IConfiguration config)
+        {
+            if (config == null) throw new ArgumentNullException(nameof(config));
+            return config.GetSection("CV:Detection")["AlgorithmsDir"] ?? DetectionSettings.Default.AlgorithmsDir;
+
+
         }
     }
 }

@@ -6,6 +6,6 @@ namespace NVs.OccupancySensor.CV.Transformation
     {
         object Apply(object input);
 
-        ITransform Copy();
+        ITransform Clone();
     }
 }

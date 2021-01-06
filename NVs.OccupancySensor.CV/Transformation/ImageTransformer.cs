@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using JetBrains.Annotations;
@@ -63,7 +62,7 @@ namespace NVs.OccupancySensor.CV.Transformation
         {
             return operations.Count <= 1 
                 ? null 
-                : new ImageTransformer(logger, operations.Take(operations.Count - 1).Select(o => o.Copy()).ToList().AsReadOnly());
+                : new ImageTransformer(logger, operations.Take(operations.Count - 1).Select(o => o.Clone()).ToList().AsReadOnly());
         }
 
         public void Dispose()
