@@ -60,9 +60,9 @@ namespace NVs.OccupancySensor.API
                 endpoints.MapControllers();
             });
 
-            if (bool.TryParse(Configuration["CV:StartCamera"], out var startSensor) && startSensor)
+            if (bool.TryParse(Configuration["StartSensor"], out var startSensor) && startSensor)
             {
-                var camera = app.ApplicationServices.GetService<ICamera>() ?? throw new InvalidOperationException("Unable to resolve Camera!");
+                var camera = app.ApplicationServices.GetService<IOccupancySensor>() ?? throw new InvalidOperationException("Unable to resolve Camera!");
                 camera.Start();
             }
         }
