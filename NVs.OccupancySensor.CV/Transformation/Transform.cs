@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 
 namespace NVs.OccupancySensor.CV.Transformation
 {
-    sealed class Transform<TColorIn, TDepthIn, TColorOut, TDepthOut> : ITypedTransform
+    internal sealed class Transform<TColorIn, TDepthIn, TColorOut, TDepthOut> : ITypedTransform
         where TColorIn : struct, IColor
         where TDepthIn : new()
         where TColorOut : struct, IColor

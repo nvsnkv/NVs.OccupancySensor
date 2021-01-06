@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Net.Mime;
 using Emgu.CV;
 using Emgu.CV.Structure;
 

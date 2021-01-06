@@ -12,7 +12,7 @@ using NVs.OccupancySensor.CV.Transformation;
 
 namespace NVs.OccupancySensor.CV.Sense
 {
-    sealed class OccupancySensor : IOccupancySensor, IDisposable
+    internal sealed class OccupancySensor : IOccupancySensor, IDisposable
     {
         private readonly ICamera camera;
         private readonly IPeopleDetector detector;

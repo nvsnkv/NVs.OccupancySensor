@@ -10,7 +10,7 @@ using NVs.OccupancySensor.CV.Settings;
 
 namespace NVs.OccupancySensor.CV.Capture
 {
-    sealed class Camera : ICamera
+    internal sealed class Camera : ICamera
     {
         private readonly object thisLock = new object();
 

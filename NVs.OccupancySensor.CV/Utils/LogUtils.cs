@@ -1,6 +1,6 @@
 ﻿namespace NVs.OccupancySensor.CV.Utils
 {
-    static class LogUtils
+    internal static class LogUtils
     {
         public static string GetHashString(this object obj)
         {

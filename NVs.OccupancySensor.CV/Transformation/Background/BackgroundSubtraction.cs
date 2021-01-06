@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Transformation.Background
 {
-    sealed class BackgroundSubtraction: ITypedTransform, IBackgroundSubtraction
+    internal sealed class BackgroundSubtraction: ITypedTransform, IBackgroundSubtraction
     {
         private static readonly double MaxLearningRate = 1.053d;
         private readonly ILogger<BackgroundSubtraction> logger;
@@ -46,7 +46,7 @@ namespace NVs.OccupancySensor.CV.Transformation.Background
                 }
                 else
                 {
-                    learningRate = learningRate * 0.95;
+                    learningRate *= 0.95;
                 }
                 logger.LogInformation($"learningRate updated to {learningRate}");
             }

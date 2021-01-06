@@ -5,7 +5,7 @@ using Emgu.CV.Structure;
 
 namespace NVs.OccupancySensor.CV.Tests.Utils
 {
-    class TestImageObserver : IObserver<Image<Rgb, byte>>
+    internal class TestImageObserver : IObserver<Image<Rgb, byte>>
     {
         public Dictionary<Image<Rgb, byte>, DateTime> ReceivedItems { get; } = new Dictionary<Image<Rgb, byte>, DateTime>();
 

@@ -6,7 +6,7 @@ using NVs.OccupancySensor.CV.Transformation;
 
 namespace NVs.OccupancySensor.CV.Tests.Utils
 {
-    sealed class TestTransform : ITransform
+    internal sealed class TestTransform : ITransform
     {
         private readonly Func<TestTransform, TestTransform> copyFunc;
 

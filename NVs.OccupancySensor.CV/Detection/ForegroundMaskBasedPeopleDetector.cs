@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Detection
 {
-    sealed class ForegroundMaskBasedPeopleDetector : IPeopleDetector
+    internal sealed class ForegroundMaskBasedPeopleDetector : IPeopleDetector
     {
         private readonly ILogger<ForegroundMaskBasedPeopleDetector> logger;
         private readonly double detectionTreshold;

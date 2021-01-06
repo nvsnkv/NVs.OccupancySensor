@@ -9,7 +9,7 @@ using NVs.OccupancySensor.CV.Utils;
 
 namespace NVs.OccupancySensor.CV.Capture
 {
-    sealed class CameraStream : ICameraStream
+    internal sealed class CameraStream : ICameraStream
     {
         private readonly VideoCapture videoCapture;
         private readonly List<IObserver<Image<Rgb, byte>>> observers = new List<IObserver<Image<Rgb, byte>>>();

@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 
 namespace NVs.OccupancySensor.CV.Transformation
 {
-    sealed class SynchronizedTransform : ITypedTransform
+    internal sealed class SynchronizedTransform : ITypedTransform
     {
         private readonly ITypedTransform transform;
         private readonly object processingLock = new object();

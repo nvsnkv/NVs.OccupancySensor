@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Transformation
 {
-    sealed class ImageTransformBuilder
+    internal sealed class ImageTransformBuilder
     {
         private readonly Func<ILogger<ImageTransformer>> loggerFactory;
 

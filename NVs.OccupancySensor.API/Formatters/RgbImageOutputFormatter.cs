@@ -7,7 +7,7 @@ using Microsoft.Net.Http.Headers;
 
 namespace NVs.OccupancySensor.API.Formatters
 {
-    sealed class RgbImageOutputFormatter : OutputFormatter
+    internal sealed class RgbImageOutputFormatter : OutputFormatter
     {
         private static readonly Image<Rgb,byte> EmptyImage = new Image<Rgb,byte>(100, 100);
         

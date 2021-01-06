@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Transformation
 {
-    sealed class ImageTransformer : IImageTransformer
+    internal sealed class ImageTransformer : IImageTransformer
     {
         private readonly ILogger<ImageTransformer> logger;
         private readonly IReadOnlyList<ITransform> operations;

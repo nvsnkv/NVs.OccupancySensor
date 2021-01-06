@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Observation
 {
-    sealed class RawImageObserver<TColor> : IImageObserver<TColor>
+    internal sealed class RawImageObserver<TColor> : IImageObserver<TColor>
     where TColor: struct, IColor
     {
         private readonly ILogger<RawImageObserver<TColor>> logger;
