@@ -1,19 +1,22 @@
 ﻿using System;
 using System.Threading;
+using Emgu.CV;
+using Emgu.CV.Structure;
 using JetBrains.Annotations;
+using NVs.OccupancySensor.CV.Transformation.Grayscale;
 
-namespace NVs.OccupancySensor.CV.Transformation
+namespace NVs.OccupancySensor.CV.Transformation.Grayscale
 {
-    internal sealed class SynchronizedTransform : ITypedTransform
+    internal sealed class SynchronizedTransform : IGrayscaleTransform
     {
-        private readonly ITypedTransform transform;
+        private readonly IGrayscaleTransform transform;
         private readonly object processingLock = new object();
         private readonly ManualResetEvent imageProcessed = new ManualResetEvent(false);
 
         private volatile bool isProcessing;
-        private volatile object lastResult;
+        private volatile Image<Gray, byte> lastResult;
 
-        public SynchronizedTransform([NotNull] ITypedTransform transform)
+        public SynchronizedTransform([NotNull] IGrayscaleTransform transform)
         {
             this.transform = transform ?? throw new ArgumentNullException(nameof(transform));
         }
@@ -23,14 +26,14 @@ namespace NVs.OccupancySensor.CV.Transformation
             transform.Dispose();
         }
 
-        public object Apply(object input)
+        public Image<Gray, byte> Apply(Image<Gray, byte> input)
         {
             if (!AcquireProcessingLock())
             {
                 return GetLastResult();
             }
 
-            object result;
+            Image<Gray, byte> result;
             try
             {
                 result = transform.Apply(input);
@@ -45,7 +48,7 @@ namespace NVs.OccupancySensor.CV.Transformation
             return result;
         }
 
-        private object GetLastResult()
+        private Image<Gray, byte> GetLastResult()
         {
             if (lastResult == null)
             {
@@ -55,7 +58,7 @@ namespace NVs.OccupancySensor.CV.Transformation
             return lastResult;
         }
 
-        private void UpdateLastResult(object result)
+        private void UpdateLastResult(Image<Gray, byte> result)
         {
             var isFirstResult = lastResult == null;
             lastResult = result;
@@ -92,14 +95,5 @@ namespace NVs.OccupancySensor.CV.Transformation
 
             return true;
         }
-
-        public ITransform Clone()
-        {
-            return new SynchronizedTransform(transform);
-        }
-
-        public Type InType => transform.InType;
-
-        public Type OutType => transform.OutType;
     }
 }

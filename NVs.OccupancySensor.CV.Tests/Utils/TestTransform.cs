@@ -3,39 +3,27 @@ using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using NVs.OccupancySensor.CV.Transformation;
+using NVs.OccupancySensor.CV.Transformation.Grayscale;
 
 namespace NVs.OccupancySensor.CV.Tests.Utils
 {
-    internal sealed class TestTransform : ITransform
-    {
-        private readonly Func<TestTransform, TestTransform> copyFunc;
-
-        public TestTransform(Func<TestTransform, TestTransform> copyFunc = null)
-        {
-            this.copyFunc = copyFunc ?? (t => t);
-        }
-        
+    internal sealed class TestTransform : IGrayscaleTransform
+    {        
         public DateTime? ApplyInvokedOn {get; private set; }
+
         public bool Disposed { get; private set; }
-        
+
         public void Dispose()
         {
             Disposed = true;
         }
 
-        public object Apply(object input)
+        public Image<Gray, byte> Apply(Image<Gray, byte> input)
         {
             ApplyInvokedOn = DateTime.Now;
             Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
-            if (!(input is Image<Gray, byte>)) {
-                return (input as Image<Rgb, byte>).Convert<Gray, byte>();
-            }
+            
             return input;
-        }
-
-        public ITransform Clone()
-        {
-            return copyFunc(this);
         }
     }
 }

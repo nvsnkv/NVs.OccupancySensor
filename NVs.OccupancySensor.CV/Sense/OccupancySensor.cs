@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using Emgu.CV;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.Capture;
 using NVs.OccupancySensor.CV.Detection;
 using NVs.OccupancySensor.CV.Transformation;
+using NVs.OccupancySensor.CV.Transformation.Grayscale;
 
 namespace NVs.OccupancySensor.CV.Sense
 {
@@ -16,14 +18,14 @@ namespace NVs.OccupancySensor.CV.Sense
     {
         private readonly ICamera camera;
         private readonly IPeopleDetector detector;
-        private readonly IImageTransformer transformer;
+        private readonly IGrayscaleStreamTransformer transformer;
         private readonly ILogger<OccupancySensor> logger;
         
         private IObservable<Image<Gray,byte>> stream;
         private IDisposable subscription;
         private bool isDisposed;
 
-        public OccupancySensor([NotNull] ICamera camera, [NotNull] IPeopleDetector detector, [NotNull] IImageTransformer transformer, [NotNull] ILogger<OccupancySensor> logger)
+        public OccupancySensor([NotNull] ICamera camera, [NotNull] IPeopleDetector detector, [NotNull] IGrayscaleStreamTransformer transformer, [NotNull] ILogger<OccupancySensor> logger)
         {
             this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
             this.camera.PropertyChanged += OnCameraPropertyChanged;
@@ -77,7 +79,8 @@ namespace NVs.OccupancySensor.CV.Sense
                     OnPropertyChanged(nameof(IsRunning));
                     if (camera.IsRunning)
                     {
-                        stream = camera.Stream.Select(transformer.Transform);
+                        transformer.RebuildStreams(camera.Stream);
+                        stream = transformer.OutputStreams.Last();
                         subscription = stream.Subscribe(detector);
                     }
                     else

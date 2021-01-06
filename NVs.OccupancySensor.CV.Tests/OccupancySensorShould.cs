@@ -1,5 +1,7 @@
 using System;
 using System.ComponentModel;
+using System.Linq;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Emgu.CV;
@@ -9,6 +11,7 @@ using Moq;
 using NVs.OccupancySensor.CV.Capture;
 using NVs.OccupancySensor.CV.Detection;
 using NVs.OccupancySensor.CV.Transformation;
+using NVs.OccupancySensor.CV.Transformation.Grayscale;
 using Xunit;
 
 namespace NVs.OccupancySensor.CV.Tests
@@ -17,7 +20,7 @@ namespace NVs.OccupancySensor.CV.Tests
     {
         private readonly Mock<ICamera> camera = new Mock<ICamera>();
         private readonly Mock<IPeopleDetector> detector = new Mock<IPeopleDetector>();
-        private readonly Mock<IImageTransformer> transformer = new Mock<IImageTransformer>();
+        private readonly Mock<IGrayscaleStreamTransformer> transformer = new Mock<IGrayscaleStreamTransformer>();
 
         private readonly Mock<ILogger<Sense.OccupancySensor>> logger = new Mock<ILogger<Sense.OccupancySensor>>(); 
 
@@ -72,7 +75,8 @@ namespace NVs.OccupancySensor.CV.Tests
             camera.SetupGet(c => c.IsRunning).Returns(true);
             camera.SetupGet(c => c.Stream).Returns(new CameraStream(capture.Object, CancellationToken.None, new Mock<ILogger<CameraStream>>().Object, TimeSpan.FromMilliseconds(100)));
             
-            transformer.Setup(r => r.Transform(It.IsAny<Image<Rgb,byte>>())).Returns(() => new Image<Gray,byte>(100, 100)).Verifiable("Resizer was not called");
+            transformer.SetupGet(t => t.OutputStreams).Returns(Enumerable.Repeat(new [] {new Image<Gray,byte>(100, 100)}.ToObservable(), 1).ToList().AsReadOnly());
+            transformer.Setup(t => t.RebuildStreams(It.IsAny<IObservable<Image<Rgb,byte>>>())).Verifiable("Transformer was not called");
             detector.Setup(d => d.OnNext(It.IsAny<Image<Gray,byte>>())).Verifiable("Detect was not called!");
             var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, transformer.Object, logger.Object);
             

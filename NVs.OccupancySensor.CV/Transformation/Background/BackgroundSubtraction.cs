@@ -4,10 +4,11 @@ using Emgu.CV.BgSegm;
 using Emgu.CV.Structure;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
+using NVs.OccupancySensor.CV.Transformation.Grayscale;
 
 namespace NVs.OccupancySensor.CV.Transformation.Background
 {
-    internal sealed class BackgroundSubtraction: ITypedTransform, IBackgroundSubtraction
+    internal sealed class BackgroundSubtraction: IGrayscaleTransform, IBackgroundSubtraction
     {
         private static readonly double MaxLearningRate = 1.0d;
         private static readonly double Delta = 0.02d;
@@ -66,12 +67,11 @@ namespace NVs.OccupancySensor.CV.Transformation.Background
             subtractor?.Dispose();
         }
 
-        public object Apply(object input)
+        public Image<Gray, byte> Apply(Image<Gray, byte> input)
         {
-            var image = (Image<Gray, byte>) input;
-            var mask = new Image<Gray, byte>(image.Width, image.Height);
+            var mask = new Image<Gray, byte>(input.Width, input.Height);
 
-            subtractor.Apply(image, mask, GetLearningRate());
+            subtractor.Apply(input, mask, GetLearningRate());
             return mask;
         }
 
@@ -108,14 +108,6 @@ namespace NVs.OccupancySensor.CV.Transformation.Background
                 throw;
             }
         }
-
-        public ITransform Clone()
-        {
-            return this;
-        }
-
-        public Type InType { get; } = typeof(Image<Gray, byte>);
-        public Type OutType { get; } = typeof(Image<Gray, byte>);
         public void ResetModel()
         {
             learningRate = MaxLearningRate;

@@ -11,6 +11,7 @@ using NVs.OccupancySensor.API.ActionResults;
 using NVs.OccupancySensor.CV.Capture;
 using NVs.OccupancySensor.CV.Observation;
 using NVs.OccupancySensor.CV.Transformation;
+using NVs.OccupancySensor.CV.Transformation.Grayscale;
 
 namespace NVs.OccupancySensor.API.Controllers
 {
@@ -21,22 +22,13 @@ namespace NVs.OccupancySensor.API.Controllers
         private readonly ICamera camera;
         private readonly IImageObserver<Rgb> rgbObserver;
         private readonly IImageObserver<Gray> grayObserver;
-        private readonly IList<IImageTransformer> transformers;
+        private readonly IGrayscaleStreamTransformer streamTransformer;
 
         private readonly ILogger<CaptureController> logger;
         
-        public CaptureController([NotNull] ICamera camera, [NotNull] IImageObserver<Rgb> rgbObserver, [NotNull] IImageObserver<Gray> grayObserver, [NotNull] IImageTransformer transformer, [NotNull] ILogger<CaptureController> logger)
+        public CaptureController([NotNull] ICamera camera, [NotNull] IImageObserver<Rgb> rgbObserver, [NotNull] IImageObserver<Gray> grayObserver, [NotNull] IGrayscaleStreamTransformer streamTransformer, [NotNull] ILogger<CaptureController> logger)
         {
-            if (transformer == null) throw new ArgumentNullException(nameof(transformer));
-
-            transformers = new List<IImageTransformer>();
-            
-            while (transformer != null)
-            {
-                transformers.Add(transformer);
-                transformer = transformer.GetPreviousTransformer();
-            }
-            
+            this.streamTransformer = streamTransformer ?? throw new ArgumentNullException(nameof(streamTransformer));
             this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
             this.rgbObserver = rgbObserver ?? throw new ArgumentNullException(nameof(rgbObserver));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -75,7 +67,7 @@ namespace NVs.OccupancySensor.API.Controllers
         [Route("streams/count")]
         public int GetStreamsCount()
         {
-            return transformers.Count;
+            return streamTransformer.OutputStreams.Count;
         }
         
         [HttpGet]
@@ -84,7 +76,22 @@ namespace NVs.OccupancySensor.API.Controllers
         {
             logger.LogDebug($"GetStream({index}) called");
 
-            var stream = camera.Stream?.Select(transformers[index].Transform);
+            if (!camera.IsRunning) 
+            {
+                return NoContent();
+            }
+
+            if (index < 0) 
+            {
+                return BadRequest();
+            }
+
+            if (index >= streamTransformer.OutputStreams.Count) 
+            {
+                return NotFound();
+            }
+
+            var stream = streamTransformer.OutputStreams[streamTransformer.OutputStreams.Count - 1 - index];
             return GetMjpegGrayStreamContent(stream);
         }
 
