@@ -29,7 +29,7 @@ namespace NVs.OccupancySensor.CV.Tests
         }
 
         [Fact]
-        public void NotDetectPrecenceIfMaskIsBlack()
+        public void NotDetectPresenceIfMaskIsBlack()
         {
             var image = new Image<Gray, byte>(10, 10);
             for(var i=0; i < image.Width; i++)

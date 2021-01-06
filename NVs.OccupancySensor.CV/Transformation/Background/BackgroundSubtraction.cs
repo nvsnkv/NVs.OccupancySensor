@@ -9,7 +9,8 @@ namespace NVs.OccupancySensor.CV.Transformation.Background
 {
     internal sealed class BackgroundSubtraction: ITypedTransform, IBackgroundSubtraction
     {
-        private static readonly double MaxLearningRate = 1.053d;
+        private static readonly double MaxLearningRate = 1.0d;
+        private static readonly double Delta = 0.02d;
         private readonly IAlgorithmModelStorage storage;
         private readonly ILogger<BackgroundSubtraction> logger;
         private readonly string name;
@@ -85,7 +86,7 @@ namespace NVs.OccupancySensor.CV.Transformation.Background
                 }
                 else
                 {
-                    learningRate *= 0.95;
+                    learningRate -= Delta;
                 }
                 logger.LogInformation($"learningRate updated to {learningRate}");
             }
