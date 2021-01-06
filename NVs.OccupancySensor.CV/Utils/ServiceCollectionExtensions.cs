@@ -44,7 +44,6 @@ namespace NVs.OccupancySensor.CV.Utils
                     .Append(s.GetService<BackgroundSubtraction>() ?? throw new InvalidOperationException("BackgroundSubtraction  dependency was not resolved"))
                     .Synchronized()
                     .Append(Transforms.MedianBlur(5))
-                    .Append((Image<Gray, byte> i) => i.Convert<Rgb, byte>())
                     .ToTransformer());
 
             services.AddSingleton<IPeopleDetector>(s => new ForegroundMaskBasedPeopleDetector(

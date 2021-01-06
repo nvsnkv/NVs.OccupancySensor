@@ -112,7 +112,7 @@ namespace NVs.OccupancySensor.API.Controllers
             }
 
             return new MjpegStreamContent(
-                async cts => (await rgbObserver.GetImage())?.ToJpegData(),
+                async cts => (await grayObserver.GetImage())?.ToJpegData(),
                 () => unsubscriber.Dispose());
         }
     }

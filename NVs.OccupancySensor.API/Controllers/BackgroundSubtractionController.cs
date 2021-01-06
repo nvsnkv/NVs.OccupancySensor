@@ -7,7 +7,7 @@ using NVs.OccupancySensor.CV.Transformation.Background;
 namespace NVs.OccupancySensor.API.Controllers
 {
     [ApiController]
-    [Route("controller")]
+    [Route("[controller]")]
     public sealed class BackgroundSubtractionController : ControllerBase
     {
         private readonly ILogger<BackgroundSubtractionController> logger;
@@ -20,7 +20,7 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpPost]
-        
+        [Route("[action]")]
         public void ResetModel()
         {
             logger.LogInformation("Reset called");
