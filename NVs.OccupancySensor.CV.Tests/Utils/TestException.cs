@@ -2,7 +2,7 @@ using System;
 
 namespace NVs.OccupancySensor.CV.Tests.Utils
 {
-    class TestException : Exception
+    internal class TestException : Exception
     {
         public TestException() { }
 

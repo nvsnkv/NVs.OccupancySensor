@@ -8,6 +8,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using NVs.OccupancySensor.API.Formatters;
 using NVs.OccupancySensor.CV;
+using NVs.OccupancySensor.CV.Capture;
+using NVs.OccupancySensor.CV.Sense;
+using NVs.OccupancySensor.CV.Utils;
 
 namespace NVs.OccupancySensor.API
 {
@@ -23,8 +26,8 @@ namespace NVs.OccupancySensor.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCamera()
-                .AddRawImageObservers()
+            services
+                .AddPresenceDetection()
                 .AddControllers(o => o.OutputFormatters.Add(new RgbImageOutputFormatter()));
 
             services.AddSwaggerGen();
@@ -56,6 +59,12 @@ namespace NVs.OccupancySensor.API
             {
                 endpoints.MapControllers();
             });
+
+            if (bool.TryParse(Configuration["StartSensor"], out var startSensor) && startSensor)
+            {
+                var camera = app.ApplicationServices.GetService<IOccupancySensor>() ?? throw new InvalidOperationException("Unable to resolve Camera!");
+                camera.Start();
+            }
         }
     }
 }

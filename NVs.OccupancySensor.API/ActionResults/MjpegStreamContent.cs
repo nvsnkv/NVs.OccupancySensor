@@ -9,7 +9,7 @@ namespace NVs.OccupancySensor.API.ActionResults
     /// <summary>
     /// Motion JPEG ActionResult - Chris Green's implementation: https://blog.green.web.za/2019/11/23/mjpeg-in-asp-net-core.html
     /// </summary>
-    sealed class MjpegStreamContent : IActionResult
+    internal sealed class MjpegStreamContent : IActionResult
     {
         private static readonly string Boundary = "MotionImageStream";
         private static readonly string ContentType = "multipart/x-mixed-replace;boundary=" + Boundary;

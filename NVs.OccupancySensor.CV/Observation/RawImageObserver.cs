@@ -3,21 +3,22 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Emgu.CV;
-using Emgu.CV.Structure;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
-namespace NVs.OccupancySensor.CV.Impl
+namespace NVs.OccupancySensor.CV.Observation
 {
-    sealed class RawImageObserver : IImageObserver
+    internal sealed class RawImageObserver<TColor> : IImageObserver<TColor>
+    where TColor: struct, IColor
     {
-        private readonly ILogger<RawImageObserver> logger;
+        private readonly ILogger<RawImageObserver<TColor>> logger;
         private readonly AutoResetEvent captureReceived = new AutoResetEvent(false);
 
-        private volatile Mat capture;
+        private volatile Image<TColor,byte> capture;
         private volatile Exception exception;
         private volatile bool completed;
 
-        public RawImageObserver(ILogger<RawImageObserver> logger)
+        public RawImageObserver([NotNull] ILogger<RawImageObserver<TColor>> logger)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -34,15 +35,15 @@ namespace NVs.OccupancySensor.CV.Impl
             SetFlag();
         }
 
-        public void OnNext(Mat value)
+        public void OnNext(Image<TColor,byte> value)
         {
             capture = value;
             SetFlag();
         }
 
-        public Task<Image<Rgb, int>> GetImage()
+        public Task<Image<TColor,byte>> GetImage()
         {
-            var task = new Task<Image<Rgb,int>>(() =>
+            var task = new Task<Image<TColor,byte>>(() =>
             {
                 captureReceived.WaitOne();
                 if (exception != null)
@@ -61,20 +62,12 @@ namespace NVs.OccupancySensor.CV.Impl
 
                 if (capture == null)
                 {
-                    logger.LogError("null Mat object received");
+                    logger.LogError("null image received");
                     throw new InvalidOperationException("Capture was not provided by observable, but neither OnError nor OnComplete were called.");
                     
                 }
 
-                try
-                {
-                    return capture.ToImage<Rgb, int>();
-                }
-                catch (Exception e)
-                {
-                    logger.LogError(e, "Failed to convert Mat to Image");
-                    throw;
-                }
+                return capture;
             });
 
             task.Start();

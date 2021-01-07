@@ -5,7 +5,7 @@ using Emgu.CV.Aruco;
 
 namespace NVs.OccupancySensor.CV.Tests.Utils
 {
-    class PropertyChangedLogger
+    internal class PropertyChangedLogger
     {
         public readonly Dictionary<object, IDictionary<DateTime, string>> Notifications = new Dictionary<object, IDictionary<DateTime, string>>();
 

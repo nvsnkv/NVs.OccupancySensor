@@ -3,18 +3,20 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Emgu.CV;
-using Microsoft.Extensions.Logging;
+using Emgu.CV.Structure;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
+using NVs.OccupancySensor.CV.Settings;
 
-namespace NVs.OccupancySensor.CV.Impl
+namespace NVs.OccupancySensor.CV.Capture
 {
-    class Camera : ICamera
+    internal sealed class Camera : ICamera
     {
         private readonly object thisLock = new object();
 
         private readonly ILogger<Camera> logger;
         private readonly ILogger<CameraStream> streamLogger;
-        private readonly Func<Settings, VideoCapture> createVideoCaptureFunc;
+        private readonly Func<CaptureSettings, VideoCapture> createVideoCaptureFunc;
         private readonly ErrorObserver errorObserver;
 
         private VideoCapture capture;
@@ -22,14 +24,14 @@ namespace NVs.OccupancySensor.CV.Impl
 
         private ICameraStream stream;
         private volatile bool isRunning;
-        private Settings settings;
+        private CaptureSettings settings;
 
-        public Camera(ILogger<Camera> logger, ILogger<CameraStream> streamLogger, Settings settings, Func<Settings, VideoCapture> createVideoCaptureFunc)
+        public Camera([NotNull] ILogger<Camera> logger, [NotNull] ILogger<CameraStream> streamLogger, [NotNull] CaptureSettings settings, [NotNull] Func<CaptureSettings, VideoCapture> createVideoCaptureFunc)
         {
-            this.logger = logger;
-            this.streamLogger = streamLogger;
-            this.settings = settings;
-            this.createVideoCaptureFunc = createVideoCaptureFunc;
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.streamLogger = streamLogger ?? throw new ArgumentNullException(nameof(streamLogger));
+            this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            this.createVideoCaptureFunc = createVideoCaptureFunc ?? throw new ArgumentNullException(nameof(createVideoCaptureFunc));
             this.errorObserver = new ErrorObserver(this);
         }
 
@@ -39,7 +41,7 @@ namespace NVs.OccupancySensor.CV.Impl
 
         public bool IsRunning => isRunning;
 
-        public Settings Settings
+        public CaptureSettings Settings
         {
             get => settings;
             set
@@ -157,7 +159,7 @@ namespace NVs.OccupancySensor.CV.Impl
             }
         }
 
-        private class ErrorObserver : IObserver<Mat>
+        private class ErrorObserver : IObserver<Image<Rgb, byte>>
         {
             private readonly Camera camera;
 
@@ -176,18 +178,18 @@ namespace NVs.OccupancySensor.CV.Impl
                 camera.Stop();
             }
 
-            public void OnNext(Mat value)
+            public void OnNext(Image<Rgb, byte> value)
             {
             }
         }
 
         [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public static VideoCapture CreateVideoCapture(Settings settings)
+        public static VideoCapture CreateVideoCapture(CaptureSettings settings)
         {
             return int.TryParse(settings.Source, out var camIndex)
                 ? new VideoCapture(camIndex)

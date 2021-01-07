@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using Emgu.CV;
+using Emgu.CV.Structure;
 
 namespace NVs.OccupancySensor.CV.Tests.Utils
 {
-    class TestMatObserver : IObserver<Mat>
+    internal class TestImageObserver : IObserver<Image<Rgb, byte>>
     {
-        public Dictionary<Mat, DateTime> ReceivedItems { get; } = new Dictionary<Mat, DateTime>();
+        public Dictionary<Image<Rgb, byte>, DateTime> ReceivedItems { get; } = new Dictionary<Image<Rgb, byte>, DateTime>();
 
         public bool StreamCompleted { get; private set; }
 
@@ -24,7 +25,7 @@ namespace NVs.OccupancySensor.CV.Tests.Utils
             Error = error;
         }
 
-        public virtual void OnNext(Mat value)
+        public virtual void OnNext(Image<Rgb, byte> value)
         {
             ReceivedItems.Add(value, DateTime.Now);
         }

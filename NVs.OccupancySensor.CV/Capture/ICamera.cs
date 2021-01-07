@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
+using NVs.OccupancySensor.CV.Settings;
 
-namespace NVs.OccupancySensor.CV
+namespace NVs.OccupancySensor.CV.Capture
 {
     public interface ICamera : INotifyPropertyChanged
     {
@@ -12,6 +13,6 @@ namespace NVs.OccupancySensor.CV
 
         void Stop();
 
-        Settings Settings { get; set; }
+        CaptureSettings Settings { get; set; }
     }
 }
