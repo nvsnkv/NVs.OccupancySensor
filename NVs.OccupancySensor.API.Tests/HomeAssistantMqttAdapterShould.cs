@@ -5,7 +5,15 @@ using NVs.OccupancySensor.API.MQTT;
 using Microsoft.Extensions.Logging;
 using MQTTnet.Client;
 using Microsoft.Extensions.Configuration;
-using System.Runtime.CompilerServices;
+using MQTTnet.Client.Options;
+using System.Text;
+using System.Threading.Tasks;
+using MQTTnet.Client.Connecting;
+using MQTTnet;
+using System.Threading;
+using MQTTnet.Client.Publishing;
+using System.Linq;
+using NVs.OccupancySensor.API.Tests.Utils;
 
 namespace NVs.OccupancySensor.API.Tests
 {
@@ -17,16 +25,22 @@ namespace NVs.OccupancySensor.API.Tests
         private readonly Mock<IConfiguration> config = new Mock<IConfiguration>();
         private readonly string expectedClientId = "AClientId";
         private readonly string expectedServer = "mqtt";
-        private readonly string expectedPort = "1883";
+        private readonly int expectedPort = 5883;
         private readonly string expectedUser = "John";
         private readonly string expectedPassword = "John's password";
 
+        private readonly SimpleMessageComparer comparer = new SimpleMessageComparer();
+
+        private readonly Messages expectedMessages;
+
         public HomeAssistantMqttAdapterShould() 
         {
+            expectedMessages = new Messages(expectedClientId);
+
             var section = new Mock<IConfigurationSection>();
             section.SetupGet(s => s[It.Is<string>(v => "ClientId".Equals(v))]).Returns(expectedClientId);
             section.SetupGet(s => s[It.Is<string>(v => "Server".Equals(v))]).Returns(expectedServer);
-            section.SetupGet(s => s[It.Is<string>(v => "Port".Equals(v))]).Returns(expectedPort);
+            section.SetupGet(s => s[It.Is<string>(v => "Port".Equals(v))]).Returns(expectedPort.ToString());
             section.SetupGet(s => s[It.Is<string>(v => "User".Equals(v))]).Returns(expectedUser);
             section.SetupGet(s => s[It.Is<string>(v => "Password".Equals(v))]).Returns(expectedPassword);
    
@@ -43,7 +57,76 @@ namespace NVs.OccupancySensor.API.Tests
             client.Verify();
         }
 
+        [Fact]
+        public async Task ProvideMqttSettingsFromConstructor()
+        {
+            client.Setup(c => c.ConnectAsync(
+                It.Is<IMqttClientOptions>(
+                    o => expectedClientId.Equals(o.ClientId)
+                    && expectedUser.Equals(o.Credentials.Username)
+                    && expectedPassword.Equals(Encoding.UTF8.GetString(o.Credentials.Password))
+                    && o.ChannelOptions is MqttClientTcpOptions
+                    && expectedServer.Equals((o.ChannelOptions as MqttClientTcpOptions).Server)
+                    && expectedPort.Equals((o.ChannelOptions as MqttClientTcpOptions).Port)
+                    ), It.IsAny<CancellationToken>()
+                ))
+                .Returns(Task.FromResult(new MqttClientAuthenticateResult()))
+                .Verifiable("Settings were not provided");
 
+            var adapter = new HomeAssistantMqttAdapter(sensor.Object, logger.Object, CreateClient, new AdapterSettings(config.Object));
+            await adapter.Start();
+
+            client.Verify();
+        }
+
+        [Fact]
+        public async Task SendConfigurationTopicsWhenStarted()
+        {
+            var sensorConfig = expectedMessages.Configs.First();
+            var switchConfig = expectedMessages.Configs.Skip(1).First();
+
+            client.Setup(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(new MqttClientAuthenticateResult()));
+
+            client.Setup(c => c.PublishAsync(It.Is<MqttApplicationMessage>(m => comparer.Equals(sensorConfig, m)), It.IsAny<CancellationToken>()))
+            .Returns(() => Task.FromResult(new MqttClientPublishResult()))
+            .Verifiable("Sensor config was not published!");
+
+            client.Setup(c => c.PublishAsync(It.Is<MqttApplicationMessage>(m => comparer.Equals(m, switchConfig)), It.IsAny<CancellationToken>()))
+            .Returns(() => Task.FromResult(new MqttClientPublishResult()))
+            .Verifiable("Switch config was not published!");
+
+            client.Setup(c => c.PublishAsync(It.Is<MqttApplicationMessage>(m => comparer.Equals(m, expectedMessages.ServiceAvailable)), It.IsAny<CancellationToken>()))
+            .Returns(() => Task.FromResult(new MqttClientPublishResult()))
+            .Verifiable("Service available was not published!");
+
+            var adapter = new HomeAssistantMqttAdapter(sensor.Object, logger.Object, CreateClient, new AdapterSettings(config.Object));
+            await adapter.Start();
+
+            client.Verify();
+        }
+
+        [Fact]
+        public async Task SendLWTsWhenStopped()
+        {
+            client.Setup(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(new MqttClientAuthenticateResult()));
+
+            client.Setup(c => c.PublishAsync(It.Is<MqttApplicationMessage>(m => comparer.Equals(m, expectedMessages.SensorUnavailable)), It.IsAny<CancellationToken>()))
+            .Returns(() => Task.FromResult(new MqttClientPublishResult()))
+            .Verifiable("Sensor unavailable was not published!");
+
+            client.Setup(c => c.PublishAsync(It.Is<MqttApplicationMessage>(m => comparer.Equals(m, expectedMessages.ServiceUnavailable)), It.IsAny<CancellationToken>()))
+            .Returns(() => Task.FromResult(new MqttClientPublishResult()))
+            .Verifiable("Service unavailable was not published!");
+
+            sensor.Setup(s => s.Start()).Verifiable("Start was not called!");
+
+            var adapter = new HomeAssistantMqttAdapter(sensor.Object, logger.Object, CreateClient, new AdapterSettings(config.Object));
+            await adapter.Start();
+            await adapter.Stop();
+
+            client.Verify();
+        }
 
         private IMqttClient CreateClient() => client.Object;
     }
