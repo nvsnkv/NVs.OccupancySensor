@@ -8,7 +8,6 @@ using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Options;
 using MQTTnet.Client.Receiving;
-using MQTTnet.Client.Subscribing;
 using NVs.OccupancySensor.CV.Sense;
 
 namespace NVs.OccupancySensor.API.MQTT
@@ -28,8 +27,13 @@ namespace NVs.OccupancySensor.API.MQTT
         
         private volatile bool isRunning;
 
-        public HomeAssistantMqttAdapter([NotNull] IOccupancySensor sensor, [NotNull] ILogger<HomeAssistantMqttAdapter> logger, [NotNull] AdapterSettings settings)
+        public HomeAssistantMqttAdapter([NotNull] IOccupancySensor sensor, [NotNull] ILogger<HomeAssistantMqttAdapter> logger, [NotNull] Func<IMqttClient> createClient, [NotNull] AdapterSettings settings)
         {
+            if (createClient is null)
+            {
+                throw new ArgumentNullException(nameof(createClient));
+            }
+
             this.sensor = sensor ?? throw new ArgumentNullException(nameof(sensor));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -37,7 +41,7 @@ namespace NVs.OccupancySensor.API.MQTT
             
             try
             {
-                client = new MqttFactory().CreateMqttClient();
+                client = createClient();
                 options = new MqttClientOptionsBuilder()
                     .WithClientId(settings.ClientId)
                     .WithTcpServer(settings.Server, settings.Port)
