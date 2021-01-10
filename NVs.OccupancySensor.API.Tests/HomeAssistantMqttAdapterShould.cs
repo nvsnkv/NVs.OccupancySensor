@@ -14,6 +14,8 @@ using System.Threading;
 using MQTTnet.Client.Publishing;
 using System.Linq;
 using NVs.OccupancySensor.API.Tests.Utils;
+using MQTTnet.Client.Subscribing;
+using System.ComponentModel;
 
 namespace NVs.OccupancySensor.API.Tests
 {
@@ -124,6 +126,90 @@ namespace NVs.OccupancySensor.API.Tests
             var adapter = new HomeAssistantMqttAdapter(sensor.Object, logger.Object, CreateClient, new AdapterSettings(config.Object));
             await adapter.Start();
             await adapter.Stop();
+
+            client.Verify();
+        }
+
+        [Fact]
+        public async Task SubscribeOnCommandTopicAfterStart()
+        {
+            client.Setup(s =>s.SubscribeAsync(
+                It.Is<MqttClientSubscribeOptions>(o => o.TopicFilters.Any(i => expectedMessages.ServiceCommandTopic.Equals(i.Topic))), 
+                It.IsAny<CancellationToken>())
+                ).Verifiable("Subscribe was not called!");
+
+            var adapter = new HomeAssistantMqttAdapter(sensor.Object, logger.Object, CreateClient, new AdapterSettings(config.Object));
+            await adapter.Start();
+
+            client.Verify();
+        }
+
+        [Fact]
+        public void NotPublishMessagesIfNotStarted()
+        {
+            sensor.SetupGet(s => s.IsRunning).Returns(true);
+            sensor.SetupGet(s => s.PresenceDetected).Returns(true);
+            client.Setup(c => c.PublishAsync(It.IsAny<MqttApplicationMessage>(), It.IsAny<CancellationToken>())).Verifiable("Publish was called");
+
+            var adapter = new HomeAssistantMqttAdapter(sensor.Object, logger.Object, CreateClient, new AdapterSettings(config.Object));
+            
+            sensor.Raise(s => s.PropertyChanged += null, new PropertyChangedEventArgs(nameof(IOccupancySensor.IsRunning)));
+            sensor.Raise(s => s.PropertyChanged += null, new PropertyChangedEventArgs(nameof(IOccupancySensor.PresenceDetected)));
+            client.Verify(c => c.PublishAsync(It.IsAny<MqttApplicationMessage>(), It.IsAny<CancellationToken>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task PublishMessagesWhenRunning()
+        {
+            sensor.SetupGet(s => s.IsRunning).Returns(true);
+            client.Setup(c => c.PublishAsync(It.IsAny<MqttApplicationMessage>(), It.IsAny<CancellationToken>())).Verifiable("Publish was not called");
+
+            var adapter = new HomeAssistantMqttAdapter(sensor.Object, logger.Object, CreateClient, new AdapterSettings(config.Object));
+            await adapter.Start();
+
+            sensor.Raise(s => s.PropertyChanged += null, new PropertyChangedEventArgs(nameof(IOccupancySensor.IsRunning)));
+
+            client.Verify();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task PublishAppropriateMessagesWhenSensorIsRunningChanges(bool state)
+        {
+            var expectedMessage = state 
+                ? expectedMessages.SensorAvailable 
+                : expectedMessages.SensorUnavailable;
+
+            sensor.SetupGet(s => s.IsRunning).Returns(state);
+            client.Setup(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(new MqttClientAuthenticateResult()));
+            client.Setup(c => c.PublishAsync(It.Is<MqttApplicationMessage>(m => comparer.Equals(m, expectedMessage)), It.IsAny<CancellationToken>())).Verifiable("Publish was not called");
+
+            var adapter = new HomeAssistantMqttAdapter(sensor.Object, logger.Object, CreateClient, new AdapterSettings(config.Object));
+
+            await adapter.Start();
+            sensor.Raise(s => s.PropertyChanged += null, new PropertyChangedEventArgs(nameof(IOccupancySensor.IsRunning)));
+
+            client.Verify();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task PublishAppropriateMessagesWhenPresenceDetectedChanges(bool state)
+        {
+            var expectedMessage = state 
+                ? expectedMessages.PresenceDetected 
+                : expectedMessages.NoPresenceDetected;
+
+            sensor.SetupGet(s => s.IsRunning).Returns(state);
+            client.Setup(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(new MqttClientAuthenticateResult()));
+            client.Setup(c => c.PublishAsync(It.Is<MqttApplicationMessage>(m => comparer.Equals(m, expectedMessage)), It.IsAny<CancellationToken>())).Verifiable("Publish was not called");
+
+            var adapter = new HomeAssistantMqttAdapter(sensor.Object, logger.Object, CreateClient, new AdapterSettings(config.Object));
+
+            await adapter.Start();
+            sensor.Raise(s => s.PropertyChanged += null, new PropertyChangedEventArgs(nameof(IOccupancySensor.PresenceDetected)));
 
             client.Verify();
         }
