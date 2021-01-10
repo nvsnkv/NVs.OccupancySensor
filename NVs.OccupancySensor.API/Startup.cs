@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.API.Formatters;
+using NVs.OccupancySensor.API.MQTT;
 using NVs.OccupancySensor.CV.Sense;
 using NVs.OccupancySensor.CV.Utils;
 
@@ -26,6 +28,12 @@ namespace NVs.OccupancySensor.API
                 .AddPresenceDetection()
                 .AddControllers(o => o.OutputFormatters.Add(new RgbImageOutputFormatter()));
 
+            services.AddSingleton(s => new HomeAssistantMqttAdapter(
+                s.GetService<IOccupancySensor>() ?? throw new InvalidOperationException("OccupancySensor was not resolved!"), 
+                s.GetService<ILogger<HomeAssistantMqttAdapter>>() ?? throw new InvalidOperationException("Logger for HomeAssistantMqttAdapter was not resolved!"),
+                HomeAssistantMqttAdapter.CreateClient,
+                new AdapterSettings(s.GetService<IConfiguration>() ?? throw new InvalidOperationException("Configuration was not resolved!"))));
+            
             services.AddSwaggerGen();
         }
 
@@ -60,6 +68,12 @@ namespace NVs.OccupancySensor.API
             {
                 var sensor = app.ApplicationServices.GetService<IOccupancySensor>() ?? throw new InvalidOperationException("Unable to resolve OccupancySensor!");
                 sensor.Start();
+            }
+            
+            if (bool.TryParse(Configuration["StartMQTT"], out var startAdapter) && startAdapter)
+            {
+                var adapter = app.ApplicationServices.GetService<HomeAssistantMqttAdapter>() ?? throw new InvalidOperationException("Unable to resolve HomeAssistantMqttAdapter!");
+                var _ =adapter.Start();
             }
         }
     }
