@@ -178,8 +178,8 @@ namespace NVs.OccupancySensor.API.Tests
         public async Task PublishAppropriateMessagesWhenSensorIsRunningChanges(bool state)
         {
             var expectedMessage = state 
-                ? expectedMessages.SensorAvailable 
-                : expectedMessages.SensorUnavailable;
+                ? expectedMessages.ServiceEnabled 
+                : expectedMessages.ServiceDisabled;
 
             sensor.SetupGet(s => s.IsRunning).Returns(state);
             client.Setup(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(new MqttClientAuthenticateResult()));
@@ -196,15 +196,24 @@ namespace NVs.OccupancySensor.API.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public async Task PublishAppropriateMessagesWhenPresenceDetectedChanges(bool state)
+        [InlineData(null)]
+        public async Task PublishAppropriateMessagesWhenPresenceDetectedChanges(bool? state)
         {
-            var expectedMessage = state 
-                ? expectedMessages.PresenceDetected 
-                : expectedMessages.NoPresenceDetected;
-
-            sensor.SetupGet(s => s.IsRunning).Returns(state);
+            var expectedAvailability = state.HasValue
+                ? expectedMessages.SensorAvailable
+                : expectedMessages.SensorUnavailable;
+            
+            sensor.SetupGet(s => s.PresenceDetected).Returns(state);
             client.Setup(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(new MqttClientAuthenticateResult()));
-            client.Setup(c => c.PublishAsync(It.Is<MqttApplicationMessage>(m => comparer.Equals(m, expectedMessage)), It.IsAny<CancellationToken>())).Verifiable("Publish was not called");
+            client.Setup(c => c.PublishAsync(It.Is<MqttApplicationMessage>(m => comparer.Equals(m, expectedAvailability)), It.IsAny<CancellationToken>())).Verifiable("Publish was not called");
+            if (state.HasValue)
+            {
+                var expectedMessage = state.Value
+                    ? expectedMessages.PresenceDetected
+                    : expectedMessages.NoPresenceDetected;
+                
+                client.Setup(c => c.PublishAsync(It.Is<MqttApplicationMessage>(m => comparer.Equals(m, expectedMessage)), It.IsAny<CancellationToken>())).Verifiable("Publish was not called");
+            }
 
             var adapter = new HomeAssistantMqttAdapter(sensor.Object, logger.Object, CreateClient, new AdapterSettings(config.Object));
 
