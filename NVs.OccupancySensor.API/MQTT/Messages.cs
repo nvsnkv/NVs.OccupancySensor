@@ -27,17 +27,26 @@ namespace NVs.OccupancySensor.API.MQTT
         {
             ServiceCommandTopic = $"homeassistant/switch/nvs_occupancy_sensor/{instanceId}/set";
             
+            object device = new {
+                            identifiers = new [] { $"id_{instanceId}_device" },
+                            name = "occupancy_sensor",
+                            sw_version = "0",
+                            model = "DYI Optical Occupancy Sensor based on RPI4",
+                            manufacturer = "nvsnkv"
+                        };
+
             Configs = new[]
             {
                 new MqttApplicationMessageBuilder()
                     .WithTopic($"homeassistant/binary_sensor/nvs_occupancy_sensor/{instanceId}/config")
                     .WithPayload(JsonConvert.SerializeObject(new
                     {
-                        name = instanceId, device_class = "occupancy",
+                        name = instanceId, 
+                        device_class = "occupancy",
                         state_topic = $"homeassistant/binary_sensor/nvs_occupancy_sensor/{instanceId}/state",
                         availability_topic = $"homeassistant/binary_sensor/nvs_occupancy_sensor/{instanceId}/availability",
                         unique_id = $"id_{instanceId}_sensor",
-                        device = $"id_{instanceId}_device"
+                        device 
                     }))
                     .WithRetainFlag()
                     .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
@@ -46,12 +55,14 @@ namespace NVs.OccupancySensor.API.MQTT
                     .WithTopic($"homeassistant/switch/nvs_occupancy_sensor/{instanceId}/config")
                     .WithPayload(JsonConvert.SerializeObject(new
                     {
-                        name = instanceId, device_class = "connectivity",
+                        name = instanceId, 
                         state_topic = $"homeassistant/switch/nvs_occupancy_sensor/{instanceId}/state",
                         command_topic = ServiceCommandTopic,
                         availability_topic = $"homeassistant/switch/nvs_occupancy_sensor/{instanceId}/availability",
+                        payload_off = "OFF",
+                        payload_on = "ON",
                         unique_id = $"id_{instanceId}_service",
-                        device = $"id_{instanceId}_device"
+                        device
                     }))
                     .WithRetainFlag()
                     .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
