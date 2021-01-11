@@ -20,7 +20,7 @@ namespace NVs.OccupancySensor.API.MQTT
     /// <summary>
     /// MQTT Adapter complaint with Home Assistant MQTT Integration. See https://www.home-assistant.io/docs/mqtt/discovery/ for details
     /// </summary>
-    internal sealed class HomeAssistantMqttAdapter : IDisposable
+    internal sealed class HomeAssistantMqttAdapter : IMqttAdapter
     {
         private static readonly IMqttClientFactory ClientFactory = new MqttFactory();
 

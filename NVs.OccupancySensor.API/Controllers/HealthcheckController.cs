@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Text;
 using Emgu.CV;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using NVs.OccupancySensor.API.MQTT;
+using NVs.OccupancySensor.CV.Sense;
 
 namespace NVs.OccupancySensor.API.Controllers
 {
@@ -13,19 +16,26 @@ namespace NVs.OccupancySensor.API.Controllers
     {
         private readonly ILogger<HealthcheckController> logger;
         private readonly IConfiguration configuration;
+        private readonly IOccupancySensor sensor;
+        private readonly IMqttAdapter adapter;
 
-        public HealthcheckController(ILogger<HealthcheckController> logger, IConfiguration configuration)
+        public HealthcheckController(ILogger<HealthcheckController> logger, IConfiguration configuration, IOccupancySensor sensor, IMqttAdapter adapter)
         {
-            this.logger = logger;
-            this.configuration = configuration;
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            this.sensor = sensor ?? throw new ArgumentNullException(nameof(sensor));
+            this.adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
         }
 
         [HttpGet]
         public string Get()
         {
             logger.Log(LogLevel.Trace, "Healthcheck called");
+            var builder = new StringBuilder();
+            builder.AppendFormat("Sensor: {0}", sensor.IsRunning ? "Running" : "Stopped");
+            builder.AppendFormat("MQTT Adapter: {0}", adapter.IsRunning ? "Running" : "Stopped");
 
-            return "OK";
+            return builder.ToString();
         }
 
         [HttpGet("versionadv")]

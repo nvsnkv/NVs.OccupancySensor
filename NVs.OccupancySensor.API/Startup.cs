@@ -28,7 +28,7 @@ namespace NVs.OccupancySensor.API
                 .AddPresenceDetection()
                 .AddControllers(o => o.OutputFormatters.Add(new RgbImageOutputFormatter()));
 
-            services.AddSingleton(s => new HomeAssistantMqttAdapter(
+            services.AddSingleton<IMqttAdapter>(s => new HomeAssistantMqttAdapter(
                 s.GetService<IOccupancySensor>() ?? throw new InvalidOperationException("OccupancySensor was not resolved!"), 
                 s.GetService<ILogger<HomeAssistantMqttAdapter>>() ?? throw new InvalidOperationException("Logger for HomeAssistantMqttAdapter was not resolved!"),
                 HomeAssistantMqttAdapter.CreateClient,
@@ -72,7 +72,7 @@ namespace NVs.OccupancySensor.API
             
             if (bool.TryParse(Configuration["StartMQTT"], out var startAdapter) && startAdapter)
             {
-                var adapter = app.ApplicationServices.GetService<HomeAssistantMqttAdapter>() ?? throw new InvalidOperationException("Unable to resolve HomeAssistantMqttAdapter!");
+                var adapter = app.ApplicationServices.GetService<IMqttAdapter>() ?? throw new InvalidOperationException("Unable to resolve HomeAssistantMqttAdapter!");
                 var _ =adapter.Start();
             }
         }
