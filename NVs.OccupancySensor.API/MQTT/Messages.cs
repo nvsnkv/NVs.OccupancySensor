@@ -23,15 +23,25 @@ namespace NVs.OccupancySensor.API.MQTT
 
         public readonly string ServiceCommandTopic;
 
-        public Messages(string instanceId)
+        public Messages(string instanceId, string version)
         {
+            if (string.IsNullOrEmpty(instanceId))
+            {
+                throw new System.ArgumentException($"'{nameof(instanceId)}' cannot be null or empty.", nameof(instanceId));
+            }
+
+            if (string.IsNullOrEmpty(version))
+            {
+                throw new System.ArgumentException($"'{nameof(version)}' cannot be null or empty.", nameof(version));
+            }
+
             ServiceCommandTopic = $"homeassistant/switch/nvs_occupancy_sensor/{instanceId}/set";
             
             object device = new {
                             identifiers = new [] { $"id_{instanceId}_device" },
                             name = "NVs Occupancy Sensor",
-                            sw_version = "0",
-                            model = "DYI Optical Occupancy Sensor based on RPI4",
+                            sw_version = version,
+                            model = "DYI Optical Occupancy Sensor",
                             manufacturer = "nvsnkv"
                         };
 
