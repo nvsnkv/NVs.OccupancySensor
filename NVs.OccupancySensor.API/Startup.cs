@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 using NVs.OccupancySensor.API.Formatters;
 using NVs.OccupancySensor.API.MQTT;
 using NVs.OccupancySensor.CV.Sense;
@@ -34,7 +35,26 @@ namespace NVs.OccupancySensor.API
                 HomeAssistantMqttAdapter.CreateClient,
                 new AdapterSettings(s.GetService<IConfiguration>() ?? throw new InvalidOperationException("Configuration was not resolved!"))));
             
-            services.AddSwaggerGen();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc(Configuration["Version"], new OpenApiInfo
+                {
+                    Version = Configuration["Version"],
+                    Title = "NV's Occupancy Sensor HTTP API",
+                    Description = "API for OpenCV-based occupancy detector",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "nvsnkv",
+                        Email = string.Empty,
+                        Url = new Uri("https://github.com/nvsnkv"),
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "MIT",
+                        Url = new Uri("https://github.com/nvsnkv/NVs.OccupancySensor/blob/master/LICENSE.txt"),
+                    }
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -47,7 +67,7 @@ namespace NVs.OccupancySensor.API
                 app.UseDeveloperExceptionPage();
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "NV's Occupancy Sensor API V0");
+                    c.SwaggerEndpoint($"/swagger/{Configuration["Version"]}/swagger.json", $"NV's Occupancy Sensor API v. {Configuration["Version"]}");
                 });
             }
 

@@ -32,8 +32,8 @@ namespace NVs.OccupancySensor.API.Controllers
         {
             logger.Log(LogLevel.Trace, "Healthcheck called");
             var builder = new StringBuilder();
-            builder.AppendFormat("Sensor: {0}", sensor.IsRunning ? "Running" : "Stopped");
-            builder.AppendFormat("MQTT Adapter: {0}", adapter.IsRunning ? "Running" : "Stopped");
+            builder.AppendFormat("Sensor: {0}{1}", sensor.IsRunning ? "Running" : "Stopped", Environment.NewLine);
+            builder.AppendFormat("MQTT Adapter: {0}{1}", adapter.IsRunning ? "Running" : "Stopped", Environment.NewLine);
 
             return builder.ToString();
         }
