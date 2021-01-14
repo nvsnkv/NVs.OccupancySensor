@@ -29,7 +29,7 @@ namespace NVs.OccupancySensor.API.MQTT
             
             object device = new {
                             identifiers = new [] { $"id_{instanceId}_device" },
-                            name = "occupancy_sensor",
+                            name = "NVs Occupancy Sensor",
                             sw_version = "0",
                             model = "DYI Optical Occupancy Sensor based on RPI4",
                             manufacturer = "nvsnkv"
