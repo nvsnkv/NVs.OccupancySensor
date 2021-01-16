@@ -6,8 +6,6 @@ namespace NVs.OccupancySensor.API.MQTT
 {
     internal sealed class AdapterSettings
     {
-        internal readonly string Version;
-
         public AdapterSettings([NotNull] IConfiguration configuration)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
@@ -30,5 +28,7 @@ namespace NVs.OccupancySensor.API.MQTT
         public string User { get; }
         
         public string Password { get; }
+
+        public string Version { get; }
     }
 }
