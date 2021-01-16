@@ -51,7 +51,7 @@ namespace NVs.OccupancySensor.API.MQTT
             this.sensor = sensor ?? throw new ArgumentNullException(nameof(sensor));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            messages = new Messages(settings.ClientId);
+            messages = new Messages(settings.ClientId, settings.Version);
 
             try
             {
