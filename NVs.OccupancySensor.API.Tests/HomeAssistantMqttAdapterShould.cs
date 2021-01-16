@@ -30,7 +30,6 @@ namespace NVs.OccupancySensor.API.Tests
         private readonly int expectedPort = 5883;
         private readonly string expectedUser = "John";
         private readonly string expectedPassword = "John's password";
-
         private readonly string expectedVersion = "0.0.TEST";
 
         private readonly SimpleMessageComparer comparer = new SimpleMessageComparer();
