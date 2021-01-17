@@ -13,19 +13,19 @@ And since it's ASP.Net Core application you can configure it's settings, like "A
 App uses .Net Core configuration, so you can:
 * update appsettings.json with the values you need
 * override the properties using environment variables
-### Camera
+#### Camera
 * `CV:Capture:Source` - the source for OpenCV capture. Required. Can be either integer value that identifies your local camera, file path or link to the stream. Defaul is _"0"_. This value is used to create [EmguCV VideoCapture](http://www.emgu.com/wiki/files/4.4.0/document/html/961857d0-b7ba-53d8-253a-5059bb3bc1df.htm)
 * `CV:Capture:FrameInterval` - the timespan that defines how often application will request new frames from the camera. Required. Default is _100 milliseconds_
-### Detection
+#### Detection
 * `CV:Detection:Threshold` - a rational value between 0 and 1 that defines sensor sensitivity. Required. Bigger values leads makes detector less sensitive. Default is _0.1_
-### MQTT
+#### MQTT
 Application uses MQTT.Net to build MQTT client. Please
 * `MQTT:ClientId` - the client identifier for MQTT client. Required. Does not have a default value
 * `MQTT:Server` - IP address or DNS name of MQTT server. Required. Does not have a default value
 * `MQTT:Port` - TCP port of MQTT server. Required. Default is _1883_
 * `MQTT:User` - username used to authenticate client on the server. Required. Does not have a default value
 * `MQTT:Password` - password used to authenticate client on the server. Required. Does not have a default value
-### Startup
+#### Startup
 * `StartSensor` - toggle to start sensor on startup. Optional. Default _False_
 * `StartMQTT` - toggle to start MQTT client on startup. Optional. Default _False_
 
