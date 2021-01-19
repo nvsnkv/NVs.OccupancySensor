@@ -10,6 +10,7 @@ using NVs.OccupancySensor.API.Formatters;
 using NVs.OccupancySensor.API.MQTT;
 using NVs.OccupancySensor.CV.Sense;
 using NVs.OccupancySensor.CV.Utils;
+using Serilog;
 
 namespace NVs.OccupancySensor.API
 {
@@ -18,6 +19,7 @@ namespace NVs.OccupancySensor.API
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(configuration).CreateLogger();
         }
 
         public IConfiguration Configuration { get; }
