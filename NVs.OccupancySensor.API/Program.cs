@@ -17,7 +17,7 @@ namespace NVs.OccupancySensor.API
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
                 .WriteTo.File(new RenderedCompactJsonFormatter(), 
-                    "/var/log/occupancy_sensor/startup.ndjson", 
+                    "startup_log.ndjson", 
                     buffered: false, 
                     rollingInterval: RollingInterval.Day, 
                     retainedFileCountLimit:10
