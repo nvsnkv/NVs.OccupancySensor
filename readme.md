@@ -28,7 +28,11 @@ Application uses MQTT.Net to build MQTT client. Please
 #### Startup
 * `StartSensor` - toggle to start sensor on startup. Optional. Default _False_
 * `StartMQTT` - toggle to start MQTT client on startup. Optional. Default _False_
-
+#### Logging
+This app uses Serilog to capture logs. Please refer to the documentation for [Serilog.Settings.Configuration](https://github.com/serilog/serilog-settings-configuration).
+Startup process gets logged to `startup.ndjson` file in the application working directory. Rolling interval is set to 1 day for this log. Application will keep last 10 startup.ndjson log files. These behaviour is hardcoded.
+#### Version
+`Version` field in appsettings.json is not actually a setting :) . MQTT adapter sends it to Home Assistant as a part of configuration topic. It is also used in Swagger as API version.
 
 
 

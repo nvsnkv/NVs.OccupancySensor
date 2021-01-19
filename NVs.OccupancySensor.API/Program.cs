@@ -13,29 +13,29 @@ namespace NVs.OccupancySensor.API
     {
         public static void Main(string[] args)
         {
-            Log.Logger = new LoggerConfiguration()
+            var startupLogger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
                 .WriteTo.File(new RenderedCompactJsonFormatter(), 
-                    "/var/log/occupancy_sensor/log.ndjson", 
-                    buffered:true, 
-                    flushToDiskInterval: TimeSpan.FromMinutes(1), 
+                    "startup_log.ndjson", 
+                    buffered: false, 
                     rollingInterval: RollingInterval.Day, 
-                    retainedFileCountLimit:10)
-                .CreateLogger();
+                    retainedFileCountLimit:10
+                ).CreateLogger();
 
             try
             {
-                Log.Information("Starting up");
+                startupLogger.Information("Starting up");
                 CreateHostBuilder(args).Build().Run();
             }
             catch (Exception e)
             {
-                Log.Fatal(e, "Application start-up failed!");
+                startupLogger.Fatal(e, "Application start-up failed!");
             }
             finally
             {
                 Log.CloseAndFlush();
+                startupLogger.Dispose();
             }
         }
 
