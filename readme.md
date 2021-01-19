@@ -1,9 +1,11 @@
 # NV's Occupancy Sensor
 ## What's that?
 Containerized ASP.Net Core application and MQTT client that uses computer vision to identify someone's precense in the room.
-Uses background subtraction algorythms to identify if camera sees something which is not a part of furnishings.
+Uses background subtraction algorithms to identify if camera sees something which is not a part of furnishings.
+MQTT client supports configuration convention used by Home Assistant [MQTT integration](https://www.home-assistant.io/docs/mqtt/)
 ## How to use it?
 Setup the app to connect it with your camera, MQTT server and have fun!
+Application can be deployed as regular ASP.Net Core application to the Windows host. Dockerfile in the repository allows to build a linux container with this app.
 This section will be updated as soon as I start using it with my home automation server. 
 ## Configuration
 There are quite a few things to configure: connection to the camera, sensitivity of the detector and MQTT client.
