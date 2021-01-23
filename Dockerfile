@@ -1,22 +1,22 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
-# container for development!
 
-FROM ubuntu:20.04 AS emgucv-src
-WORKDIR /key
+FROM balenalib/raspberry-pi-debian AS emgucv-src
+WORKDIR /install
 RUN apt-get update;
-RUN apt-get install -y wget
-RUN wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-RUN dpkg -i packages-microsoft-prod.deb
-RUN apt-get install -y apt-transport-https && apt-get update && apt-get install -y aspnetcore-runtime-3.1
+RUN apt upgrade -y;
+RUN apt-get install -y wget;
+RUN wget -q https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+RUN chmod +x dotnet-install.sh
+RUN ./dotnet-install.sh --architecture arm --channel 3.1
 WORKDIR /vendor
 RUN apt-get install -y git
 RUN git clone https://github.com/emgucv/emgucv emgucv
 WORKDIR /vendor/emgucv
+RUN git checkout  4.4.0
 RUN git submodule update --init --recursive
-WORKDIR /vendor/emgucv/platforms/ubuntu/20.04
-RUN apt-get install -y sudo
-RUN yes | ./apt_install_dependency.sh
-RUN ./cmake_configure.sh
+WORKDIR /vendor/emgucv/platforms/raspbian
+RUN yes | ./apt_install_dependency
+RUN ./cmake_configure
 
 FROM emgucv-src as emgucv
 WORKDIR /libs
@@ -36,13 +36,13 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
 COPY ["NVs.OccupancySensor.API/NVs.OccupancySensor.API.csproj", "NVs.OccupancySensor.API/"]
-RUN dotnet restore "NVs.OccupancySensor.API/NVs.OccupancySensor.API.csproj"
+RUN dotnet restore "NVs.OccupancySensor.API/NVs.OccupancySensor.API.csproj" -r linux-arm
 COPY . .
 WORKDIR "/src/NVs.OccupancySensor.API"
-RUN dotnet build "NVs.OccupancySensor.API.csproj" -c Release -o /app/build
+RUN dotnet build "NVs.OccupancySensor.API.csproj" -c Release -o /app/build -r linux-arm
 
 FROM build AS publish
-RUN dotnet publish "NVs.OccupancySensor.API.csproj" -c Release -o /app/publish
+RUN dotnet publish "NVs.OccupancySensor.API.csproj" -c Release -o /app/publish -r linux-arm
 
 FROM base AS final
 WORKDIR /app
