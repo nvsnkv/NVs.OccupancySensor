@@ -5,8 +5,7 @@ Uses background subtraction algorithms to identify if camera sees something whic
 MQTT client supports configuration convention used by Home Assistant [MQTT integration](https://www.home-assistant.io/docs/mqtt/)
 ## How to use it?
 Setup the app to connect it with your camera, MQTT server and have fun!
-Application can be deployed as regular ASP.Net Core application to the Windows host. Dockerfile in the repository allows to build a linux container with this app.
-This section will be updated as soon as I start using it with my home automation server. 
+Application can be deployed as regular ASP.Net Core application to the Windows host. Dockerfiles in the repository allows to build a linux container with this app for x86_64 and arm32 architectures. 
 ## Configuration
 There are quite a few things to configure: connection to the camera, sensitivity of the detector and MQTT client.
 This app uses Serilog with file and console sinks so it can also be configured.
@@ -35,6 +34,9 @@ This app uses Serilog to capture logs. Please refer to the documentation for [Se
 Startup process gets logged to `startup.ndjson` file in the application working directory. Rolling interval is set to 1 day for this log. Application will keep last 10 startup.ndjson log files. These behaviour is hardcoded.
 #### Version
 `Version` field in appsettings.json is not actually a setting :) . MQTT adapter sends it to Home Assistant as a part of configuration topic. It is also used in Swagger as API version.
-
-
-
+## Building notes
+Thanks to docker, container creation is pretty simple. Use `Dockerfile` in the repository root to create an arm32 image. Use `NVs.OccupancySensor.API/Dockerfile` to create x86_64 image. The image in NVs.OccupancySensor.API folder works well with Visual Studio and allows to debug a container from the IDE without additional configuration. 
+Please note that image creation steps contains compilation of OpenCV and EmguCV - it may take significant time to get created. In my case it took about 5 hours to build it on Raspberry Pi 4.
+#### Known issues
+* Cross-compilation using `qemu-user-static` on x86_64 machine may fail during dotnet build - dotnet currently does not support QEMU. See [this comment](https://github.com/dotnet/dotnet-docker/issues/1512#issuecomment-562180086) for more details
+* Image creation fails on `apt-get update` when building on "Raspbian 10 GNU/Linux buster" - `libseccomp2` package needs to be updated to fix the original issue. Please refer to details [here](https://askubuntu.com/questions/1263284/apt-update-throws-signature-error-in-ubuntu-20-04-container-on-arm) and [here](https://github.com/moby/moby/issues/40734) 
