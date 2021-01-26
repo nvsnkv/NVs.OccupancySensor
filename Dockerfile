@@ -24,7 +24,8 @@ RUN ./cmake_configure.sh
 FROM deps as emgucv
 WORKDIR /libs
 COPY --from=deps /vendor/emgucv/libs .
-ENV LD_LIBRARY_PATH=/libs
+RUN mv arm/* .
+ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/libs"
 ENV SUDO_FORCE_REMOVE=yes
 RUN apt remove -y sudo git wget
 RUN apt-get clean autoclean
@@ -33,12 +34,7 @@ RUN rm -rf /var/lib/{apt,dpkg,cache,log}/
 RUN rm -rf /vendor/emgucv
 RUN rm /usr/share/sdk.tar.gz
 
-FROM emgucv AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
-
-FROM base AS build
+FROM deps AS build
 WORKDIR /src
 COPY ["NVs.OccupancySensor.API/NVs.OccupancySensor.API.csproj", "NVs.OccupancySensor.API/"]
 COPY ["NVs.OccupancySensor.CV/NVs.OccupancySensor.CV.csproj", "NVs.OccupancySensor.CV/"]
@@ -46,12 +42,13 @@ RUN dotnet restore "NVs.OccupancySensor.CV/NVs.OccupancySensor.CV.csproj"
 RUN dotnet restore "NVs.OccupancySensor.API/NVs.OccupancySensor.API.csproj"
 COPY . .
 WORKDIR "/src/NVs.OccupancySensor.API"
-RUN dotnet build "NVs.OccupancySensor.API.csproj" -c Release -o /app/build
+RUN dotnet build "NVs.OccupancySensor.API.csproj" -c Release -o /app/build -r linux-arm
 
 FROM build AS publish
-RUN dotnet publish "NVs.OccupancySensor.API.csproj" -c Release -o /app/publish
+RUN dotnet publish "NVs.OccupancySensor.API.csproj" -c Release -o /app/publish -r linux-arm
 
-FROM base AS final
+FROM emgucv AS final
 WORKDIR /app
+EXPOSE 80
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "NVs.OccupancySensor.API.dll"]
