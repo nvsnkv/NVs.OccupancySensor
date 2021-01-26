@@ -49,6 +49,7 @@ RUN dotnet publish "NVs.OccupancySensor.API.csproj" -c Release -o /app/publish -
 
 FROM emgucv AS final
 WORKDIR /app
+ENV ASPNETCORE_URLS=http://+:80
 EXPOSE 80
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "NVs.OccupancySensor.API.dll"]

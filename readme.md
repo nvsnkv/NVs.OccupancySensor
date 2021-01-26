@@ -6,6 +6,21 @@ MQTT client supports configuration convention used by Home Assistant [MQTT integ
 ## How to use it?
 Setup the app to connect it with your camera, MQTT server and have fun!
 Application can be deployed as regular ASP.Net Core application to the Windows host. Dockerfiles in the repository allows to build a linux container with this app for x86_64 and arm32 architectures. 
+#### Docker example
+```sh
+#!/bin/bash
+docker run -e "CV:Capture:FrameInterval"="00:00:01" \
+  -e "MQTT:ClientId"="sensor_dev" \
+  -e "MQTT:Server"="127.0.0.1" \
+  -e "MQTT:USER"="user" \
+  -e "MQTT:Password"="i have no clue" \
+  -e "StartSensor"="True" \
+  -e "StartMQTT"="True" \
+  --device /dev/video0 \ #video device needs to be added to the container if CV:Capture:Source is not a file or URL
+  -p 40080:80 \ #container exposes port 80 by default
+  --rm \
+  occupancy_sensor
+```
 ## Configuration
 There are quite a few things to configure: connection to the camera, sensitivity of the detector and MQTT client.
 This app uses Serilog with file and console sinks so it can also be configured.
