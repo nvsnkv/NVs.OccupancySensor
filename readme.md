@@ -39,7 +39,7 @@ App uses .Net Core configuration, so you can:
 * `CV:Capture:Source` - the source for OpenCV capture. Required. Can be either integer value that identifies your local camera, file path or link to the stream. Defaul is _"0"_. This value is used to create [EmguCV VideoCapture](http://www.emgu.com/wiki/files/4.4.0/document/html/961857d0-b7ba-53d8-253a-5059bb3bc1df.htm)
 * `CV:Capture:FrameInterval` - the timespan that defines how often application will request new frames from the camera. Required. Default is _100 milliseconds_
 #### Detection
-* `CV:Detection:Threshold` - a rational value between 0 and 1 that defines sensor sensitivity. Required. Bigger values leads makes detector less sensitive. Default is _0.1_
+* `CV:Detection:Threshold` - a rational value between 0 and 1 that defines sensor sensitivity. Required. Bigger values makes detector less sensitive. Default is _0.1_
 #### MQTT
 Application uses MQTT.Net to build MQTT client. Please
 * `MQTT:ClientId` - the client identifier for MQTT client. Required. Does not have a default value
