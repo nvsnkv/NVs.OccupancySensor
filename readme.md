@@ -7,6 +7,12 @@ MQTT client supports configuration convention used by Home Assistant [MQTT integ
 Setup the app to connect it with your camera, MQTT server and have fun!
 Application can be deployed as regular ASP.Net Core application to the Windows host. Dockerfiles in the repository allows to build a linux container with this app for x86_64 and arm32 architectures. 
 #### Docker example
+Build:
+```sh
+#/bin/bash
+docker build -t occupancy_sensor .
+```
+Run:
 ```sh
 #!/bin/bash
 docker run -e "CV:Capture:FrameInterval"="00:00:01" \
