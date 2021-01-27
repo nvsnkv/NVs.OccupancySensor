@@ -56,7 +56,10 @@ Startup process gets logged to `startup.ndjson` file in the application working 
 #### Version
 `Version` field in appsettings.json is not actually a setting :) . MQTT adapter sends it to Home Assistant as a part of configuration topic. It is also used in Swagger as API version.
 ## Building notes
-Thanks to docker, container creation is pretty simple. Use `Dockerfile` in the repository root to create an arm32 image. Use `NVs.OccupancySensor.API/Dockerfile` to create x86_64 image. The image in NVs.OccupancySensor.API folder works well with Visual Studio and allows to debug a container from the IDE without additional configuration. 
+Thanks to docker, container creation is pretty simple. Use `Dockerfile` in the repository root to create an arm32 image. 
+
+Use `NVs.OccupancySensor.API/Dockerfile` to create x86_64 image. This image works well with Visual Studio and allows to debug a container from the IDE without additional configuration on solution level (you still need to setup docker on your host machine and enable linux containers support). 
+
 Please note that image creation steps contains compilation of OpenCV and EmguCV - it may take significant time to get created. In my case it took about 5 hours to build it on Raspberry Pi 4.
 #### Known issues
 * Cross-compilation using `qemu-user-static` on x86_64 machine may fail during dotnet build - dotnet currently does not support QEMU. See [this comment](https://github.com/dotnet/dotnet-docker/issues/1512#issuecomment-562180086) for more details
