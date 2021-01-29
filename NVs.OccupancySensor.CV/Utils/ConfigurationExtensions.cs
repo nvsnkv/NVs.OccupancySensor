@@ -25,7 +25,7 @@ namespace NVs.OccupancySensor.CV.Utils
         internal static double GetDetectorThreshold([NotNull] this IConfiguration config)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
-            var threshold = config.GetSection("CV:Detection")["Threshold"] ?? string.Empty;
+            var threshold = config.GetSection("CV:Detection")?["Threshold"] ?? string.Empty;
 
             return double.TryParse(threshold, out var result)
                 ? result
@@ -35,7 +35,7 @@ namespace NVs.OccupancySensor.CV.Utils
         internal static string GetAlgorithmsDir([NotNull] this IConfiguration config)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
-            return config.GetSection("CV:Detection")["AlgorithmsDir"] ?? DetectionSettings.Default.AlgorithmsDir;
+            return config.GetSection("CV:Detection")?["AlgorithmsDir"] ?? DetectionSettings.Default.AlgorithmsDir;
 
 
         }

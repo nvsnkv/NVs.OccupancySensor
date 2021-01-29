@@ -46,5 +46,78 @@ namespace NVs.OccupancySensor.CV.Tests
             Assert.Equal(expectedFrameInterval, settings.FrameInterval);
             Assert.Equal(expectedSource, settings.Source);
         }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("0.12")]
+        [InlineData("bad value")]
+        public void ReadDetectionThresholdFromConfiguration(string threshold)
+        {
+            var section = new Mock<IConfigurationSection>();
+            section.SetupGet(s => s["Threshold"]).Returns(threshold);
+            var config = new Mock<IConfiguration>();
+            config.Setup(c => c.GetSection("CV:Detection")).Returns(section.Object);
+
+            if(!double.TryParse(threshold, out var expectedThreshold)) 
+            {
+                expectedThreshold = DetectionSettings.Default.Threshold;
+            }
+            
+            var actual = config.Object.GetDetectorThreshold();
+            Assert.Equal(expectedThreshold, actual);
+        }
+
+        [Fact]
+        public void ReturnDefaultDetectionThresholdIfNoDetectionSectionExist() 
+        {
+            Assert.Equal(DetectionSettings.Default.Threshold, new Mock<IConfiguration>().Object.GetDetectorThreshold());
+        }
+
+        [Fact]
+        public void ReturnDefaultTransformSettingsIfNoTransformSectionExist()
+        {
+            Assert.Equal(TransformSettings.Default, new Mock<IConfiguration>().Object.GetTransformSettings());
+        }
+
+        [Theory]
+        [InlineData(null, null, null)]
+        [InlineData(null, null, "5")]
+        [InlineData(null, "3", null)]
+         [InlineData(null, "9", "7")]
+        [InlineData("0.1", null, null)]
+        [InlineData("0.1", null, "5")]
+        [InlineData("0.1", "11", null)]
+        [InlineData("0.1", "11", "5")]
+        [InlineData("all", "values", "bad")]
+        public void ReadTransformSettingsFromConfig(string resizeFactor, string inputBlurKernelSize, string outputBlurKernelSize)
+        {
+            if (!double.TryParse(resizeFactor, out double expectedResizeFactor))
+            {
+                expectedResizeFactor = TransformSettings.Default.ResizeFactor;
+            }
+
+            if (!int.TryParse(inputBlurKernelSize, out int expectedInputBlurKernelSize)) 
+            {
+                expectedInputBlurKernelSize = TransformSettings.Default.InputBlurKernelSize;
+            }
+
+            if (!int.TryParse(outputBlurKernelSize, out int expectedOutputBlurKernelSize)) 
+            {
+                expectedOutputBlurKernelSize = TransformSettings.Default.OutputBlurKernelSize;
+            }
+
+            var section = new Mock<IConfigurationSection>();
+            section.SetupGet(s => s["ResizeFactor"]).Returns(resizeFactor);
+            section.SetupGet(s => s["InputBlurKernelSize"]).Returns(inputBlurKernelSize);
+            section.SetupGet(s => s["OutputBlurKernelSize"]).Returns(outputBlurKernelSize);
+
+            var config = new Mock<IConfiguration>();
+            config.Setup(c => c.GetSection("CV:Transform")).Returns(section.Object);
+            var settings = config.Object.GetTransformSettings();
+
+            Assert.Equal(expectedResizeFactor, settings.ResizeFactor);
+            Assert.Equal(expectedInputBlurKernelSize, settings.InputBlurKernelSize);
+            Assert.Equal(expectedOutputBlurKernelSize, settings.OutputBlurKernelSize);
+        }      
     }
 }
