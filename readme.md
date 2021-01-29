@@ -3,12 +3,24 @@
 Containerized ASP.Net Core application and MQTT client that uses computer vision to identify someone's precense in the room.
 Uses background subtraction algorithms to identify if camera sees something which is not a part of furnishings.
 MQTT client supports configuration convention used by Home Assistant [MQTT integration](https://www.home-assistant.io/docs/mqtt/)
+#### How it works?
+Applications applies following set of transformations to incoming images stream:
+1. Grayscale conversion
+2. Resizing
+3. Bluring
+4. Background subtraction
+5. Bluring
+
+Precense detector consumes the foreground mask, received as a result of this transformation.
+It compares the area of foreground mask with overall image area.
+If comparison result is greater than detection threshold sensor decides that someone is present in the room
 ## How to use it?
 Setup the app to connect it with your camera, MQTT server and have fun!
 Application can be deployed as regular ASP.Net Core application to the Windows host. Dockerfile in the repository allows to build a linux container with this app.
 This section will be updated as soon as I start using it with my home automation server. 
 ## Configuration
-There are quite a few things to configure: connection to the camera, sensitivity of the detector and MQTT client.
+There are quite a few things to configure: connection to the camera, sensitivity of the detector and MQTT client. 
+YOu can also tweak a balance between accuracy, performance and resource consumption by tweaking image transformation pipeline settings.
 This app uses Serilog with file and console sinks so it can also be configured.
 And since it's ASP.Net Core application you can configure it's settings, like "AllowedHosts" etc.
 
@@ -20,6 +32,9 @@ App uses .Net Core configuration, so you can:
 * `CV:Capture:FrameInterval` - the timespan that defines how often application will request new frames from the camera. Required. Default is _100 milliseconds_
 #### Detection
 * `CV:Detection:Threshold` - a rational value between 0 and 1 that defines sensor sensitivity. Required. Bigger values leads makes detector less sensitive. Default is _0.1_
+
+#### Image transformation settings
+   
 #### MQTT
 Application uses MQTT.Net to build MQTT client. Please
 * `MQTT:ClientId` - the client identifier for MQTT client. Required. Does not have a default value
