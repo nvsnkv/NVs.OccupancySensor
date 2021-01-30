@@ -1,19 +1,8 @@
 # NV's Occupancy Sensor
 ## What's that?
-Containerized ASP.Net Core application and MQTT client that uses computer vision to identify someone's precense in the room.
+Containerized ASP.Net Core application and MQTT client that uses computer vision to identify someone's presence in the room.
 Uses background subtraction algorithms to identify if camera sees something which is not a part of furnishings.
 MQTT client supports configuration convention used by Home Assistant [MQTT integration](https://www.home-assistant.io/docs/mqtt/)
-#### How it works?
-Applications applies following set of transformations to incoming images stream:
-1. Grayscale conversion
-2. Resizing
-3. Bluring
-4. Background subtraction
-5. Bluring
-
-Precense detector consumes the foreground mask, received as a result of this transformation.
-It compares the area of foreground mask with overall image area.
-If comparison result is greater than detection threshold sensor decides that someone is present in the room
 ## How to use it?
 Setup the app to connect it with your camera, MQTT server and have fun!
 Application can be deployed as regular ASP.Net Core application to the Windows host. Dockerfile in the repository allows to build a linux container with this app.
@@ -28,23 +17,25 @@ App uses .Net Core configuration, so you can:
 * update appsettings.json with the values you need
 * override the properties using environment variables
 #### Camera
-* `CV:Capture:Source` - the source for OpenCV capture. Required. Can be either integer value that identifies your local camera, file path or link to the stream. Defaul is _"0"_. This value is used to create [EmguCV VideoCapture](http://www.emgu.com/wiki/files/4.4.0/document/html/961857d0-b7ba-53d8-253a-5059bb3bc1df.htm)
-* `CV:Capture:FrameInterval` - the timespan that defines how often application will request new frames from the camera. Required. Default is _100 milliseconds_
+* `CV:Capture:Source` - the source for OpenCV capture. Can be either integer value that identifies your local camera, file path or link to the stream. Default is _"0"_. This value is used to create [EmguCV VideoCapture](http://www.emgu.com/wiki/files/4.4.0/document/html/961857d0-b7ba-53d8-253a-5059bb3bc1df.htm)
+* `CV:Capture:FrameInterval` - the timespan that defines how often application will request new frames from the camera. Default is _100 milliseconds_
 #### Detection
-* `CV:Detection:Threshold` - a rational value between 0 and 1 that defines sensor sensitivity. Required. Bigger values leads makes detector less sensitive. Default is _0.1_
-
+* `CV:Detection:Threshold` - a rational value between 0 and 1 that defines sensor sensitivity. Bigger values makes detector less sensitive. Default is _0.1_
 #### Image transformation settings
-   
+These settings also impact detection quality. Changing them allows to find a right balance between performance, resource consumption and detection quality (I hope :))
+* `CV:Transform:ResizeFactor` - resize factor. Default is _0.5_
+* `CV:Transform:InputBlurKernelSize` - kernel size for median blur that would be applied before background subtraction. Must be odd number. Default is _5_
+* `CV:Transform:OutputBlurKernelSize` - kernel size for median blur that would be applied to foreground mask received from background subtraction. Must be odd number. Default is _5_
 #### MQTT
 Application uses MQTT.Net to build MQTT client. Please
 * `MQTT:ClientId` - the client identifier for MQTT client. Required. Does not have a default value
 * `MQTT:Server` - IP address or DNS name of MQTT server. Required. Does not have a default value
-* `MQTT:Port` - TCP port of MQTT server. Required. Default is _1883_
-* `MQTT:User` - username used to authenticate client on the server. Required. Does not have a default value
-* `MQTT:Password` - password used to authenticate client on the server. Required. Does not have a default value
+* `MQTT:Port` - TCP port of MQTT server. Default is _1883_
+* `MQTT:User` - username used to authenticate client on the server. Does not have a default value
+* `MQTT:Password` - password used to authenticate client on the server. Does not have a default value
 #### Startup
-* `StartSensor` - toggle to start sensor on startup. Optional. Default _False_
-* `StartMQTT` - toggle to start MQTT client on startup. Optional. Default _False_
+* `StartSensor` - toggle to start sensor on startup. Default _False_
+* `StartMQTT` - toggle to start MQTT client on startup. Default _False_
 #### Logging
 This app uses Serilog to capture logs. Please refer to the documentation for [Serilog.Settings.Configuration](https://github.com/serilog/serilog-settings-configuration).
 Startup process gets logged to `startup.ndjson` file in the application working directory. Rolling interval is set to 1 day for this log. Application will keep last 10 startup.ndjson log files. These behaviour is hardcoded.
