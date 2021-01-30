@@ -9,15 +9,19 @@ updates:
     directory: "/NVs.OccupancySensor.API" # Location of package manifests
     schedule:
       interval: "weekly"
+    target-branch: develop
   - package-ecosystem: "nuget" # See documentation for possible values
     directory: "/NVs.OccupancySensor.CV" # Location of package manifests
     schedule:
       interval: "weekly"
+    target-branch: develop
   - package-ecosystem: "nuget" # See documentation for possible values
     directory: "/NVs.OccupancySensor.CV.Tests" # Location of package manifests
     schedule:
       interval: "weekly"
+    target-branch: develop
   - package-ecosystem: "nuget" # See documentation for possible values
     directory: "/NVs.OccupancySensor.API.Tests" # Location of package manifests
     schedule:
       interval: "weekly"
+    target-branch: develop
