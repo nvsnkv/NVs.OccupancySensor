@@ -7,9 +7,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NVs.OccupancySensor.API", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NVs.OccupancySensor.CV", "NVs.OccupancySensor.CV\NVs.OccupancySensor.CV.csproj", "{4718A03D-7B51-4122-B00A-B532F3FCEC45}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NVs.OccupancySensor.CV.Tests", "NVs.OccupancySensor.CV.Tests\NVs.OccupancySensor.CV.Tests.csproj", "{C3FF3E4D-9B4E-406B-8D48-B65664D073B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NVs.OccupancySensor.CV.Tests", "NVs.OccupancySensor.CV.Tests\NVs.OccupancySensor.CV.Tests.csproj", "{C3FF3E4D-9B4E-406B-8D48-B65664D073B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NVs.OccupancySensor.API.Tests", "NVs.OccupancySensor.API.Tests\NVs.OccupancySensor.API.Tests.csproj", "{9E1722B3-1D44-428F-B056-32B99F506EAA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NVs.OccupancySensor.API.Tests", "NVs.OccupancySensor.API.Tests\NVs.OccupancySensor.API.Tests.csproj", "{9E1722B3-1D44-428F-B056-32B99F506EAA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{617A8ED2-5913-4E54-84DE-3A420BB0B0A8}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		Dockerfile = Dockerfile
+		readme.md = readme.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
