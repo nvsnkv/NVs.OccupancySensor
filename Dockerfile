@@ -12,7 +12,7 @@ WORKDIR /vendor
 RUN apt-get install -y git
 RUN git clone https://github.com/emgucv/emgucv emgucv
 WORKDIR /vendor/emgucv
-RUN git checkout  4.4.0
+RUN git checkout  4.5.1
 RUN git submodule update --init --recursive
 WORKDIR /vendor/emgucv/platforms/raspbian
 RUN yes | ./apt_install_dependency
