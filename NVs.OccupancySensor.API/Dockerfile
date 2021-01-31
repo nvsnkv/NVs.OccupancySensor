@@ -1,4 +1,5 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+# container for development!
 
 FROM ubuntu:20.04 AS emgucv-src
 WORKDIR /key
@@ -11,6 +12,7 @@ WORKDIR /vendor
 RUN apt-get install -y git
 RUN git clone https://github.com/emgucv/emgucv emgucv
 WORKDIR /vendor/emgucv
+RUN git checkout 4.5.1
 RUN git submodule update --init --recursive
 WORKDIR /vendor/emgucv/platforms/ubuntu/20.04
 RUN apt-get install -y sudo

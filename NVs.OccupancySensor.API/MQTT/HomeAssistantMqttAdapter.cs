@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -112,7 +113,45 @@ namespace NVs.OccupancySensor.API.MQTT
                 return;
             }
 
-            await UpdateState();
+            var messagesToSend = PrepareMessages(e.PropertyName);
+            try
+            {
+                await client.PublishAsync(messagesToSend);
+                logger.LogInformation("State change message was published.");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError("Failed to publish state change!", ex);
+            }
+        }
+
+        private IEnumerable<MqttApplicationMessage> PrepareMessages(string propertyName)
+        {
+            switch (propertyName)
+            {
+                case nameof(sensor.IsRunning):
+                    logger.LogInformation($"Sensor.IsRunning has been changed to {sensor.IsRunning}, preparing the message...");
+                    yield return sensor.IsRunning
+                        ? messages.ServiceEnabled
+                        : messages.ServiceDisabled;
+                    break;
+                
+                case nameof(sensor.PresenceDetected):
+                    logger.LogInformation($"Sensor.PresenceDetected has been changed to {sensor.PresenceDetected}, preparing the messages...");
+
+                    yield return sensor.PresenceDetected.HasValue
+                        ? messages.SensorAvailable
+                        : messages.SensorUnavailable;
+
+                    if (sensor.PresenceDetected.HasValue)
+                    {
+                        yield return sensor.PresenceDetected.Value
+                            ? messages.PresenceDetected
+                            : messages.NoPresenceDetected;
+                    }
+                    break;
+
+            }
         }
 
         private bool SetIsRunning(bool newState)
@@ -224,7 +263,10 @@ namespace NVs.OccupancySensor.API.MQTT
                 EnsureResultSuccessful(await client.PublishAsync(messages.ServiceAvailable));
                 logger.LogInformation("Service state successfully updated.");
 
-                await UpdateState();
+                await client.PublishAsync(sensor.IsRunning
+                    ? messages.ServiceEnabled
+                    : messages.ServiceDisabled
+                );
             }
             catch (Exception e)
             {
@@ -298,36 +340,6 @@ namespace NVs.OccupancySensor.API.MQTT
             client.UseApplicationMessageReceivedHandler((IMqttApplicationMessageReceivedHandler)null);
 
             client.Dispose();
-        }
-
-        private async Task UpdateState()
-        {
-            try
-            {
-                await client.PublishAsync(
-                    sensor.IsRunning
-                        ? messages.ServiceEnabled
-                        : messages.ServiceDisabled);
-
-                await client.PublishAsync(
-                    sensor.PresenceDetected.HasValue
-                        ? messages.SensorAvailable
-                        : messages.SensorUnavailable);
-
-                if (sensor.PresenceDetected.HasValue)
-                {
-                    await client.PublishAsync(
-                        sensor.PresenceDetected.Value
-                            ? messages.PresenceDetected
-                            : messages.NoPresenceDetected);
-                }
-
-                logger.LogInformation("State updated.");
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Failed to update state!");
-            }
         }
 
         public static IMqttClient CreateClient() => ClientFactory.CreateMqttClient();
