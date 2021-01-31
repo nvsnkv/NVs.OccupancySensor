@@ -117,7 +117,7 @@ namespace NVs.OccupancySensor.API.MQTT
             try
             {
                 await client.PublishAsync(messagesToSend);
-                logger.LogInformation("State change message was published!");
+                logger.LogInformation("State change message was published.");
             }
             catch (Exception ex)
             {
