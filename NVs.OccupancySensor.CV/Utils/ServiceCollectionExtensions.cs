@@ -39,7 +39,7 @@ namespace NVs.OccupancySensor.CV.Utils
             {
                 var transformSettings = s.GetService<IConfiguration>()?.GetTransformSettings() ?? throw new InvalidOperationException("TransformSettings were not resolved!");
                 return new GrayscaleStreamTransformerBuilder(s.GetService<ILogger<GrayscaleStreamTransformer>>)
-                    .Append(i => i.Resize(transformSettings.ResizeFactor, Inter.Linear))
+                    .Append(Transforms.Resize(transformSettings.ResizeFactor))
                     .Append(Transforms.MedianBlur(transformSettings.InputBlurKernelSize))
                     .Append(s.GetService<BackgroundSubtraction>() ?? throw new InvalidOperationException("BackgroundSubtraction  dependency was not resolved"))
                     .Synchronized()
