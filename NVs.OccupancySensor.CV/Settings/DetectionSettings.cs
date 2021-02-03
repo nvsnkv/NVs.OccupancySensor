@@ -2,17 +2,20 @@
 {
     public sealed class DetectionSettings
     {
-        public DetectionSettings(double threshold, string algorithmsDir)
+        public DetectionSettings(double threshold, string dataDir, string algorithm)
         {
             Threshold = threshold;
-            AlgorithmsDir = algorithmsDir;
+            DataDir = dataDir;
+            Algorithm = algorithm;
         }
 
         public double Threshold { get; }
         
-        public string AlgorithmsDir { get; }
+        public string DataDir { get; }
 
-        public static DetectionSettings Default { get; } = new DetectionSettings(0.1d, "algorithms");
+        public string Algorithm { get; }
+
+        public static DetectionSettings Default { get; } = new DetectionSettings(0.1d, "data", "CNT");
         
     }
 }

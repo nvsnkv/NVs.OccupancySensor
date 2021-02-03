@@ -41,6 +41,8 @@ App uses .Net Core configuration, so you can:
 * `CV:Capture:FrameInterval` - the timespan that defines how often application will request new frames from the camera. Default is _100 milliseconds_
 #### Detection
 * `CV:Detection:Threshold` - a rational value between 0 and 1 that defines sensor sensitivity. Bigger values makes detector less sensitive. Default is _0.1_
+* `CV:Detection:Algorithm` - background subtraction algorithm to use. Default is _CNT_.
+** `CNT` - CouNT subtraction algorithm. Please refere to the [docs](https://github.com/sagi-z/BackgroundSubtractorCNT) for more details
 #### Image transformation settings
 These settings also impact detection quality. Changing them allows to find a right balance between performance, resource consumption and detection quality (I hope :))
 * `CV:Transform:ResizeFactor` - resize factor. Default is _0.5_

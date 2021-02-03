@@ -32,12 +32,16 @@ namespace NVs.OccupancySensor.CV.Utils
                 : DetectionSettings.Default.Threshold;
         }
 
-        internal static string GetAlgorithmsDir([NotNull] this IConfiguration config)
+        internal static string GetDataDir([NotNull] this IConfiguration config)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
-            return config.GetSection("CV:Detection")?["AlgorithmsDir"] ?? DetectionSettings.Default.AlgorithmsDir;
+            return config.GetSection("CV:Detection")?["DataDir"] ?? DetectionSettings.Default.DataDir;
+        }
 
-
+        internal static string GetAlgorithm([NotNull] this IConfiguration config)
+        {
+            if (config == null) throw new ArgumentNullException(nameof(config));
+            return config.GetSection("CV:Detection")?["Algorithm"] ?? DetectionSettings.Default.Algorithm;
         }
 
         internal static TransformSettings GetTransformSettings([NotNull] this IConfiguration config)

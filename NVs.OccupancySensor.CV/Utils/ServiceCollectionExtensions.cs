@@ -27,7 +27,7 @@ namespace NVs.OccupancySensor.CV.Utils
                     s.GetService<IConfiguration>()?.GetCaptureSettings() ?? throw new InvalidOperationException("CaptureSettings were not resolved"),
                     Camera.CreateVideoCapture));
 
-            services.AddSingleton<IAlgorithmModelStorage>(s => new FileBasedAlgorithmStorage(s.GetService<IConfiguration>()?.GetAlgorithmsDir() ?? throw new InvalidOperationException("DetectionSettings were not resolved")));
+            services.AddSingleton<IAlgorithmModelStorage>(s => new FileBasedAlgorithmStorage(s.GetService<IConfiguration>()?.GetDataDir() ?? throw new InvalidOperationException("DetectionSettings were not resolved")));
 
             services.AddSingleton(s => new BackgroundSubtraction(
                        s.GetService<IAlgorithmModelStorage>() ?? throw new InvalidOperationException(),

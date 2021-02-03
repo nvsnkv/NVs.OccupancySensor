@@ -74,6 +74,46 @@ namespace NVs.OccupancySensor.CV.Tests
         }
 
         [Fact]
+        public void ReturnDetectionAlgorithmFromSettings()
+        {
+            var section = new Mock<IConfigurationSection>();
+            var expectedAlgorithm = "CNT";
+            section.SetupGet(s => s["Algorithm"]).Returns(expectedAlgorithm);
+            var config = new Mock<IConfiguration>();
+            config.Setup(c => c.GetSection("CV:Detection")).Returns(section.Object);
+
+            var actual = config.Object.GetAlgorithm();
+
+            Assert.Equal(expectedAlgorithm, actual);
+        }
+
+        [Fact]
+        public void ReturnDefaultDetectionAlgorithmIfSettingsWereNotProvided()
+        {
+            var section = new Mock<IConfigurationSection>();
+            var expectedAlgorithm = "CNT";
+            section.SetupGet(s => s["Algorithm"]).Returns((string)null);
+            var config = new Mock<IConfiguration>();
+            config.Setup(c => c.GetSection("CV:Detection")).Returns(section.Object);
+
+            var actual = config.Object.GetAlgorithm();
+
+            Assert.Equal(expectedAlgorithm, actual);
+        }
+
+        [Fact]
+        public void ReturnDefaultDetectionAlgorithmIfSettingsSectionIsNotProvided()
+        {
+            var expectedAlgorithm = "CNT";
+            var config = new Mock<IConfiguration>();
+            
+
+            var actual = config.Object.GetAlgorithm();
+
+            Assert.Equal(expectedAlgorithm, actual);
+        }
+
+        [Fact]
         public void ReturnDefaultTransformSettingsIfNoTransformSectionExist()
         {
             Assert.Equal(TransformSettings.Default, new Mock<IConfiguration>().Object.GetTransformSettings());
