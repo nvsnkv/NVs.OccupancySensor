@@ -50,9 +50,9 @@ namespace NVs.OccupancySensor.CV.Utils
 
             services.AddSingleton<IDecisionMaker>(s => new DecisionMaker(s.GetService<ILogger<DecisionMaker>>()){ Settings = s.GetService<IConfiguration>()?.GetDetectionSettings()});
 
-            services.AddSingleton<IPeopleDetector>(s => new ForegroundMaskBasedPeopleDetector(
+            services.AddSingleton<IPeopleDetector>(s => new CNTBackgroundSubtractionBasedPeopleDetector(
                 s.GetService<IDecisionMaker>() ?? throw new InvalidOperationException("DecisionMaker dependency was not resolved!"),
-                s.GetService<ILogger<ForegroundMaskBasedPeopleDetector>>() ?? throw new InvalidOperationException("FgmaskBasedPeopleDetector logger dependency was not resolved!")
+                s.GetService<ILogger<CNTBackgroundSubtractionBasedPeopleDetector>>() ?? throw new InvalidOperationException("FgmaskBasedPeopleDetector logger dependency was not resolved!")
                 ));
 
             services.AddSingleton<IOccupancySensor>(

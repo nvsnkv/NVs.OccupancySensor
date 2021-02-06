@@ -13,7 +13,7 @@ namespace NVs.OccupancySensor.CV.Tests
     public sealed class ForegroundMaskBasedPeopleDetectorShould
     {
         private readonly Mock<IDecisionMaker> decisionMaker = new Mock<IDecisionMaker>();
-        private readonly Mock<ILogger<ForegroundMaskBasedPeopleDetector>> logger = new Mock<ILogger<ForegroundMaskBasedPeopleDetector>>();
+        private readonly Mock<ILogger<CNTBackgroundSubtractionBasedPeopleDetector>> logger = new Mock<ILogger<CNTBackgroundSubtractionBasedPeopleDetector>>();
 
         [Fact]
         public void NotifyWhenPeopleDetected()
@@ -21,7 +21,7 @@ namespace NVs.OccupancySensor.CV.Tests
             decisionMaker.Setup(m => m.PresenceDetected(It.IsAny<Image<Gray, byte>>())).Returns(true);
 
             var propertyName = string.Empty;
-            var detector = new ForegroundMaskBasedPeopleDetector(decisionMaker.Object ,logger.Object);
+            var detector = new CNTBackgroundSubtractionBasedPeopleDetector(decisionMaker.Object ,logger.Object);
             detector.PropertyChanged += (_, e) => propertyName = e.PropertyName;
             
             detector.OnNext(new Image<Gray, byte>(1, 1));
@@ -35,7 +35,7 @@ namespace NVs.OccupancySensor.CV.Tests
             decisionMaker.Setup(m => m.PresenceDetected(It.IsAny<Image<Gray, byte>>())).Returns(false);
 
             var propertyName = string.Empty;
-            var detector = new ForegroundMaskBasedPeopleDetector(decisionMaker.Object, logger.Object);
+            var detector = new CNTBackgroundSubtractionBasedPeopleDetector(decisionMaker.Object, logger.Object);
             detector.PropertyChanged += (_, e) => propertyName = e.PropertyName;
             
             detector.OnNext(new Image<Gray, byte>(1, 1));
@@ -46,7 +46,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void SetPeopleDetectedToNullWhenStreamEnds()
         {
-            var detector = new ForegroundMaskBasedPeopleDetector(decisionMaker.Object, logger.Object);
+            var detector = new CNTBackgroundSubtractionBasedPeopleDetector(decisionMaker.Object, logger.Object);
             detector.OnNext(new Image<Gray, byte>(1,1));
 
             detector.OnCompleted();
@@ -56,7 +56,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void SetPeopleDetectedToNullWhenStreamErrorsOut()
         {
-            var detector = new ForegroundMaskBasedPeopleDetector(decisionMaker.Object, logger.Object);
+            var detector = new CNTBackgroundSubtractionBasedPeopleDetector(decisionMaker.Object, logger.Object);
             detector.OnNext(new Image<Gray, byte>(1,1));
 
             detector.OnError(new System.Exception());
@@ -66,7 +66,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void SetPeopleDetectedToNullOnReset()
         {
-            var detector = new ForegroundMaskBasedPeopleDetector(decisionMaker.Object, logger.Object);
+            var detector = new CNTBackgroundSubtractionBasedPeopleDetector(decisionMaker.Object, logger.Object);
             detector.OnNext(new Image<Gray, byte>(1,1));
 
             detector.Reset();

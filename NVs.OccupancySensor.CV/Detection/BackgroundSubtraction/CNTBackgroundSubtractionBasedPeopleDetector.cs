@@ -8,13 +8,13 @@ using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
 {
-    internal sealed class ForegroundMaskBasedPeopleDetector : IPeopleDetector
+    internal sealed class CNTBackgroundSubtractionBasedPeopleDetector : IPeopleDetector
     {
-        private readonly ILogger<ForegroundMaskBasedPeopleDetector> logger;
+        private readonly ILogger<CNTBackgroundSubtractionBasedPeopleDetector> logger;
         private readonly IDecisionMaker decisionMaker;
         private bool? peopleDetected;
 
-        public ForegroundMaskBasedPeopleDetector([NotNull] IDecisionMaker decisionMaker, [NotNull] ILogger<ForegroundMaskBasedPeopleDetector> logger)
+        public CNTBackgroundSubtractionBasedPeopleDetector([NotNull] IDecisionMaker decisionMaker, [NotNull] ILogger<CNTBackgroundSubtractionBasedPeopleDetector> logger)
         {
             this.decisionMaker = decisionMaker ?? throw new ArgumentNullException(nameof(decisionMaker));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
