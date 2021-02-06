@@ -1,16 +1,11 @@
 using System;
 using System.ComponentModel;
-using System.Linq;
-using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
-using Emgu.CV;
-using Emgu.CV.Structure;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.Capture;
 using NVs.OccupancySensor.CV.Detection;
-using NVs.OccupancySensor.CV.Transformation;
-using NVs.OccupancySensor.CV.Transformation.Grayscale;
+
 
 namespace NVs.OccupancySensor.CV.Sense
 {
@@ -18,20 +13,17 @@ namespace NVs.OccupancySensor.CV.Sense
     {
         private readonly ICamera camera;
         private readonly IPeopleDetector detector;
-        private readonly IGrayscaleStreamTransformer transformer;
         private readonly ILogger<OccupancySensor> logger;
         
-        private IObservable<Image<Gray,byte>> stream;
         private IDisposable subscription;
         private bool isDisposed;
 
-        public OccupancySensor([NotNull] ICamera camera, [NotNull] IPeopleDetector detector, [NotNull] IGrayscaleStreamTransformer transformer, [NotNull] ILogger<OccupancySensor> logger)
+        public OccupancySensor([NotNull] ICamera camera, [NotNull] IPeopleDetector detector, [NotNull] ILogger<OccupancySensor> logger)
         {
             this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
             this.camera.PropertyChanged += OnCameraPropertyChanged;
 
             this.detector = detector ?? throw new ArgumentNullException(nameof(detector));
-            this.transformer = transformer ?? throw new ArgumentNullException(nameof(transformer));
             this.detector.PropertyChanged += OnDetectorPropertyChanged;
 
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -79,15 +71,12 @@ namespace NVs.OccupancySensor.CV.Sense
                     OnPropertyChanged(nameof(IsRunning));
                     if (camera.IsRunning)
                     {
-                        transformer.RebuildStreams(camera.Stream);
-                        stream = transformer.OutputStreams.Last();
-                        subscription = stream.Subscribe(detector);
+                        subscription = camera.Stream.Subscribe(detector);
                     }
                     else
                     {
                         subscription?.Dispose();
                         detector.Reset();
-                        stream = null;
                     }
                     break;
             }

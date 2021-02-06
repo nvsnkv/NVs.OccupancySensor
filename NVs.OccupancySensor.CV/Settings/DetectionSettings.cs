@@ -1,8 +1,9 @@
 ﻿using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction;
+using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.DecisionMaking;
 
 namespace NVs.OccupancySensor.CV.Settings
 {
-    public sealed class DetectionSettings : IDecisionMakerSettings
+    public sealed class DetectionSettings : IBackgroundSubtractionBasedDetectorSettings
     {
         public DetectionSettings(double threshold, string dataDir, string algorithm)
         {

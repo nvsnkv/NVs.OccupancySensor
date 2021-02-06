@@ -4,7 +4,7 @@ using Emgu.CV.Structure;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
-namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
+namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.DecisionMaking
 {
     internal sealed class DecisionMaker : IDecisionMaker
     {
@@ -16,7 +16,7 @@ namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
         [NotNull]
         public IDecisionMakerSettings Settings { get => settings; set => settings = value ?? throw new ArgumentNullException(nameof(value)); }
 
-        public bool PresenceDetected(Image<Gray, byte> mask)
+        public bool DetectPresence(Image<Gray, byte> mask)
         {
             double average = 0;
             try

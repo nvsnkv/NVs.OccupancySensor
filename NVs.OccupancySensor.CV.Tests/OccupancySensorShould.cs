@@ -10,8 +10,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NVs.OccupancySensor.CV.Capture;
 using NVs.OccupancySensor.CV.Detection;
-using NVs.OccupancySensor.CV.Transformation;
-using NVs.OccupancySensor.CV.Transformation.Grayscale;
 using Xunit;
 
 namespace NVs.OccupancySensor.CV.Tests
@@ -20,15 +18,13 @@ namespace NVs.OccupancySensor.CV.Tests
     {
         private readonly Mock<ICamera> camera = new Mock<ICamera>();
         private readonly Mock<IPeopleDetector> detector = new Mock<IPeopleDetector>();
-        private readonly Mock<IGrayscaleStreamTransformer> transformer = new Mock<IGrayscaleStreamTransformer>();
-
         private readonly Mock<ILogger<Sense.OccupancySensor>> logger = new Mock<ILogger<Sense.OccupancySensor>>(); 
 
         [Fact]
         public void StartCameraOnStart()
         {
             camera.Setup(c => c.Start()).Verifiable("Start was not requested");
-            var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, transformer.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, logger.Object);
 
             sensor.Start();
             camera.Verify();
@@ -38,7 +34,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public void StopCameraOnStop()
         {
             camera.Setup(c => c.Stop()).Verifiable("Stop was not requested");
-            var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, transformer.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, logger.Object);
 
             sensor.Stop();
             camera.Verify();
@@ -48,7 +44,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public void RaiseIsRunningPropertyChangedWhenCameraRaisesCorrespondingPropertyChanged() 
         {
             var propertyName = string.Empty;
-            var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, transformer.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, logger.Object);
             sensor.PropertyChanged += (_, e) => propertyName = e.PropertyName;
 
             camera.Raise(c => c.PropertyChanged += null, new PropertyChangedEventArgs(nameof(ICamera.IsRunning)));
@@ -60,7 +56,7 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             camera.SetupGet(c => c.IsRunning).Returns(false);
             detector.Setup(d => d.Reset()).Verifiable("Reset was not called!");
-            var _ = new Sense.OccupancySensor(camera.Object, detector.Object, transformer.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, logger.Object);
 
             camera.Raise(c => c.PropertyChanged += null, new PropertyChangedEventArgs(nameof(ICamera.IsRunning)));
             detector.Verify();
@@ -75,15 +71,12 @@ namespace NVs.OccupancySensor.CV.Tests
             camera.SetupGet(c => c.IsRunning).Returns(true);
             camera.SetupGet(c => c.Stream).Returns(new CameraStream(capture.Object, CancellationToken.None, new Mock<ILogger<CameraStream>>().Object, TimeSpan.FromMilliseconds(100)));
             
-            transformer.SetupGet(t => t.OutputStreams).Returns(Enumerable.Repeat(new [] {new Image<Gray,byte>(100, 100)}.ToObservable(), 1).ToList().AsReadOnly());
-            transformer.Setup(t => t.RebuildStreams(It.IsAny<IObservable<Image<Rgb,byte>>>())).Verifiable("Transformer was not called");
-            detector.Setup(d => d.OnNext(It.IsAny<Image<Gray,byte>>())).Verifiable("Detect was not called!");
-            var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, transformer.Object, logger.Object);
+            detector.Setup(d => d.OnNext(It.IsAny<Image<Rgb,byte>>())).Verifiable("Detect was not called!");
+            var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, logger.Object);
             
             camera.Raise(c => c.PropertyChanged += null, new PropertyChangedEventArgs(nameof(ICamera.IsRunning)));
             
             await Task.Delay(TimeSpan.FromMilliseconds(200));
-            transformer.Verify();
             detector.Verify();
         }
 
@@ -91,7 +84,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public void RaisePresenceDetectedPropertyChangedWhenDetectorRaisesCorrespondingPropertyChanged()
         {
             var propertyName = string.Empty;
-            var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, transformer.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, logger.Object);
             sensor.PropertyChanged += (_, e) => propertyName = e.PropertyName;
 
             detector.Raise(d => d.PropertyChanged += null, new PropertyChangedEventArgs(nameof(IPeopleDetector.PeopleDetected)));
@@ -105,7 +98,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public void ReturnSameValueAsPeopleDetectorFromPresenceDetected(bool? expected)
         {
             detector.SetupGet(d => d.PeopleDetected).Returns(expected);
-            var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, transformer.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, logger.Object);
 
             Assert.Equal(expected, sensor.PresenceDetected);
         }
@@ -116,7 +109,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public void ReturnSameValueAsCameraFromIsRunning(bool expected)
         {
             camera.SetupGet(c => c.IsRunning).Returns(expected);
-            var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, transformer.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, logger.Object);
 
             Assert.Equal(expected, sensor.IsRunning);
         }
@@ -125,7 +118,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public void UnsubscribeItselfFromCameraAfterDispose() 
         {
             bool propertyChangedRaised = false;
-            var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, transformer.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, logger.Object);
             sensor.PropertyChanged += (_,__) => propertyChangedRaised = true;
 
             sensor.Dispose();
@@ -138,7 +131,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public void UnsubscribeItselfFromDetectorAfterDispose() 
         {
             bool propertyChangedRaised = false;
-            var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, transformer.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, detector.Object, logger.Object);
             sensor.PropertyChanged += (_,__) => propertyChangedRaised = true;
 
             sensor.Dispose();

@@ -30,35 +30,7 @@ namespace NVs.OccupancySensor.CV.Utils
             return new DetectionSettings(
                 double.TryParse(threshold, out var result) ? result : DetectionSettings.Default.DetectionThreshold,
                 config.GetSection("CV:Detection")?["DataDir"] ?? DetectionSettings.Default.DataDir,
-                config.GetSection("CV:Detection")?["Algorithm"] ?? DetectionSettings.Default.Algorithm);   
-        }
-
-        internal static TransformSettings GetTransformSettings([NotNull] this IConfiguration config)
-        {
-            if (config == null) throw new ArgumentNullException(nameof(config));
-            var section = config.GetSection("CV:Transform");
-            
-            if (section == null)
-            {
-                return TransformSettings.Default;
-            }
-            
-            if (!double.TryParse(section["ResizeFactor"], out var rF))
-            {
-                rF = TransformSettings.Default.ResizeFactor;
-            }
-
-            if (!int.TryParse(section["InputBlurKernelSize"], out var iK))
-            {
-                iK = TransformSettings.Default.InputBlurKernelSize;
-            }
-            
-            if (!int.TryParse(section["OutputBlurKernelSize"], out var oK))
-            {
-                oK = TransformSettings.Default.OutputBlurKernelSize;
-            }
-
-            return new TransformSettings(rF, iK, oK);
+                config.GetSection("CV:Detection")?["Algorithm"] ?? DetectionSettings.Default.Algorithm);
         }
     }
 }

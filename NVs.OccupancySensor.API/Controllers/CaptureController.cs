@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Emgu.CV;
@@ -9,9 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.API.ActionResults;
 using NVs.OccupancySensor.CV.Capture;
+using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction;
 using NVs.OccupancySensor.CV.Observation;
-using NVs.OccupancySensor.CV.Transformation;
-using NVs.OccupancySensor.CV.Transformation.Grayscale;
+
 
 namespace NVs.OccupancySensor.API.Controllers
 {
@@ -20,19 +20,19 @@ namespace NVs.OccupancySensor.API.Controllers
     public sealed class CaptureController : ControllerBase
     {
         private readonly ICamera camera;
+        private readonly IBackgroundSubtractionBasedDetector detector;
         private readonly IImageObserver<Rgb> rgbObserver;
         private readonly IImageObserver<Gray> grayObserver;
-        private readonly IGrayscaleStreamTransformer streamTransformer;
 
         private readonly ILogger<CaptureController> logger;
         
-        public CaptureController([NotNull] ICamera camera, [NotNull] IImageObserver<Rgb> rgbObserver, [NotNull] IImageObserver<Gray> grayObserver, [NotNull] IGrayscaleStreamTransformer streamTransformer, [NotNull] ILogger<CaptureController> logger)
+        public CaptureController([NotNull] ICamera camera, [NotNull] IBackgroundSubtractionBasedDetector detector, [NotNull] IImageObserver<Rgb> rgbObserver, [NotNull] IImageObserver<Gray> grayObserver, [NotNull] ILogger<CaptureController> logger)
         {
-            this.streamTransformer = streamTransformer ?? throw new ArgumentNullException(nameof(streamTransformer));
             this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
+            this.detector = detector ?? throw new ArgumentNullException(nameof(detector));
             this.rgbObserver = rgbObserver ?? throw new ArgumentNullException(nameof(rgbObserver));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.grayObserver = grayObserver ?? throw new ArgumentNullException(nameof(grayObserver));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpGet]
@@ -62,36 +62,25 @@ namespace NVs.OccupancySensor.API.Controllers
             var stream = camera.Stream;
             return GetMjpegRgbStreamContent(stream);
         }
-
-        [HttpGet]
-        [Route("streams/count")]
-        public int GetStreamsCount()
-        {
-            return streamTransformer.OutputStreams.Count;
-        }
         
         [HttpGet]
-        [Route("stream-{index}.mjpeg")]
-        public IActionResult GetStream(int index)
+        [Route("stream.mjpeg")]
+        public IActionResult GetStream()
         {
-            logger.LogDebug($"GetStream({index}) called");
+            logger.LogDebug($"GetStream called");
 
             if (!camera.IsRunning) 
             {
                 return NoContent();
             }
 
-            if (index < 0) 
-            {
-                return BadRequest();
-            }
+            PropertyChangedEventHandler handler = null;
+            var stream = Observable.FromEventPattern<PropertyChangedEventArgs>(
+                    h => detector.PropertyChanged += handler = (o, e) => h(o, e),
+                    h => detector.PropertyChanged -= handler
+                ).Where(s => nameof(detector.Mask).Equals(s.EventArgs.PropertyName))
+                .Select(s => detector.Mask);
 
-            if (index >= streamTransformer.OutputStreams.Count) 
-            {
-                return NotFound();
-            }
-
-            var stream = streamTransformer.OutputStreams[streamTransformer.OutputStreams.Count - 1 - index];
             return GetMjpegGrayStreamContent(stream);
         }
 

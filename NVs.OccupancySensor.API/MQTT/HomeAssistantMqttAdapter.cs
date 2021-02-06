@@ -137,7 +137,7 @@ namespace NVs.OccupancySensor.API.MQTT
                     break;
                 
                 case nameof(sensor.PresenceDetected):
-                    logger.LogInformation($"Sensor.PresenceDetected has been changed to {sensor.PresenceDetected}, preparing the messages...");
+                    logger.LogInformation($"Sensor.DetectPresence has been changed to {sensor.PresenceDetected}, preparing the messages...");
 
                     yield return sensor.PresenceDetected.HasValue
                         ? messages.SensorAvailable

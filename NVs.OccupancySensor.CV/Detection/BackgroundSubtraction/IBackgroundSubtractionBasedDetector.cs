@@ -3,8 +3,10 @@ using Emgu.CV.Structure;
 
 namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
 {
-    public interface IBackgroundSubtractionBasedPeopleDetector : IPeopleDetector
+    public interface IBackgroundSubtractionBasedDetector : IPeopleDetector
     {
         Image<Gray, byte> Mask { get; }
+
+        IBackgroundSubtractionBasedDetectorSettings Settings { get; }
     }
 }

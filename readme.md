@@ -28,7 +28,7 @@ docker run -e "CV:Capture:FrameInterval"="00:00:01" \
   occupancy_sensor
 ```
 ## Configuration
-There are quite a few things to configure: connection to the camera, sensitivity of the detector and MQTT client. 
+There are quite a few things to configure: connection to the camera, detection algorithm, sensitivity of the detector and MQTT client. 
 YOu can also tweak a balance between accuracy, performance and resource consumption by tweaking image transformation pipeline settings.
 This app uses Serilog with file and console sinks so it can also be configured.
 And since it's ASP.Net Core application you can configure it's settings, like "AllowedHosts" etc.
@@ -42,12 +42,7 @@ App uses .Net Core configuration, so you can:
 #### Detection
 * `CV:Detection:Threshold` - a rational value between 0 and 1 that defines sensor sensitivity. Bigger values makes detector less sensitive. Default is _0.1_
 * `CV:Detection:Algorithm` - background subtraction algorithm to use. Default is _CNT_.
-** `CNT` - CouNT subtraction algorithm. Please refere to the [docs](https://github.com/sagi-z/BackgroundSubtractorCNT) for more details
-#### Image transformation settings
-These settings also impact detection quality. Changing them allows to find a right balance between performance, resource consumption and detection quality (I hope :))
-* `CV:Transform:ResizeFactor` - resize factor. Default is _0.5_
-* `CV:Transform:InputBlurKernelSize` - kernel size for median blur that would be applied before background subtraction. Must be odd number. Default is _5_
-* `CV:Transform:OutputBlurKernelSize` - kernel size for median blur that would be applied to foreground mask received from background subtraction. Must be odd number. Default is _5_
+** `CNT` - CouNT subtraction algorithm. Please refere to the [docs](https://github.com/sagi-z/BackgroundSubtractorCNT) for more details.
 #### MQTT
 Application uses MQTT.Net to build MQTT client. Please
 * `MQTT:ClientId` - the client identifier for MQTT client. Required. Does not have a default value

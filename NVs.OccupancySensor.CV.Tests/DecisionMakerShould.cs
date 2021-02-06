@@ -3,6 +3,7 @@ using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction;
+using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.DecisionMaking;
 using NVs.OccupancySensor.CV.Settings;
 using Xunit;
 
@@ -34,7 +35,7 @@ namespace NVs.OccupancySensor.CV.Tests
             };
 
             var decisionMaker = new DecisionMaker(logger.Object) { Settings = DetectionSettings.Default };
-            var result = decisionMaker.PresenceDetected(image);
+            var result = decisionMaker.DetectPresence(image);
 
             Assert.True(result);
         }
@@ -50,7 +51,7 @@ namespace NVs.OccupancySensor.CV.Tests
             };
 
             var decisionMaker = new DecisionMaker(logger.Object) { Settings = DetectionSettings.Default };
-            var result = decisionMaker.PresenceDetected(image);
+            var result = decisionMaker.DetectPresence(image);
 
             Assert.False(result);
         }
@@ -66,12 +67,12 @@ namespace NVs.OccupancySensor.CV.Tests
             };
 
             var decisionMaker = new DecisionMaker(logger.Object) { Settings = DetectionSettings.Default };
-            var result = decisionMaker.PresenceDetected(image);
+            var result = decisionMaker.DetectPresence(image);
 
             Assert.True(result);
 
             decisionMaker.Settings = new TestSettings(1.1);
-            result = decisionMaker.PresenceDetected(image);
+            result = decisionMaker.DetectPresence(image);
 
             Assert.False(result);
 
