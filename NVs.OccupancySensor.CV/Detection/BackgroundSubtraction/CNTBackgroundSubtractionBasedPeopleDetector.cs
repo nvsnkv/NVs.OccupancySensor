@@ -8,11 +8,12 @@ using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
 {
-    internal sealed class CNTBackgroundSubtractionBasedPeopleDetector : IPeopleDetector
+    internal sealed class CNTBackgroundSubtractionBasedPeopleDetector : IBackgroundSubtractionBasedPeopleDetector
     {
         private readonly ILogger<CNTBackgroundSubtractionBasedPeopleDetector> logger;
         private readonly IDecisionMaker decisionMaker;
         private bool? peopleDetected;
+        private Image<Gray, byte> mask;
 
         public CNTBackgroundSubtractionBasedPeopleDetector([NotNull] IDecisionMaker decisionMaker, [NotNull] ILogger<CNTBackgroundSubtractionBasedPeopleDetector> logger)
         {
@@ -24,12 +25,14 @@ namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
         {
             logger.LogInformation("Stream completed, setting PeopleDetected to null");
             PeopleDetected = null;
+            Mask = null;
         }
 
         public void OnError(Exception error)
         {
             logger.LogInformation($"Error received, setting PeopleDetected to null{Environment.NewLine}Exception: {error}");
             PeopleDetected = null;
+            Mask = null;
         }
 
         public void OnNext([NotNull] Image<Gray, byte> value)
@@ -38,12 +41,14 @@ namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
             logger.LogInformation("New foreground mask received");
     
             PeopleDetected = decisionMaker.PresenceDetected(value);
+            Mask = value;
         }
 
         public void Reset()
         {
             logger.LogInformation("Reset requested, setting PeopleDetected to null");
             PeopleDetected = null;
+            Mask = null;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -55,6 +60,17 @@ namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
             {
                 if (value == peopleDetected) return;
                 peopleDetected = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public Image<Gray, byte> Mask
+        {
+            get => mask;
+            private set
+            {
+                if (Equals(value, mask)) return;
+                mask = value;
                 OnPropertyChanged();
             }
         }

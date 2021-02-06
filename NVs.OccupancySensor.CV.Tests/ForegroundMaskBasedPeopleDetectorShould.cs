@@ -1,10 +1,10 @@
+using System.Collections.Generic;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NVs.OccupancySensor.CV.Detection;
 using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction;
-using NVs.OccupancySensor.CV.Settings;
 using Xunit;
 
 namespace NVs.OccupancySensor.CV.Tests
@@ -20,13 +20,13 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             decisionMaker.Setup(m => m.PresenceDetected(It.IsAny<Image<Gray, byte>>())).Returns(true);
 
-            var propertyName = string.Empty;
+            var propertiesChanged = new List<string>();
             var detector = new CNTBackgroundSubtractionBasedPeopleDetector(decisionMaker.Object ,logger.Object);
-            detector.PropertyChanged += (_, e) => propertyName = e.PropertyName;
+            detector.PropertyChanged += (_, e) => propertiesChanged.Add(e.PropertyName);
             
             detector.OnNext(new Image<Gray, byte>(1, 1));
 
-            Assert.Equal(nameof(IPeopleDetector.PeopleDetected), propertyName);
+            Assert.Contains(propertiesChanged, s => nameof(IPeopleDetector.PeopleDetected).Equals(s));
         }
 
         [Fact]
@@ -34,13 +34,12 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             decisionMaker.Setup(m => m.PresenceDetected(It.IsAny<Image<Gray, byte>>())).Returns(false);
 
-            var propertyName = string.Empty;
+            var propertiesChanged = new List<string>();
             var detector = new CNTBackgroundSubtractionBasedPeopleDetector(decisionMaker.Object, logger.Object);
-            detector.PropertyChanged += (_, e) => propertyName = e.PropertyName;
+            detector.PropertyChanged += (_, e) => propertiesChanged.Add(e.PropertyName);
             
             detector.OnNext(new Image<Gray, byte>(1, 1));
-
-            Assert.Equal(nameof(IPeopleDetector.PeopleDetected), propertyName);
+            Assert.Contains(propertiesChanged, s => nameof(IPeopleDetector.PeopleDetected).Equals(s));
         }
      
         [Fact]
@@ -71,6 +70,50 @@ namespace NVs.OccupancySensor.CV.Tests
 
             detector.Reset();
             Assert.Null(detector.PeopleDetected);
+        }
+
+
+        [Fact]
+        public void RaisePropertyChangedWhenMaskChanged()
+        {
+            var propertiesChanged = new List<string>();
+
+            var detector = new CNTBackgroundSubtractionBasedPeopleDetector(decisionMaker.Object, logger.Object);
+            detector.PropertyChanged += (o, e) => propertiesChanged.Add(e.PropertyName);
+
+            detector.OnNext(new Image<Gray, byte>(1,1));
+
+            Assert.Contains(propertiesChanged, s => nameof(IBackgroundSubtractionBasedPeopleDetector.Mask).Equals(s));
+        }
+
+        [Fact]
+        public void SetMaskToNullWhenStreamEnds()
+        {
+            var detector = new CNTBackgroundSubtractionBasedPeopleDetector(decisionMaker.Object, logger.Object);
+            detector.OnNext(new Image<Gray, byte>(1,1));
+
+            detector.OnCompleted();
+            Assert.Null(detector.Mask);
+        }
+
+        [Fact]
+        public void SetMaskToNullWhenStreamErrorsOut()
+        {
+            var detector = new CNTBackgroundSubtractionBasedPeopleDetector(decisionMaker.Object, logger.Object);
+            detector.OnNext(new Image<Gray, byte>(1,1));
+
+            detector.OnError(new System.Exception());
+            Assert.Null(detector.Mask);
+        }
+
+        [Fact]
+        public void SetMaskToNullOnReset()
+        {
+            var detector = new CNTBackgroundSubtractionBasedPeopleDetector(decisionMaker.Object, logger.Object);
+            detector.OnNext(new Image<Gray, byte>(1,1));
+
+            detector.Reset();
+            Assert.Null(detector.Mask);
         }
     }
 }
