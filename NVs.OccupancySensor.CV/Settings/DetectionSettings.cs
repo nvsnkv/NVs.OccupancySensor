@@ -1,21 +1,22 @@
-﻿namespace NVs.OccupancySensor.CV.Settings
+﻿using NVs.OccupancySensor.CV.Detection.ForegroundDetection;
+
+namespace NVs.OccupancySensor.CV.Settings
 {
-    public sealed class DetectionSettings
+    public sealed class DetectionSettings : IDecisionMakerSettings
     {
         public DetectionSettings(double threshold, string dataDir, string algorithm)
         {
-            Threshold = threshold;
+            DetectionThreshold = threshold;
             DataDir = dataDir;
             Algorithm = algorithm;
         }
 
-        public double Threshold { get; }
+        public double DetectionThreshold { get; }
         
         public string DataDir { get; }
 
         public string Algorithm { get; }
 
         public static DetectionSettings Default { get; } = new DetectionSettings(0.1d, "data", "CNT");
-        
     }
 }

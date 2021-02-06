@@ -60,17 +60,17 @@ namespace NVs.OccupancySensor.CV.Tests
 
             if(!double.TryParse(threshold, out var expectedThreshold)) 
             {
-                expectedThreshold = DetectionSettings.Default.Threshold;
+                expectedThreshold = DetectionSettings.Default.DetectionThreshold;
             }
             
-            var actual = config.Object.GetDetectorThreshold();
+            var actual = config.Object.GetDetectionSettings().DetectionThreshold;
             Assert.Equal(expectedThreshold, actual);
         }
 
         [Fact]
         public void ReturnDefaultDetectionThresholdIfNoDetectionSectionExist() 
         {
-            Assert.Equal(DetectionSettings.Default.Threshold, new Mock<IConfiguration>().Object.GetDetectorThreshold());
+            Assert.Equal(DetectionSettings.Default.DetectionThreshold, new Mock<IConfiguration>().Object.GetDetectionSettings().DetectionThreshold);
         }
 
         [Fact]
@@ -82,7 +82,7 @@ namespace NVs.OccupancySensor.CV.Tests
             var config = new Mock<IConfiguration>();
             config.Setup(c => c.GetSection("CV:Detection")).Returns(section.Object);
 
-            var actual = config.Object.GetAlgorithm();
+            var actual = config.Object.GetDetectionSettings().Algorithm;
 
             Assert.Equal(expectedAlgorithm, actual);
         }
@@ -96,7 +96,7 @@ namespace NVs.OccupancySensor.CV.Tests
             var config = new Mock<IConfiguration>();
             config.Setup(c => c.GetSection("CV:Detection")).Returns(section.Object);
 
-            var actual = config.Object.GetAlgorithm();
+            var actual = config.Object.GetDetectionSettings().Algorithm;
 
             Assert.Equal(expectedAlgorithm, actual);
         }
@@ -108,7 +108,7 @@ namespace NVs.OccupancySensor.CV.Tests
             var config = new Mock<IConfiguration>();
             
 
-            var actual = config.Object.GetAlgorithm();
+            var actual = config.Object.GetDetectionSettings().Algorithm;
 
             Assert.Equal(expectedAlgorithm, actual);
         }
@@ -116,7 +116,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void ReturnDefaultTransformSettingsIfNoTransformSectionExist()
         {
-            Assert.Equal(TransformSettings.Default, new Mock<IConfiguration>().Object.GetTransformSettings());
+            Assert.Equal(TransformSettings.Default, new Mock<IConfiguration> ().Object.GetTransformSettings());
         }
 
         [Theory]

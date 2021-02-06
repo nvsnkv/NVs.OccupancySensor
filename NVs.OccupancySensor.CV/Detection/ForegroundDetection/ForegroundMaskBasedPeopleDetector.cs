@@ -5,19 +5,20 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
+using NVs.OccupancySensor.CV.Detection.ForegroundDetection;
 
 namespace NVs.OccupancySensor.CV.Detection
 {
     internal sealed class ForegroundMaskBasedPeopleDetector : IPeopleDetector
     {
         private readonly ILogger<ForegroundMaskBasedPeopleDetector> logger;
-        private readonly double detectionTreshold;
+        private readonly IDecisionMaker decisionMaker;
         private bool? peopleDetected;
 
-        public ForegroundMaskBasedPeopleDetector([NotNull] ILogger<ForegroundMaskBasedPeopleDetector> logger, double detectionTreshold)
+        public ForegroundMaskBasedPeopleDetector([NotNull] IDecisionMaker decisionMaker, [NotNull] ILogger<ForegroundMaskBasedPeopleDetector> logger)
         {
+            this.decisionMaker = decisionMaker ?? throw new ArgumentNullException(nameof(decisionMaker));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.detectionTreshold = detectionTreshold;
         }
         
         public void OnCompleted()
@@ -36,20 +37,8 @@ namespace NVs.OccupancySensor.CV.Detection
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             logger.LogInformation("New foreground mask received");
-
-            double result;
-            try
-            {
-                result = value.GetAverage().Intensity / 255;
-                logger.LogInformation($"Computed average: {result}");
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Failed to compute average!");
-                throw;
-            }
-            
-            PeopleDetected = result > detectionTreshold;
+    
+            PeopleDetected = decisionMaker.PresenceDetected(value);
         }
 
         public void Reset()
