@@ -1,4 +1,4 @@
-namespace NVs.OccupancySensor.CV.Detection.ForegroundDetection
+namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
 {
     public interface IDecisionMakerSettings
     {

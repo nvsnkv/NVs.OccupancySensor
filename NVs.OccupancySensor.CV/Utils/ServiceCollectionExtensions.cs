@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.Capture;
 using NVs.OccupancySensor.CV.Detection;
-using NVs.OccupancySensor.CV.Detection.ForegroundDetection;
+using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction;
 using NVs.OccupancySensor.CV.Observation;
 using NVs.OccupancySensor.CV.Sense;
 using NVs.OccupancySensor.CV.Transformation;

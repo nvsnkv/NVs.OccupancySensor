@@ -5,9 +5,8 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
-using NVs.OccupancySensor.CV.Detection.ForegroundDetection;
 
-namespace NVs.OccupancySensor.CV.Detection
+namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
 {
     internal sealed class ForegroundMaskBasedPeopleDetector : IPeopleDetector
     {
