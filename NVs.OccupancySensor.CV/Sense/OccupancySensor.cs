@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.Capture;
+using NVs.OccupancySensor.CV.Denoising;
 using NVs.OccupancySensor.CV.Detection;
 
 
