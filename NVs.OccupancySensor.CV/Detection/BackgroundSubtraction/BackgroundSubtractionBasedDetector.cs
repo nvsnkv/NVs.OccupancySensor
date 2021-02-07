@@ -7,11 +7,13 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.DecisionMaking;
 using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.Subtractors;
+using NVs.OccupancySensor.CV.Utils;
 
 namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
 {
     internal sealed class BackgroundSubtractionBasedDetector : IBackgroundSubtractionBasedDetector, IDisposable
     {
+        private readonly ProcessingLock processingLock = new ProcessingLock();
         private readonly IBackgroundSubtractorFactory factory;
         private readonly ILogger<BackgroundSubtractionBasedDetector> logger;
         private readonly IDecisionMaker decisionMaker;
@@ -55,6 +57,12 @@ namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
 
             Image<Gray, byte> fgMask;
 
+            if (!processingLock.Acquire())
+            {
+                logger.LogWarning("Previously started operation is still in progress, the frame will be dropped!");
+                return;
+            }
+
             try
             {
                 fgMask = subtractor.GetForegroundMask(value);
@@ -64,6 +72,10 @@ namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
             {
                 logger.LogError(e, "Failed to calculate foreground mask!");
                 throw;
+            }
+            finally
+            {
+                processingLock.Release();
             }
             
             PeopleDetected = decisionMaker.DetectPresence(fgMask);

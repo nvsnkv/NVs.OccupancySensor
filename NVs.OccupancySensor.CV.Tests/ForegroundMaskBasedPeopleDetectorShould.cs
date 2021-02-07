@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
@@ -129,6 +132,28 @@ namespace NVs.OccupancySensor.CV.Tests
 
             detector.Reset();
             Assert.Null(detector.Mask);
+        }
+
+        [Fact]
+        public async Task DropNewFramesIfSubtractorIsStillCalculating()
+        {
+            var maskChanged = 0;
+            subtractor
+                .Setup(s => s.GetForegroundMask(It.IsAny<Image<Rgb, byte>>()))
+                .Returns(() =>
+                {
+                    Task.Delay(TimeSpan.FromMilliseconds(600)).Wait();
+                    return new Image<Gray, byte>(1, 1);
+                })
+                .Verifiable();
+
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            detector.PropertyChanged += (_, e) => maskChanged += nameof(detector.Mask).Equals(e.PropertyName) ? 1 : 0;
+
+            Enumerable.Range(0, 3).ToList().ForEach(_ => Task.Factory.StartNew(() => detector.OnNext(new Image<Rgb, byte>(1, 1))));
+            
+            await Task.Delay(TimeSpan.FromMilliseconds(2000));
+            Assert.Equal(1, maskChanged);
         }
     }
 }
