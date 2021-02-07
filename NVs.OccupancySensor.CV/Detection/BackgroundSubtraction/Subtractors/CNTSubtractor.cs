@@ -8,7 +8,13 @@ namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.Subtractors
 {
     internal sealed class CNTSubtractor : IBackgroundSubtractor
     {
-        private readonly BackgroundSubtractorCNT subtractor = new BackgroundSubtractorCNT();
+        private readonly BackgroundSubtractorCNT subtractor;
+
+        public CNTSubtractor([NotNull] ICNTSubtractorSettings settings)
+        {
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
+            subtractor = new BackgroundSubtractorCNT(settings.MinPixelStability, settings.UseHistory, settings.MaxPixelStability, settings.IsParallel);
+        }
 
         public Image<Gray, byte> GetForegroundMask([NotNull] Image<Rgb, byte> source)
         {

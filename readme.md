@@ -27,6 +27,8 @@ docker run -e "CV:Capture:FrameInterval"="00:00:01" \
   --rm \
   occupancy_sensor
 ```
+#### Swagger
+Application exposes Swagger UI on URL `/swagger/index.html`. This UI allows to explore and interact with HTTP API exposed by this app.
 ## Configuration
 There are quite a few things to configure: connection to the camera, detection algorithm, sensitivity of the detector and MQTT client. 
 YOu can also tweak a balance between accuracy, performance and resource consumption by tweaking image transformation pipeline settings.
@@ -42,7 +44,15 @@ App uses .Net Core configuration, so you can:
 #### Detection
 * `CV:Detection:Threshold` - a rational value between 0 and 1 that defines sensor sensitivity. Bigger values makes detector less sensitive. Default is _0.1_
 * `CV:Detection:Algorithm` - background subtraction algorithm to use. Default is _CNT_.
-** `CNT` - CouNT subtraction algorithm. Please refere to the [docs](https://github.com/sagi-z/BackgroundSubtractorCNT) for more details.
+** `CNT` - CouNT subtraction algorithm created by [sagi-z](https://github.com/sagi-z). Has it's own site with lots of useful details: [https://sagi-z.github.io/BackgroundSubtractorCNT/](https://sagi-z.github.io/BackgroundSubtractorCNT/)
+##### Algorithms Settings : CNT
+These settings will be sent to CNT subtractor constructor each time a new instance is created (each time detector is getting reset).
+Author provided a pretty good explanation of the parameters of this algo, please check [documentation](https://sagi-z.github.io/BackgroundSubtractorCNT/doxygen/html/index.html).
+The following settings are currently supported:
+* `CV:Detection:CNT:MinPixelStability` - optional. Default is _15_
+* `CV:Detection:CNT:UseHistory` - optional. Default is _True_
+* `CV:Detection:CNT:MaxPixelStability` - optional. Default is _900_
+* `CV:Detection:CNT:IsParallel` - optional. Default is _True_
 #### MQTT
 Application uses MQTT.Net to build MQTT client. Please
 * `MQTT:ClientId` - the client identifier for MQTT client. Required. Does not have a default value

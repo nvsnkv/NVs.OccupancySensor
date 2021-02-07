@@ -30,7 +30,7 @@ namespace NVs.OccupancySensor.CV.Utils
                 Settings = s.GetService<IConfiguration>()?.GetDetectionSettings() ?? throw new InvalidOperationException("DecisionMaker configuration was not resolved")
             });
 
-            services.AddSingleton<IBackgroundSubtractorFactory>(s => new BackgroundSubtractorFactory());
+            services.AddSingleton<IBackgroundSubtractorFactory>(s => new BackgroundSubtractorFactory(s.GetService<IConfiguration>()?.GetCNTSubtractorSettings() ?? throw new InvalidOperationException("CNTSubtractor settings dependency was not resolved")));
             
             services.AddSingleton<IBackgroundSubtractionBasedDetector>(s => new BackgroundSubtractionBasedDetector(
                 s.GetService<IBackgroundSubtractorFactory>() ?? throw new InvalidOperationException("BackgroundSubtractorFactory dependency was not resolved"),

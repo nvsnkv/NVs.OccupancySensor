@@ -2,6 +2,7 @@
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using NVs.OccupancySensor.CV.Settings;
+using NVs.OccupancySensor.CV.Settings.Subtractors;
 
 namespace NVs.OccupancySensor.CV.Utils
 {
@@ -31,6 +32,19 @@ namespace NVs.OccupancySensor.CV.Utils
                 double.TryParse(threshold, out var result) ? result : DetectionSettings.Default.DetectionThreshold,
                 config.GetSection("CV:Detection")?["DataDir"] ?? DetectionSettings.Default.DataDir,
                 config.GetSection("CV:Detection")?["Algorithm"] ?? DetectionSettings.Default.Algorithm);
+        }
+
+        internal static CNTSubtractorSettings GetCNTSubtractorSettings([NotNull] this IConfiguration config)
+        {
+            if (config == null) throw new ArgumentNullException(nameof(config));
+            var section = config.GetSection("CV:Detection:CNT");
+
+            return new CNTSubtractorSettings(
+                int.TryParse(section?["MinPixelStability"], out var minPixelStability) ? minPixelStability : CNTSubtractorSettings.Default.MinPixelStability,
+                bool.TryParse(section?["UseHistory"], out var useHistory) ? useHistory : CNTSubtractorSettings.Default.UseHistory,
+                int.TryParse(section?["MaxPixelStability"], out var maxPixelStability) ? maxPixelStability : CNTSubtractorSettings.Default.MaxPixelStability,
+                bool.TryParse(section?["IsParallel"], out var isParallel) ? isParallel : CNTSubtractorSettings.Default.IsParallel
+                );
         }
     }
 }
