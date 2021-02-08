@@ -48,16 +48,16 @@ namespace NVs.OccupancySensor.CV.Utils
                 );
         }
 
-        internal static FastNlMeanDenoisingSettings GetFastNlMeanDenoisingSettings([NotNull] this IConfiguration config)
+        internal static FastNlMeansDenoisingSettings GetFastNlMeansDenoisingSettings([NotNull] this IConfiguration config)
         {
             if (config is null)  throw new ArgumentNullException(nameof(config));
-            var section = config.GetSection("CV:Denoising:FastNlMean");
+            var section = config.GetSection("CV:Denoising:FastNlMeans");
 
-            return new FastNlMeanDenoisingSettings(
-                float.TryParse(section?["H"], out var h) ? h : FastNlMeanDenoisingSettings.Default.H,
-                float.TryParse(section?["HColor"], out var hColor) ? hColor : FastNlMeanDenoisingSettings.Default.HColor,
-                int.TryParse(section?["TemplateWindowSize"], out var templateWindowSize) ? templateWindowSize : FastNlMeanDenoisingSettings.Default.TemplateWindowSize,
-                int.TryParse(section?["SearchWindowSize"], out var searchWindowSize) ? searchWindowSize : FastNlMeanDenoisingSettings.Default.SearchWindowSize
+            return new FastNlMeansDenoisingSettings(
+                float.TryParse(section?["H"], out var h) ? h : FastNlMeansDenoisingSettings.Default.H,
+                float.TryParse(section?["HColor"], out var hColor) ? hColor : FastNlMeansDenoisingSettings.Default.HColor,
+                int.TryParse(section?["TemplateWindowSize"], out var templateWindowSize) ? templateWindowSize : FastNlMeansDenoisingSettings.Default.TemplateWindowSize,
+                int.TryParse(section?["SearchWindowSize"], out var searchWindowSize) ? searchWindowSize : FastNlMeansDenoisingSettings.Default.SearchWindowSize
                 );
         }
 

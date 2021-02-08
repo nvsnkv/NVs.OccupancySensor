@@ -1,4 +1,4 @@
-namespace NVs.OccupancySensor.CV.Denoising
+namespace NVs.OccupancySensor.CV.Denoising.Denoisers
 {
     public interface IFastNlMeansDenoisingSettings
     {
