@@ -9,7 +9,7 @@ namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.Subtractors
 
         public BackgroundSubtractorFactory([NotNull] ICNTSubtractorSettings cntSubtractorSettings)
         {
-            CNTSubtractorSettings = cntSubtractorSettings ?? throw new ArgumentNullException(nameof(cntSubtractorSettings));
+            this.cntSubtractorSettings = cntSubtractorSettings ?? throw new ArgumentNullException(nameof(cntSubtractorSettings));
         }
 
         public IBackgroundSubtractor Create(string algorithm)
