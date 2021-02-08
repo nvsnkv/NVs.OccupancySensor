@@ -11,12 +11,11 @@ namespace NVs.OccupancySensor.CV.Tests
 {
     public sealed class ConfigurationExtensionsShould
     {
-        private readonly Mock<IConfiguration> configuration = new Mock<IConfiguration>();
-
         [Fact]
         public void CreateDefaultCameraSettingsIfCaptureSectionIsNotPresent()
         {
-            var settings = configuration.Object.GetCaptureSettings();
+            var config = new Mock<IConfiguration>();
+            var settings = config.Object.GetCaptureSettings();
             Assert.Equal(CaptureSettings.Default.FrameInterval, settings.FrameInterval);
             Assert.Equal(CaptureSettings.Default.Source, settings.Source);
         }
@@ -35,9 +34,10 @@ namespace NVs.OccupancySensor.CV.Tests
             section.SetupGet(s => s["Source"]).Returns(source);
             section.SetupGet(s => s["FrameInterval"]).Returns(frameInterval);
 
-            configuration.Setup(c => c.GetSection("CV:Capture")).Returns(section.Object);
+            var config = new Mock<IConfiguration>();
+            config.Setup(c => c.GetSection("CV:Capture")).Returns(section.Object);
             
-            var settings = configuration.Object.GetCaptureSettings();
+            var settings = config.Object.GetCaptureSettings();
 
             var expectedSource = source ?? CaptureSettings.Default.Source;
             if (!TimeSpan.TryParse(frameInterval, out var expectedFrameInterval))
@@ -172,7 +172,26 @@ namespace NVs.OccupancySensor.CV.Tests
             Assert.Equal(expectedHColor, actual.HColor);
             Assert.Equal(expectedSearchWindowSize, actual.SearchWindowSize);
             Assert.Equal(expectedTemplateWindowSize, actual.TemplateWindowSize);
-
         }
+
+        [Theory]
+        [InlineData(false, null)]
+        [InlineData(true, null)]
+        [InlineData(true, "")]
+        [InlineData(true, "None")]
+        [InlineData(true, "FastNlMeans")]
+        [InlineData(true, "banana")]
+        public void ReturnSettingsForDenoiser(bool sectionExists, string algorithm)
+        {
+            var section = new Mock<IConfigurationSection>();
+            section.Setup(s => s["Algorithm"]).Returns(algorithm);
+
+            var config = new Mock<IConfiguration>();
+            config.Setup(s => s.GetSection("CV:Denoising")).Returns(sectionExists ? section.Object : null);
+
+            var expectedAlgorithm = (sectionExists ? algorithm : null) ?? DenoisingSettings.Default.Algorithm;
+            Assert.Equal(expectedAlgorithm, config.Object.GetDenoisingSettings().Algorithm);
+        }
+
     }
 }

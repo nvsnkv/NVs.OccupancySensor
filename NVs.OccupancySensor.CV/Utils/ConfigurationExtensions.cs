@@ -60,5 +60,13 @@ namespace NVs.OccupancySensor.CV.Utils
                 int.TryParse(section?["SearchWindowSize"], out var searchWindowSize) ? searchWindowSize : FastNlMeanDenoisingSettings.Default.SearchWindowSize
                 );
         }
+
+        internal static DenoisingSettings GetDenoisingSettings([NotNull] this IConfiguration config)
+        {
+            if (config == null) throw new ArgumentNullException(nameof(config));
+            var section = config.GetSection("CV:Denoising");
+
+            return new DenoisingSettings(section?["Algorithm"] ?? DenoisingSettings.Default.Algorithm);
+        }
     }
 }
