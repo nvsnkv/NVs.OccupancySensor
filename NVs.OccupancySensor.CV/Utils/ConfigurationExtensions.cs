@@ -53,7 +53,12 @@ namespace NVs.OccupancySensor.CV.Utils
             if (config is null)  throw new ArgumentNullException(nameof(config));
             var section = config.GetSection("CV:Denoising:FastNlMean");
 
-            
+            return new FastNlMeanDenoisingSettings(
+                float.TryParse(section?["H"], out var h) ? h : FastNlMeanDenoisingSettings.Default.H,
+                float.TryParse(section?["HColor"], out var hColor) ? hColor : FastNlMeanDenoisingSettings.Default.HColor,
+                int.TryParse(section?["TemplateWindowSize"], out var templateWindowSize) ? templateWindowSize : FastNlMeanDenoisingSettings.Default.TemplateWindowSize,
+                int.TryParse(section?["SearchWindowSize"], out var searchWindowSize) ? searchWindowSize : FastNlMeanDenoisingSettings.Default.SearchWindowSize
+                );
         }
     }
 }

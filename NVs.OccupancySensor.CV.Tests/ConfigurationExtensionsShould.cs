@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Moq;
 using NVs.OccupancySensor.CV.Settings;
+using NVs.OccupancySensor.CV.Settings.Denoising;
 using NVs.OccupancySensor.CV.Settings.Subtractors;
 using NVs.OccupancySensor.CV.Utils;
 using Xunit;
@@ -141,6 +142,37 @@ namespace NVs.OccupancySensor.CV.Tests
             Assert.Equal(expectedMaxPixel, actual.MaxPixelStability);
             Assert.Equal(expectedUseHistory, actual.UseHistory);
             Assert.Equal(expectedIsParallel, actual.IsParallel);
+        }
+
+        [Theory]
+        [InlineData(false, null, null, null, null)]
+        [InlineData(true, null, null, null, null)]
+        [InlineData(true, "totally", "invalid", "configuration", "given")]
+        [InlineData(true, "5", "5", "9", "31")]
+        [InlineData(true, "0.1", "9.2", "9", "31")]
+        public void ReturnSettingsForFastNlMeansDenoiser(bool sectionExists, string h, string hColor, string templateWindowSize, string searchWindowSize)
+        {
+            var section = new Mock<IConfigurationSection>();
+            section.SetupGet(s => s["H"]).Returns(h);
+            section.SetupGet(s => s["HColor"]).Returns(hColor);
+            section.SetupGet(s => s["TemplateWindowSize"]).Returns(templateWindowSize);
+            section.SetupGet(s => s["SearchWindowSize"]).Returns(searchWindowSize);
+
+            var config = new Mock<IConfiguration>();
+            config.Setup(c => c.GetSection("CV:Denoising:FastNlMean")).Returns(sectionExists ? section.Object : null);
+
+            var expectedH = float.TryParse(h, out var th) ? th : FastNlMeanDenoisingSettings.Default.H;
+            var expectedHColor = float.TryParse(hColor, out var thColor) ? thColor : FastNlMeanDenoisingSettings.Default.HColor;
+            var expectedTemplateWindowSize = int.TryParse(templateWindowSize, out var ttemplateWindowSize) ? ttemplateWindowSize : FastNlMeanDenoisingSettings.Default.TemplateWindowSize;
+            var expectedSearchWindowSize = float.TryParse(searchWindowSize, out var tsearchWindowSize) ? tsearchWindowSize : FastNlMeanDenoisingSettings.Default.SearchWindowSize;
+
+            var actual = config.Object.GetFastNlMeanDenoisingSettings();
+
+            Assert.Equal(expectedH, actual.H);
+            Assert.Equal(expectedHColor, actual.HColor);
+            Assert.Equal(expectedSearchWindowSize, actual.SearchWindowSize);
+            Assert.Equal(expectedTemplateWindowSize, actual.TemplateWindowSize);
+
         }
     }
 }
