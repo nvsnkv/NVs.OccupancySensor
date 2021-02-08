@@ -46,7 +46,7 @@ App uses .Net Core configuration, so you can:
   * `None` - no denoising performed. The image captured from the camera goes directly to detection logic
   * `FastNlMeans` - ([fastNlMeansDenoisingColored](https://docs.opencv.org/4.5.1/d5/d69/tutorial_py_non_local_means.html) function used, documentation can be found [here](https://emgu.com/wiki/files/4.5.1/document/html/55cd7112-6814-99e7-76f4-ce3b8b8d0694.htm)).
 There are several algorithm options that may be adjusted:
-    * `CV:Denoising:FastNlMeans:H` - rational, optional. Default is _3_
+    * `CV:Denoising:FastNlMeans:H` - rational, optional. Default is _3_`
     * `CV:Denoising:FastNlMeans:HColor` - rational, optional. Default is _3_
     * `CV:Denoising:FastNlMeans:TemplateWindowSize` - odd integer, optional. Default is _7_
     * `CV:Denoising:FastNlMeans:SearchWindowSize` - odd integer, optional. Default is _21_

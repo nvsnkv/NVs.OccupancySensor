@@ -2,6 +2,7 @@
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using NVs.OccupancySensor.CV.Settings;
+using NVs.OccupancySensor.CV.Settings.Denoising;
 using NVs.OccupancySensor.CV.Settings.Subtractors;
 
 namespace NVs.OccupancySensor.CV.Utils
@@ -45,6 +46,14 @@ namespace NVs.OccupancySensor.CV.Utils
                 int.TryParse(section?["MaxPixelStability"], out var maxPixelStability) ? maxPixelStability : CNTSubtractorSettings.Default.MaxPixelStability,
                 bool.TryParse(section?["IsParallel"], out var isParallel) ? isParallel : CNTSubtractorSettings.Default.IsParallel
                 );
+        }
+
+        internal static FastNlMeanDenoisingSettings GetFastNlMeanDenoisingSettings([NotNull] this IConfiguration config)
+        {
+            if (config is null)  throw new ArgumentNullException(nameof(config));
+            var section = config.GetSection("CV:Denoising:FastNlMean");
+
+            
         }
     }
 }

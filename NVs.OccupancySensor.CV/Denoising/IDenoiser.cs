@@ -7,6 +7,6 @@ namespace NVs.OccupancySensor.CV.Denoising
     {
         Image<Rgb, byte> Denoise(Image<Rgb, byte> source);
 
-        IDenoisingSettings Settings { get; set; }
+        IFastNlMeansDenoisingSettings Settings { get; set; }
     }
 }
