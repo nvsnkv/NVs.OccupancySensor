@@ -11,6 +11,7 @@ using NVs.OccupancySensor.API.ActionResults;
 using NVs.OccupancySensor.CV.Capture;
 using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction;
 using NVs.OccupancySensor.CV.Observation;
+using NVs.OccupancySensor.CV.Utils;
 
 
 namespace NVs.OccupancySensor.API.Controllers
@@ -74,13 +75,7 @@ namespace NVs.OccupancySensor.API.Controllers
                 return NoContent();
             }
 
-            PropertyChangedEventHandler handler = null;
-            var stream = Observable.FromEventPattern<PropertyChangedEventArgs>(
-                    h => detector.PropertyChanged += handler = (o, e) => h(o, e),
-                    h => detector.PropertyChanged -= handler
-                ).Where(s => nameof(detector.Mask).Equals(s.EventArgs.PropertyName))
-                .Select(s => detector.Mask);
-
+            var stream = detector.ToObservable(nameof(detector.Mask), () => detector.Mask);
             return GetMjpegGrayStreamContent(stream);
         }
 
