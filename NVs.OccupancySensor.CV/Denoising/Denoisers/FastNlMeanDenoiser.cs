@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 
 namespace NVs.OccupancySensor.CV.Denoising.Denoisers
 {
-    internal sealed class FastNlMeansDenoiser : IDenoiser
+    internal sealed class FastNlMeansDenoiser : IDenoisingStrategy
     {
         private readonly IFastNlMeansDenoisingSettings settings;
 

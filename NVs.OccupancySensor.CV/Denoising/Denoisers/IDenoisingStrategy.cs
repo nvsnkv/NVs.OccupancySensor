@@ -3,7 +3,7 @@ using Emgu.CV.Structure;
 
 namespace NVs.OccupancySensor.CV.Denoising.Denoisers
 {
-    public interface IDenoiser
+    public interface IDenoisingStrategy
     {
         Image<Rgb, byte> Denoise(Image<Rgb, byte> source);
     }

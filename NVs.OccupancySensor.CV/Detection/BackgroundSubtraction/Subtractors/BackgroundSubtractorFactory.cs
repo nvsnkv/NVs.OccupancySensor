@@ -12,7 +12,7 @@ namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.Subtractors
             this.cntSubtractorSettings = cntSubtractorSettings ?? throw new ArgumentNullException(nameof(cntSubtractorSettings));
         }
 
-        public IBackgroundSubtractor Create(string algorithm)
+        public ISubtractionStrategy Create(string algorithm)
         {
             if (Enum.TryParse(algorithm, out SupportedAlgorithms supportedAlgorithm))
             {

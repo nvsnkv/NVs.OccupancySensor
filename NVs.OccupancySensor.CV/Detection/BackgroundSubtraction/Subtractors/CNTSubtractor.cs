@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 
 namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.Subtractors
 {
-    internal sealed class CNTSubtractor : IBackgroundSubtractor
+    internal sealed class CNTSubtractor : ISubtractionStrategy
     {
         private readonly BackgroundSubtractorCNT subtractor;
 

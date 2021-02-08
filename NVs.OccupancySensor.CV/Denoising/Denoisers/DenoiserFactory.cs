@@ -9,7 +9,7 @@ namespace NVs.OccupancySensor.CV.Denoising.Denoisers
 
         public DenoiserFactory(IFastNlMeansDenoisingSettings fastNlMeansDenoisingSettings) => this.fastNlMeansDenoisingSettings = fastNlMeansDenoisingSettings ?? throw new ArgumentNullException(nameof(fastNlMeansDenoisingSettings));
 
-        public IDenoiser Create([NotNull] string algorithm)
+        public IDenoisingStrategy Create([NotNull] string algorithm)
         {
             if (algorithm == null) throw new ArgumentNullException(nameof(algorithm));
             if (Enum.TryParse(algorithm, out SupportedAlgorithms supportedAlgorithm))

@@ -18,7 +18,7 @@ namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
         private readonly ILogger<BackgroundSubtractionBasedDetector> logger;
         private readonly IDecisionMaker decisionMaker;
 
-        private volatile IBackgroundSubtractor subtractor;
+        private volatile ISubtractionStrategy subtractor;
 
         private bool? peopleDetected;
         private Image<Gray, byte> mask;

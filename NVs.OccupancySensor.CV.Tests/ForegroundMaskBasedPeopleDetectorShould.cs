@@ -12,7 +12,6 @@ using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.DecisionMaking;
 using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.Subtractors;
 using NVs.OccupancySensor.CV.Settings;
 using Xunit;
-using IBackgroundSubtractor = NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.IBackgroundSubtractor;
 
 namespace NVs.OccupancySensor.CV.Tests
 {
@@ -21,7 +20,7 @@ namespace NVs.OccupancySensor.CV.Tests
     {
         private readonly Mock<IDecisionMaker> decisionMaker = new Mock<IDecisionMaker>();
         private readonly Mock<ILogger<BackgroundSubtractionBasedDetector>> logger = new Mock<ILogger<BackgroundSubtractionBasedDetector>>();
-        private readonly Mock<IBackgroundSubtractor> subtractor = new Mock<IBackgroundSubtractor>();
+        private readonly Mock<ISubtractionStrategy> subtractor = new Mock<ISubtractionStrategy>();
         private readonly Mock<IBackgroundSubtractorFactory> factory = new Mock<IBackgroundSubtractorFactory>();
 
         public BackgroundSubtractionBasedDetectorShould()

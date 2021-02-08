@@ -2,6 +2,6 @@
 {
     public interface IBackgroundSubtractorFactory
     {
-        IBackgroundSubtractor Create(string algorithm);
+        ISubtractionStrategy Create(string algorithm);
     }
 }
