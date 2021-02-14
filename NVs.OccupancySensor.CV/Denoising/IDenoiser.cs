@@ -7,7 +7,7 @@ namespace NVs.OccupancySensor.CV.Denoising
 {
     public interface IDenoiser : IObserver<Image<Rgb,byte>>, INotifyPropertyChanged
     {
-        Image<Rgb, byte> Output { get; }
+        IObservable<Image<Rgb, byte>> Output { get; }
 
         IDenoisingSettings Settings { get; set; }
 
