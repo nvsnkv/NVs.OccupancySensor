@@ -32,10 +32,33 @@ namespace NVs.OccupancySensor.CV.Tests
             {
                 denoiser.Process(inputImage);
                 await Task.Delay(TimeSpan.FromMilliseconds(100));
+                denoiser.Process(inputImage);
+                await Task.Delay(TimeSpan.FromMilliseconds(100));
             }
 
-            Assert.Equal(1, observer.ReceivedItems.Count);
+            Assert.Equal(2, observer.ReceivedItems.Count);
             Assert.Equal(expectedImage, observer.ReceivedItems.Keys.First());
+            Assert.Equal(expectedImage, observer.ReceivedItems.Keys.Skip(1).First());
+        }
+
+        [Fact]
+        public async Task NotProvideDataForObserversAfterCompletion()
+        {
+            var inputImage = new Image<Rgb, byte>(1, 1);
+            var expectedImage = new Image<Rgb, byte>(10, 10);
+            strategy.Setup(s => s.Denoise(inputImage)).Returns(expectedImage);
+
+            var denoiser = new DenoisingStream(strategy.Object, CancellationToken.None, logger.Object);
+            var observer = new TestImageObserver();
+
+            using (denoiser.Subscribe(observer))
+            {
+                denoiser.Complete();
+                denoiser.Process(inputImage);
+                await Task.Delay(TimeSpan.FromMilliseconds(100));
+            }
+
+            Assert.Empty(observer.ReceivedItems);
         }
 
         [Fact]
@@ -61,7 +84,7 @@ namespace NVs.OccupancySensor.CV.Tests
                 await Task.Delay(TimeSpan.FromMilliseconds(1300));
             }
 
-            Assert.Equal(1, observer.ReceivedItems.Count);
+            Assert.Single(observer.ReceivedItems);
         }
 
         [Fact]
@@ -80,7 +103,7 @@ namespace NVs.OccupancySensor.CV.Tests
         }
 
         [Fact]
-        public async Task CompleteStreamIfErrorOccured()
+        public async Task CompleteStreamIfErrorOccurred()
         {
             var inputImage = new Image<Rgb, byte>(1, 1);
             strategy.Setup(s => s.Denoise(inputImage)).Throws<TestException>();
@@ -95,6 +118,22 @@ namespace NVs.OccupancySensor.CV.Tests
 
             Assert.IsType<TestException>(observer.Error);
             Assert.True(observer.StreamCompleted);
+        }
+
+        [Fact]
+        public void BeNotCompletedByDefault()
+        {
+            var denoiser = new DenoisingStream(strategy.Object, CancellationToken.None, logger.Object);
+            Assert.False(denoiser.Completed);
+        }
+
+        [Fact]
+        public void BeCompletedAfterCompletion()
+        {
+            var denoiser = new DenoisingStream(strategy.Object, CancellationToken.None, logger.Object);
+            denoiser.Complete();
+
+            Assert.True(denoiser.Completed);
         }
     }
 }

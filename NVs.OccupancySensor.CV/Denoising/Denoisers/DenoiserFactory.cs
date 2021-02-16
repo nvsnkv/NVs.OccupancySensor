@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace NVs.OccupancySensor.CV.Denoising.Denoisers
 {
-    internal sealed class DenoiserFactory
+    internal sealed class DenoiserFactory : IDenoiserFactory
     {
         [NotNull] private IFastNlMeansDenoisingSettings fastNlMeansDenoisingSettings;
 

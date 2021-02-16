@@ -4,6 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.Capture;
+using NVs.OccupancySensor.CV.Denoising;
+using NVs.OccupancySensor.CV.Denoising.Denoisers;
 using NVs.OccupancySensor.CV.Detection;
 using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction;
 using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.DecisionMaking;
@@ -25,6 +27,13 @@ namespace NVs.OccupancySensor.CV.Utils
                     s.GetService<IConfiguration>()?.GetCaptureSettings() ?? throw new InvalidOperationException("CaptureSettings were not resolved"),
                     Camera.CreateVideoCapture));
 
+            services.AddSingleton<IDenoiserFactory>(s => new DenoiserFactory(s.GetService<IConfiguration>()?.GetFastNlMeansDenoisingSettings() ?? throw new InvalidOperationException("FastNlMeansDenoising settings dependency was not resolved")));
+
+            services.AddSingleton<IDenoiser>(s => new Denoiser(
+                s.GetService<IDenoiserFactory>() ?? throw new InvalidOperationException("DenoiserFactory dependency was not resolved"), 
+                s.GetService<IConfiguration>()?.GetDenoisingSettings() ?? throw new InvalidOperationException("Denoising settings dependency was not resolved"),
+                s.GetService<ILogger<Denoiser>>() ?? throw new InvalidOperationException("Denoiser logger dependency was not resolved")));
+            
             services.AddSingleton<IDecisionMaker>(s => new DecisionMaker(s.GetService<ILogger<DecisionMaker>>() ?? throw new InvalidOperationException("DecisionMaker logger dependency was not resolved"))
             {
                 Settings = s.GetService<IConfiguration>()?.GetDetectionSettings() ?? throw new InvalidOperationException("DecisionMaker configuration was not resolved")

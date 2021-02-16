@@ -19,6 +19,8 @@ namespace NVs.OccupancySensor.CV.Denoising
             this.strategy = strategy ?? throw new ArgumentNullException(nameof(strategy));
         }
 
+        public bool Completed { get; private set; }
+
         public void Process(Image<Rgb, byte> image)
         {
             if (image is null)
@@ -36,16 +38,26 @@ namespace NVs.OccupancySensor.CV.Denoising
             Image<Rgb, byte> denoised;
             try
             {
+                if (Completed)
+                {
+                    logger.LogWarning("Denoising stream was completed, frame will be dropped!");
+                    return;
+                }
+
                 denoised = strategy.Denoise(image);
                 logger.LogInformation("Noise reduction strategy applied!");
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 logger.LogError(e, "Failed to apply denoising strategy!");
                 Notify(o => o.OnError(e));
                 Notify(o => o.OnCompleted());
 
                 return;
+            }
+            finally
+            {
+                processingLock.Release();
             }
 
             Notify(o => o.OnNext(denoised));
@@ -54,6 +66,12 @@ namespace NVs.OccupancySensor.CV.Denoising
         public void Complete()
         {
             Notify(o => o.OnCompleted());
+            Completed = true;
+        }
+
+        public void Error(Exception error)
+        {
+            Notify(o => o.OnError(error));
         }
     }
 }
