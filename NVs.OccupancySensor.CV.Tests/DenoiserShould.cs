@@ -61,7 +61,6 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var denoiser = new Denoiser(factory.Object, new DenoisingSettings(SupportedAlgorithms.None.ToString()), logger.Object);
             var observer = new TestImageObserver();
-            var expectedImage = new Image<Rgb, byte>(10, 5);
             
             using (denoiser.Output.Subscribe(observer))
             {
@@ -70,6 +69,22 @@ namespace NVs.OccupancySensor.CV.Tests
             }
 
             Assert.IsType<TestException>(observer.Error);
+        }
+
+        [Fact]
+        public async Task CompleteStreamOnReset()
+        {
+            var denoiser = new Denoiser(factory.Object, new DenoisingSettings(SupportedAlgorithms.None.ToString()), logger.Object);
+            var observer = new TestImageObserver();
+
+            using (denoiser.Output.Subscribe(observer))
+            {
+                await Task.Run(() => denoiser.Reset());
+                await Task.Delay(TimeSpan.FromMilliseconds(100));
+            }
+
+            Assert.True(observer.StreamCompleted);
+
         }
     }
 }
