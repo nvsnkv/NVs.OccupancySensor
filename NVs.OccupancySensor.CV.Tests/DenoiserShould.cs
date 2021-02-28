@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
 using Emgu.CV;
@@ -18,8 +19,13 @@ namespace NVs.OccupancySensor.CV.Tests
         private readonly Mock<ILogger<Denoiser>> logger = new Mock<ILogger<Denoiser>>();
         private readonly Mock<IDenoiserFactory> factory = new Mock<IDenoiserFactory>();
 
+        public DenoiserShould()
+        {
+            factory.Setup(f => f.Create(SupportedAlgorithms.None.ToString())).Returns(new BypassDenoiser());
+        }
+
         [Fact]
-        public async Task BypassImageIfNoDenoisingReuqesed()
+        public async Task BypassImageIfNoDenoisingRequested()
         {
             var denoiser = new Denoiser(factory.Object, new DenoisingSettings(SupportedAlgorithms.None.ToString()), logger.Object);
             var observer = new TestImageObserver();
@@ -28,6 +34,7 @@ namespace NVs.OccupancySensor.CV.Tests
             using (denoiser.Output.Subscribe(observer))
             {
                 await Task.Run(() => denoiser.OnNext(expectedImage));
+                await Task.Delay(TimeSpan.FromMilliseconds(100));
             }
 
             Assert.Equal(expectedImage, observer.ReceivedItems.Keys.First());
@@ -43,6 +50,7 @@ namespace NVs.OccupancySensor.CV.Tests
             using (denoiser.Output.Subscribe(observer))
             {
                 await Task.Run(() => denoiser.OnCompleted());
+                await Task.Delay(TimeSpan.FromMilliseconds(100));
             }
 
             Assert.True(observer.StreamCompleted);
@@ -58,6 +66,7 @@ namespace NVs.OccupancySensor.CV.Tests
             using (denoiser.Output.Subscribe(observer))
             {
                 await Task.Run(() => denoiser.OnError(new TestException()));
+                await Task.Delay(TimeSpan.FromMilliseconds(100));
             }
 
             Assert.IsType<TestException>(observer.Error);
