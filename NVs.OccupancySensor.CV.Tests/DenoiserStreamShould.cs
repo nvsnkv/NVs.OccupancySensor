@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,8 +23,15 @@ namespace NVs.OccupancySensor.CV.Tests
         public async Task ProvideDataForObservers()
         {
             var inputImage = new Image<Rgb, byte>(1, 1);
-            var expectedImage = new Image<Rgb, byte>(10, 10);
-            strategy.Setup(s => s.Denoise(inputImage)).Returns(expectedImage);
+            var expectedImages = new List<Image<Rgb, byte>>();
+            var i = 0;
+
+            strategy.Setup(s => s.Denoise(inputImage)).Returns(() =>
+            {
+                var value = new Image<Rgb, byte>(++i, 1);
+                expectedImages.Add(value);
+                return value;
+            });
 
             var denoiser = new DenoisingStream(strategy.Object, CancellationToken.None, logger.Object);
             var observer = new TestImageObserver();
@@ -37,8 +45,8 @@ namespace NVs.OccupancySensor.CV.Tests
             }
 
             Assert.Equal(2, observer.ReceivedItems.Count);
-            Assert.Equal(expectedImage, observer.ReceivedItems.Keys.First());
-            Assert.Equal(expectedImage, observer.ReceivedItems.Keys.Skip(1).First());
+            Assert.Equal(expectedImages[0], observer.ReceivedItems.Keys.First());
+            Assert.Equal(expectedImages[1], observer.ReceivedItems.Keys.Skip(1).First());
         }
 
         [Fact]
