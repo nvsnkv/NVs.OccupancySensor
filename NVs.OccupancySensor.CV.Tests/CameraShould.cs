@@ -13,16 +13,42 @@ using Xunit;
 
 namespace NVs.OccupancySensor.CV.Tests
 {
+    [Collection("Run Exclusively")]
+    public sealed class CameraShouldExclusively
+    {
+        private readonly Mock<ILogger<Camera>> cameraLogger = new Mock<ILogger<Camera>>();
+        private readonly Mock<ILogger<CameraStream>> streamLogger = new Mock<ILogger<CameraStream>>();
+        
+        [Fact]
+        //TODO: redesign blinking test
+        public async Task UseProvidedSettingsToSetFrameInterval()
+        {
+            var settings = new CaptureSettings("Some source", TimeSpan.FromMilliseconds(50));
+
+            var captureMock = new Mock<VideoCapture>(MockBehavior.Default, 0, VideoCapture.API.Any);
+            captureMock.Setup(c => c.QueryFrame()).Returns(() => new Image<Rgb, byte>(100,100).Mat);
+
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, CaptureSettings.Default, _ => captureMock.Object);
+            var observer = new TestImageObserver();
+
+            camera.Settings = settings;
+
+            camera.Start();
+            using (camera.Stream.Subscribe(observer))
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(500));
+                camera.Stop();
+            }
+            
+            Assert.True(11 >= observer.ReceivedItems.Count);
+            Assert.True(9 <= observer.ReceivedItems.Count);
+        }
+    }
+
     public sealed class CameraShould
     {
-        private readonly Mock<ILogger<Camera>> cameraLogger;
-        private readonly Mock<ILogger<CameraStream>> streamLogger;
-
-        public CameraShould()
-        {
-            cameraLogger = new Mock<ILogger<Camera>>();
-            streamLogger = new Mock<ILogger<CameraStream>>();
-        }
+        private readonly Mock<ILogger<Camera>> cameraLogger = new Mock<ILogger<Camera>>();
+        private readonly Mock<ILogger<CameraStream>> streamLogger = new Mock<ILogger<CameraStream>>();
 
         [Fact]
         public void NotifyWhenItWasStarted()
@@ -190,31 +216,6 @@ namespace NVs.OccupancySensor.CV.Tests
             
             camera.Start();
             Assert.Equal(expectedSettings, capturedSettings);
-        }
-
-        [Fact]
-        //TODO: redesign blinking test
-        public async Task UseProvidedSettingsToSetFrameInterval()
-        {
-            var settings = new CaptureSettings("Some source", TimeSpan.FromMilliseconds(50));
-
-            var captureMock = new Mock<VideoCapture>(MockBehavior.Default, 0, VideoCapture.API.Any);
-            captureMock.Setup(c => c.QueryFrame()).Returns(() => new Image<Rgb, byte>(100,100).Mat);
-
-            var camera = new Camera(cameraLogger.Object, streamLogger.Object, CaptureSettings.Default, _ => captureMock.Object);
-            var observer = new TestImageObserver();
-
-            camera.Settings = settings;
-
-            camera.Start();
-            using (camera.Stream.Subscribe(observer))
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(500));
-                camera.Stop();
-            }
-            
-            Assert.True(11 >= observer.ReceivedItems.Count);
-            Assert.True(9 <= observer.ReceivedItems.Count);
         }
     }
 }

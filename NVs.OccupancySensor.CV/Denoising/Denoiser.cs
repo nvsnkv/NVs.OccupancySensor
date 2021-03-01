@@ -107,6 +107,7 @@ namespace NVs.OccupancySensor.CV.Denoising
             }
 
             expectedStream.Complete();
+            OnPropertyChanged(nameof(Output));
         }
 
         [NotifyPropertyChangedInvocator]

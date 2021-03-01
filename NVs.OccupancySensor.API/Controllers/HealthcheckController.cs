@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Text;
 using Emgu.CV;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -19,8 +20,12 @@ namespace NVs.OccupancySensor.API.Controllers
         private readonly IOccupancySensor sensor;
         private readonly IMqttAdapter adapter;
 
-        public HealthcheckController(ILogger<HealthcheckController> logger, IConfiguration configuration, IOccupancySensor sensor, IMqttAdapter adapter)
+        public HealthcheckController([NotNull] ILogger<HealthcheckController> logger, [NotNull] IConfiguration configuration, [NotNull] IOccupancySensor sensor, [NotNull] IMqttAdapter adapter)
         {
+            if (logger == null) throw new ArgumentNullException(nameof(logger));
+            if (configuration == null) throw new ArgumentNullException(nameof(configuration));
+            if (sensor == null) throw new ArgumentNullException(nameof(sensor));
+            if (adapter == null) throw new ArgumentNullException(nameof(adapter));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             this.sensor = sensor ?? throw new ArgumentNullException(nameof(sensor));

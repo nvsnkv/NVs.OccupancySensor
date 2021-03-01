@@ -53,6 +53,7 @@ namespace NVs.OccupancySensor.CV.Utils
             services.AddSingleton<IOccupancySensor>(
                 s => new Sense.OccupancySensor(
                     s.GetService<ICamera>() ?? throw new InvalidOperationException("Camera dependency was not resolved"),
+                    s.GetService<IDenoiser>() ?? throw new InvalidOperationException("Denoiser dependency was not resolved"),
                     s.GetService<IPeopleDetector>() ?? throw new InvalidOperationException("PeopleDetector dependency was not resolved"),
                     s.GetService<ILogger<Sense.OccupancySensor>>() ?? throw new InvalidOperationException("OccupancySensor logger dependency was not resolved")));
 

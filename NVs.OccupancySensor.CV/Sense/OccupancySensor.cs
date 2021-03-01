@@ -13,13 +13,15 @@ namespace NVs.OccupancySensor.CV.Sense
     internal sealed class OccupancySensor : IOccupancySensor, IDisposable
     {
         private readonly ICamera camera;
+        private readonly IDenoiser denoiser;
         private readonly IPeopleDetector detector;
         private readonly ILogger<OccupancySensor> logger;
         
-        private IDisposable subscription;
+        private IDisposable cameraSubscription;
+        private IDisposable denoiserSubscription;
         private bool isDisposed;
 
-        public OccupancySensor([NotNull] ICamera camera, [NotNull] IPeopleDetector detector, [NotNull] ILogger<OccupancySensor> logger)
+        public OccupancySensor([NotNull] ICamera camera, [NotNull] IDenoiser denoiser, [NotNull] IPeopleDetector detector, [NotNull] ILogger<OccupancySensor> logger)
         {
             this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
             this.camera.PropertyChanged += OnCameraPropertyChanged;
@@ -28,6 +30,7 @@ namespace NVs.OccupancySensor.CV.Sense
             this.detector.PropertyChanged += OnDetectorPropertyChanged;
 
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.denoiser = denoiser ?? throw new ArgumentNullException(nameof(denoiser));
         }
 
         public bool? PresenceDetected => detector.PeopleDetected;
@@ -72,12 +75,16 @@ namespace NVs.OccupancySensor.CV.Sense
                     OnPropertyChanged(nameof(IsRunning));
                     if (camera.IsRunning)
                     {
-                        subscription = camera.Stream.Subscribe(detector);
+                        cameraSubscription = camera.Stream.Subscribe(denoiser);
+                        denoiserSubscription = denoiser.Output.Subscribe(detector);
                     }
                     else
                     {
-                        subscription?.Dispose();
+                        cameraSubscription?.Dispose();
+                        denoiserSubscription?.Dispose();
+
                         detector.Reset();
+                        denoiser.Reset();
                     }
                     break;
             }
@@ -106,7 +113,9 @@ namespace NVs.OccupancySensor.CV.Sense
             {
                 if (disposing)
                 {
-                    subscription?.Dispose();
+                    cameraSubscription?.Dispose();
+                    denoiserSubscription?.Dispose();
+
                     camera.PropertyChanged -= OnCameraPropertyChanged;
                     detector.PropertyChanged -= OnDetectorPropertyChanged;
                 }

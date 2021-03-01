@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.API.ActionResults;
 using NVs.OccupancySensor.CV.Capture;
+using NVs.OccupancySensor.CV.Denoising;
 using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction;
 using NVs.OccupancySensor.CV.Observation;
 using NVs.OccupancySensor.CV.Utils;
@@ -21,15 +22,17 @@ namespace NVs.OccupancySensor.API.Controllers
     public sealed class CaptureController : ControllerBase
     {
         private readonly ICamera camera;
+        [NotNull] private readonly IDenoiser denoiser;
         private readonly IBackgroundSubtractionBasedDetector detector;
         private readonly IImageObserver<Rgb> rgbObserver;
         private readonly IImageObserver<Gray> grayObserver;
 
         private readonly ILogger<CaptureController> logger;
         
-        public CaptureController([NotNull] ICamera camera, [NotNull] IBackgroundSubtractionBasedDetector detector, [NotNull] IImageObserver<Rgb> rgbObserver, [NotNull] IImageObserver<Gray> grayObserver, [NotNull] ILogger<CaptureController> logger)
+        public CaptureController([NotNull] ICamera camera, [NotNull] IDenoiser denoiser, [NotNull] IBackgroundSubtractionBasedDetector detector, [NotNull] IImageObserver<Rgb> rgbObserver, [NotNull] IImageObserver<Gray> grayObserver, [NotNull] ILogger<CaptureController> logger)
         {
             this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
+            this.denoiser = denoiser ?? throw new ArgumentNullException(nameof(denoiser));
             this.detector = detector ?? throw new ArgumentNullException(nameof(detector));
             this.rgbObserver = rgbObserver ?? throw new ArgumentNullException(nameof(rgbObserver));
             this.grayObserver = grayObserver ?? throw new ArgumentNullException(nameof(grayObserver));
@@ -61,6 +64,34 @@ namespace NVs.OccupancySensor.API.Controllers
             logger.LogDebug("GetRawStream called");
 
             var stream = camera.Stream;
+            return GetMjpegRgbStreamContent(stream);
+        }
+
+        [HttpGet]
+        [Produces("image/jpeg")]
+        [Route("frame-denoised.jpg")]
+        public async Task<Image<Rgb,byte>> GetDenoisedFrame()
+        {
+            logger.LogDebug("GetDenoisedFrame called");
+
+            if (!camera.IsRunning)
+            {
+                return null;
+            }
+            
+            using (denoiser.Output.Subscribe(rgbObserver))
+            {
+                return await rgbObserver.GetImage();
+            }
+        }
+
+        [HttpGet]
+        [Route("stream-denoised.mjpeg")]
+        public IActionResult GetDenoisedStream()
+        {
+            logger.LogDebug("GetDenoisedStream called");
+
+            var stream = denoiser.Output;
             return GetMjpegRgbStreamContent(stream);
         }
         
