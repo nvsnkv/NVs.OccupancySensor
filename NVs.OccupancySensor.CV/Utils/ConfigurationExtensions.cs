@@ -2,6 +2,8 @@
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using NVs.OccupancySensor.CV.Settings;
+using NVs.OccupancySensor.CV.Settings.Denoising;
+using NVs.OccupancySensor.CV.Settings.Subtractors;
 
 namespace NVs.OccupancySensor.CV.Utils
 {
@@ -22,50 +24,49 @@ namespace NVs.OccupancySensor.CV.Utils
             return cameraSettings;
         }
 
-        internal static double GetDetectorThreshold([NotNull] this IConfiguration config)
+        internal static DetectionSettings GetDetectionSettings([NotNull] this IConfiguration config)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             var threshold = config.GetSection("CV:Detection")?["Threshold"] ?? string.Empty;
 
-            return double.TryParse(threshold, out var result)
-                ? result
-                : DetectionSettings.Default.Threshold;
+            return new DetectionSettings(
+                double.TryParse(threshold, out var result) ? result : DetectionSettings.Default.DetectionThreshold,
+                config.GetSection("CV:Detection")?["DataDir"] ?? DetectionSettings.Default.DataDir,
+                config.GetSection("CV:Detection")?["Algorithm"] ?? DetectionSettings.Default.Algorithm);
         }
 
-        internal static string GetAlgorithmsDir([NotNull] this IConfiguration config)
+        internal static CNTSubtractorSettings GetCNTSubtractorSettings([NotNull] this IConfiguration config)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
-            return config.GetSection("CV:Detection")?["AlgorithmsDir"] ?? DetectionSettings.Default.AlgorithmsDir;
+            var section = config.GetSection("CV:Detection:CNT");
 
-
+            return new CNTSubtractorSettings(
+                int.TryParse(section?["MinPixelStability"], out var minPixelStability) ? minPixelStability : CNTSubtractorSettings.Default.MinPixelStability,
+                bool.TryParse(section?["UseHistory"], out var useHistory) ? useHistory : CNTSubtractorSettings.Default.UseHistory,
+                int.TryParse(section?["MaxPixelStability"], out var maxPixelStability) ? maxPixelStability : CNTSubtractorSettings.Default.MaxPixelStability,
+                bool.TryParse(section?["IsParallel"], out var isParallel) ? isParallel : CNTSubtractorSettings.Default.IsParallel
+                );
         }
 
-        internal static TransformSettings GetTransformSettings([NotNull] this IConfiguration config)
+        internal static FastNlMeansDenoisingSettings GetFastNlMeansDenoisingSettings([NotNull] this IConfiguration config)
+        {
+            if (config is null)  throw new ArgumentNullException(nameof(config));
+            var section = config.GetSection("CV:Denoising:FastNlMeans");
+
+            return new FastNlMeansDenoisingSettings(
+                float.TryParse(section?["H"], out var h) ? h : FastNlMeansDenoisingSettings.Default.H,
+                float.TryParse(section?["HColor"], out var hColor) ? hColor : FastNlMeansDenoisingSettings.Default.HColor,
+                int.TryParse(section?["TemplateWindowSize"], out var templateWindowSize) ? templateWindowSize : FastNlMeansDenoisingSettings.Default.TemplateWindowSize,
+                int.TryParse(section?["SearchWindowSize"], out var searchWindowSize) ? searchWindowSize : FastNlMeansDenoisingSettings.Default.SearchWindowSize
+                );
+        }
+
+        internal static DenoisingSettings GetDenoisingSettings([NotNull] this IConfiguration config)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
-            var section = config.GetSection("CV:Transform");
-            
-            if (section == null)
-            {
-                return TransformSettings.Default;
-            }
-            
-            if (!double.TryParse(section["ResizeFactor"], out var rF))
-            {
-                rF = TransformSettings.Default.ResizeFactor;
-            }
+            var section = config.GetSection("CV:Denoising");
 
-            if (!int.TryParse(section["InputBlurKernelSize"], out var iK))
-            {
-                iK = TransformSettings.Default.InputBlurKernelSize;
-            }
-            
-            if (!int.TryParse(section["OutputBlurKernelSize"], out var oK))
-            {
-                oK = TransformSettings.Default.OutputBlurKernelSize;
-            }
-
-            return new TransformSettings(rF, iK, oK);
+            return new DenoisingSettings(section?["Algorithm"] ?? DenoisingSettings.Default.Algorithm);
         }
     }
 }

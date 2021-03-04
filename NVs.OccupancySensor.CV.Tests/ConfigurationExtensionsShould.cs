@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using Moq;
 using NVs.OccupancySensor.CV.Settings;
+using NVs.OccupancySensor.CV.Settings.Denoising;
+using NVs.OccupancySensor.CV.Settings.Subtractors;
 using NVs.OccupancySensor.CV.Utils;
 using Xunit;
 
@@ -9,12 +11,11 @@ namespace NVs.OccupancySensor.CV.Tests
 {
     public sealed class ConfigurationExtensionsShould
     {
-        private readonly Mock<IConfiguration> configuration = new Mock<IConfiguration>();
-
         [Fact]
         public void CreateDefaultCameraSettingsIfCaptureSectionIsNotPresent()
         {
-            var settings = configuration.Object.GetCaptureSettings();
+            var config = new Mock<IConfiguration>();
+            var settings = config.Object.GetCaptureSettings();
             Assert.Equal(CaptureSettings.Default.FrameInterval, settings.FrameInterval);
             Assert.Equal(CaptureSettings.Default.Source, settings.Source);
         }
@@ -33,9 +34,10 @@ namespace NVs.OccupancySensor.CV.Tests
             section.SetupGet(s => s["Source"]).Returns(source);
             section.SetupGet(s => s["FrameInterval"]).Returns(frameInterval);
 
-            configuration.Setup(c => c.GetSection("CV:Capture")).Returns(section.Object);
+            var config = new Mock<IConfiguration>();
+            config.Setup(c => c.GetSection("CV:Capture")).Returns(section.Object);
             
-            var settings = configuration.Object.GetCaptureSettings();
+            var settings = config.Object.GetCaptureSettings();
 
             var expectedSource = source ?? CaptureSettings.Default.Source;
             if (!TimeSpan.TryParse(frameInterval, out var expectedFrameInterval))
@@ -60,64 +62,136 @@ namespace NVs.OccupancySensor.CV.Tests
 
             if(!double.TryParse(threshold, out var expectedThreshold)) 
             {
-                expectedThreshold = DetectionSettings.Default.Threshold;
+                expectedThreshold = DetectionSettings.Default.DetectionThreshold;
             }
             
-            var actual = config.Object.GetDetectorThreshold();
+            var actual = config.Object.GetDetectionSettings().DetectionThreshold;
             Assert.Equal(expectedThreshold, actual);
         }
 
         [Fact]
         public void ReturnDefaultDetectionThresholdIfNoDetectionSectionExist() 
         {
-            Assert.Equal(DetectionSettings.Default.Threshold, new Mock<IConfiguration>().Object.GetDetectorThreshold());
+            Assert.Equal(DetectionSettings.Default.DetectionThreshold, new Mock<IConfiguration>().Object.GetDetectionSettings().DetectionThreshold);
         }
 
         [Fact]
-        public void ReturnDefaultTransformSettingsIfNoTransformSectionExist()
+        public void ReturnDetectionAlgorithmFromSettings()
         {
-            Assert.Equal(TransformSettings.Default, new Mock<IConfiguration>().Object.GetTransformSettings());
+            var section = new Mock<IConfigurationSection>();
+            var expectedAlgorithm = "CNT";
+            section.SetupGet(s => s["Algorithm"]).Returns(expectedAlgorithm);
+            var config = new Mock<IConfiguration>();
+            config.Setup(c => c.GetSection("CV:Detection")).Returns(section.Object);
+
+            var actual = config.Object.GetDetectionSettings().Algorithm;
+
+            Assert.Equal(expectedAlgorithm, actual);
+        }
+
+        [Fact]
+        public void ReturnDefaultDetectionAlgorithmIfSettingsWereNotProvided()
+        {
+            var section = new Mock<IConfigurationSection>();
+            var expectedAlgorithm = "CNT";
+            section.SetupGet(s => s["Algorithm"]).Returns((string)null);
+            var config = new Mock<IConfiguration>();
+            config.Setup(c => c.GetSection("CV:Detection")).Returns(section.Object);
+
+            var actual = config.Object.GetDetectionSettings().Algorithm;
+
+            Assert.Equal(expectedAlgorithm, actual);
+        }
+
+        [Fact]
+        public void ReturnDefaultDetectionAlgorithmIfSettingsSectionIsNotProvided()
+        {
+            var expectedAlgorithm = "CNT";
+            var config = new Mock<IConfiguration>();
+            
+
+            var actual = config.Object.GetDetectionSettings().Algorithm;
+
+            Assert.Equal(expectedAlgorithm, actual);
         }
 
         [Theory]
-        [InlineData(null, null, null)]
-        [InlineData(null, null, "5")]
-        [InlineData(null, "3", null)]
-         [InlineData(null, "9", "7")]
-        [InlineData("0.1", null, null)]
-        [InlineData("0.1", null, "5")]
-        [InlineData("0.1", "11", null)]
-        [InlineData("0.1", "11", "5")]
-        [InlineData("all", "values", "bad")]
-        public void ReadTransformSettingsFromConfig(string resizeFactor, string inputBlurKernelSize, string outputBlurKernelSize)
+        [InlineData(false, null, null, null, null)]
+        [InlineData(true, null, null, null, null)]
+        [InlineData(true, "totally", "invalid", "configuration", "given")]
+        [InlineData(true, "20", "False", "800", "False")]
+        public void ReturnSettingsForCNTSubtractor(bool sectionExists, string minPixel, string history, string maxPixel, string parallel)
         {
-            if (!double.TryParse(resizeFactor, out double expectedResizeFactor))
-            {
-                expectedResizeFactor = TransformSettings.Default.ResizeFactor;
-            }
-
-            if (!int.TryParse(inputBlurKernelSize, out int expectedInputBlurKernelSize)) 
-            {
-                expectedInputBlurKernelSize = TransformSettings.Default.InputBlurKernelSize;
-            }
-
-            if (!int.TryParse(outputBlurKernelSize, out int expectedOutputBlurKernelSize)) 
-            {
-                expectedOutputBlurKernelSize = TransformSettings.Default.OutputBlurKernelSize;
-            }
-
             var section = new Mock<IConfigurationSection>();
-            section.SetupGet(s => s["ResizeFactor"]).Returns(resizeFactor);
-            section.SetupGet(s => s["InputBlurKernelSize"]).Returns(inputBlurKernelSize);
-            section.SetupGet(s => s["OutputBlurKernelSize"]).Returns(outputBlurKernelSize);
+            section.SetupGet(s => s["MinPixelStability"]).Returns(minPixel);
+            section.SetupGet(s => s["UseHistory"]).Returns(history);
+            section.SetupGet(s => s["MaxPixelStability"]).Returns(maxPixel);
+            section.SetupGet(s => s["IsParallel"]).Returns(parallel);
 
             var config = new Mock<IConfiguration>();
-            config.Setup(c => c.GetSection("CV:Transform")).Returns(section.Object);
-            var settings = config.Object.GetTransformSettings();
+            config.Setup(c => c.GetSection("CV:Detection:CNT")).Returns(sectionExists ? section.Object : null);
 
-            Assert.Equal(expectedResizeFactor, settings.ResizeFactor);
-            Assert.Equal(expectedInputBlurKernelSize, settings.InputBlurKernelSize);
-            Assert.Equal(expectedOutputBlurKernelSize, settings.OutputBlurKernelSize);
-        }      
+            var expectedMinPixel = sectionExists && int.TryParse(minPixel, out var mps) ? mps : CNTSubtractorSettings.Default.MinPixelStability;
+            var expectedMaxPixel = sectionExists && int.TryParse(maxPixel, out var maps) ? maps : CNTSubtractorSettings.Default.MaxPixelStability;
+            var expectedUseHistory = sectionExists && bool.TryParse(history, out var h) ? h : CNTSubtractorSettings.Default.UseHistory;
+            var expectedIsParallel = sectionExists && bool.TryParse(parallel, out var p) ? p : CNTSubtractorSettings.Default.IsParallel;
+
+            var actual = config.Object.GetCNTSubtractorSettings();
+
+            Assert.Equal(expectedMinPixel, actual.MinPixelStability);
+            Assert.Equal(expectedMaxPixel, actual.MaxPixelStability);
+            Assert.Equal(expectedUseHistory, actual.UseHistory);
+            Assert.Equal(expectedIsParallel, actual.IsParallel);
+        }
+
+        [Theory]
+        [InlineData(false, null, null, null, null)]
+        [InlineData(true, null, null, null, null)]
+        [InlineData(true, "totally", "invalid", "configuration", "given")]
+        [InlineData(true, "5", "5", "9", "31")]
+        [InlineData(true, "0.1", "9.2", "9", "31")]
+        public void ReturnSettingsForFastNlMeansDenoiser(bool sectionExists, string h, string hColor, string templateWindowSize, string searchWindowSize)
+        {
+            var section = new Mock<IConfigurationSection>();
+            section.SetupGet(s => s["H"]).Returns(h);
+            section.SetupGet(s => s["HColor"]).Returns(hColor);
+            section.SetupGet(s => s["TemplateWindowSize"]).Returns(templateWindowSize);
+            section.SetupGet(s => s["SearchWindowSize"]).Returns(searchWindowSize);
+
+            var config = new Mock<IConfiguration>();
+            config.Setup(c => c.GetSection("CV:Denoising:FastNlMeans")).Returns(sectionExists ? section.Object : null);
+
+            var expectedH = float.TryParse(h, out var th) ? th : FastNlMeansDenoisingSettings.Default.H;
+            var expectedHColor = float.TryParse(hColor, out var thColor) ? thColor : FastNlMeansDenoisingSettings.Default.HColor;
+            var expectedTemplateWindowSize = int.TryParse(templateWindowSize, out var ttemplateWindowSize) ? ttemplateWindowSize : FastNlMeansDenoisingSettings.Default.TemplateWindowSize;
+            var expectedSearchWindowSize = float.TryParse(searchWindowSize, out var tsearchWindowSize) ? tsearchWindowSize : FastNlMeansDenoisingSettings.Default.SearchWindowSize;
+
+            var actual = config.Object.GetFastNlMeansDenoisingSettings();
+
+            Assert.Equal(expectedH, actual.H);
+            Assert.Equal(expectedHColor, actual.HColor);
+            Assert.Equal(expectedSearchWindowSize, actual.SearchWindowSize);
+            Assert.Equal(expectedTemplateWindowSize, actual.TemplateWindowSize);
+        }
+
+        [Theory]
+        [InlineData(false, null)]
+        [InlineData(true, null)]
+        [InlineData(true, "")]
+        [InlineData(true, "None")]
+        [InlineData(true, "FastNlMeans")]
+        [InlineData(true, "banana")]
+        public void ReturnSettingsForDenoiser(bool sectionExists, string algorithm)
+        {
+            var section = new Mock<IConfigurationSection>();
+            section.Setup(s => s["Algorithm"]).Returns(algorithm);
+
+            var config = new Mock<IConfiguration>();
+            config.Setup(s => s.GetSection("CV:Denoising")).Returns(sectionExists ? section.Object : null);
+
+            var expectedAlgorithm = (sectionExists ? algorithm : null) ?? DenoisingSettings.Default.Algorithm;
+            Assert.Equal(expectedAlgorithm, config.Object.GetDenoisingSettings().Algorithm);
+        }
+
     }
 }

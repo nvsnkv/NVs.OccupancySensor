@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Emgu.CV;
@@ -9,9 +9,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.API.ActionResults;
 using NVs.OccupancySensor.CV.Capture;
+using NVs.OccupancySensor.CV.Denoising;
+using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction;
 using NVs.OccupancySensor.CV.Observation;
-using NVs.OccupancySensor.CV.Transformation;
-using NVs.OccupancySensor.CV.Transformation.Grayscale;
+using NVs.OccupancySensor.CV.Utils;
+
 
 namespace NVs.OccupancySensor.API.Controllers
 {
@@ -20,19 +22,21 @@ namespace NVs.OccupancySensor.API.Controllers
     public sealed class CaptureController : ControllerBase
     {
         private readonly ICamera camera;
+        [NotNull] private readonly IDenoiser denoiser;
+        private readonly IBackgroundSubtractionBasedDetector detector;
         private readonly IImageObserver<Rgb> rgbObserver;
         private readonly IImageObserver<Gray> grayObserver;
-        private readonly IGrayscaleStreamTransformer streamTransformer;
 
         private readonly ILogger<CaptureController> logger;
         
-        public CaptureController([NotNull] ICamera camera, [NotNull] IImageObserver<Rgb> rgbObserver, [NotNull] IImageObserver<Gray> grayObserver, [NotNull] IGrayscaleStreamTransformer streamTransformer, [NotNull] ILogger<CaptureController> logger)
+        public CaptureController([NotNull] ICamera camera, [NotNull] IDenoiser denoiser, [NotNull] IBackgroundSubtractionBasedDetector detector, [NotNull] IImageObserver<Rgb> rgbObserver, [NotNull] IImageObserver<Gray> grayObserver, [NotNull] ILogger<CaptureController> logger)
         {
-            this.streamTransformer = streamTransformer ?? throw new ArgumentNullException(nameof(streamTransformer));
             this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
+            this.denoiser = denoiser ?? throw new ArgumentNullException(nameof(denoiser));
+            this.detector = detector ?? throw new ArgumentNullException(nameof(detector));
             this.rgbObserver = rgbObserver ?? throw new ArgumentNullException(nameof(rgbObserver));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.grayObserver = grayObserver ?? throw new ArgumentNullException(nameof(grayObserver));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpGet]
@@ -64,34 +68,45 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
-        [Route("streams/count")]
-        public int GetStreamsCount()
+        [Produces("image/jpeg")]
+        [Route("frame-denoised.jpg")]
+        public async Task<Image<Rgb,byte>> GetDenoisedFrame()
         {
-            return streamTransformer.OutputStreams.Count;
+            logger.LogDebug("GetDenoisedFrame called");
+
+            if (!camera.IsRunning)
+            {
+                return null;
+            }
+            
+            using (denoiser.Output.Subscribe(rgbObserver))
+            {
+                return await rgbObserver.GetImage();
+            }
+        }
+
+        [HttpGet]
+        [Route("stream-denoised.mjpeg")]
+        public IActionResult GetDenoisedStream()
+        {
+            logger.LogDebug("GetDenoisedStream called");
+
+            var stream = denoiser.Output;
+            return GetMjpegRgbStreamContent(stream);
         }
         
         [HttpGet]
-        [Route("stream-{index}.mjpeg")]
-        public IActionResult GetStream(int index)
+        [Route("stream.mjpeg")]
+        public IActionResult GetStream()
         {
-            logger.LogDebug($"GetStream({index}) called");
+            logger.LogDebug($"GetStream called");
 
             if (!camera.IsRunning) 
             {
                 return NoContent();
             }
 
-            if (index < 0) 
-            {
-                return BadRequest();
-            }
-
-            if (index >= streamTransformer.OutputStreams.Count) 
-            {
-                return NotFound();
-            }
-
-            var stream = streamTransformer.OutputStreams[streamTransformer.OutputStreams.Count - 1 - index];
+            var stream = detector.ToObservable(nameof(detector.Mask), () => detector.Mask);
             return GetMjpegGrayStreamContent(stream);
         }
 

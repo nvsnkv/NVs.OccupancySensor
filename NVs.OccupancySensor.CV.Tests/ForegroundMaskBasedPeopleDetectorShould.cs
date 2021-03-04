@@ -1,104 +1,69 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NVs.OccupancySensor.CV.Detection;
+using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction;
+using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.DecisionMaking;
+using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.Subtractors;
 using NVs.OccupancySensor.CV.Settings;
 using Xunit;
 
 namespace NVs.OccupancySensor.CV.Tests
 {
-    public sealed class ForegroundMaskBasedPeopleDetectorShould
+
+    public sealed class BackgroundSubtractionBasedDetectorShould
     {
-        private readonly Mock<ILogger<ForegroundMaskBasedPeopleDetector>> logger = new Mock<ILogger<ForegroundMaskBasedPeopleDetector>>(); 
+        private readonly Mock<IDecisionMaker> decisionMaker = new Mock<IDecisionMaker>();
+        private readonly Mock<ILogger<BackgroundSubtractionBasedDetector>> logger = new Mock<ILogger<BackgroundSubtractionBasedDetector>>();
+        private readonly Mock<ISubtractionStrategy> subtractor = new Mock<ISubtractionStrategy>();
+        private readonly Mock<IBackgroundSubtractorFactory> factory = new Mock<IBackgroundSubtractorFactory>();
 
-        [Fact]
-        public void DetectPrecenceIfMaskIsWhite()
+        public BackgroundSubtractionBasedDetectorShould()
         {
-            var image = new Image<Gray, byte>(10, 10);
-            for(var i=0; i < image.Width; i++)
-            for(var j=0; j < image.Height; j++)
-            {
-                image[i,j] = new Gray(255);
-            };
+            subtractor
+                .Setup(s => s.GetForegroundMask(It.IsAny<Image<Rgb, byte>>()))
+                .Returns(new Image<Gray, byte>(1, 1));
 
-            var detector = new ForegroundMaskBasedPeopleDetector(logger.Object, DetectionSettings.Default.Threshold);
-            detector.OnNext(image);
-
-            Assert.True(detector.PeopleDetected);
-        }
-
-        [Fact]
-        public void NotDetectPresenceIfMaskIsBlack()
-        {
-            var image = new Image<Gray, byte>(10, 10);
-            for(var i=0; i < image.Width; i++)
-            for(var j=0; j < image.Height; j++)
-            {
-                image[i,j] = new Gray(0);
-            };
-
-            var detector = new ForegroundMaskBasedPeopleDetector(logger.Object, DetectionSettings.Default.Threshold);
-            detector.OnNext(image);
-
-            Assert.False(detector.PeopleDetected);
+            factory.Setup(f => f.Create(SupportedAlgorithms.CNT.ToString())).Returns(subtractor.Object);
         }
 
         [Fact]
         public void NotifyWhenPeopleDetected()
         {
-            var image = new Image<Gray, byte>(10, 10);
-            for(var i=0; i < image.Width; i++)
-            for(var j=0; j < image.Height; j++)
-            {
-                image[i,j] = new Gray(255);
-            };
+            decisionMaker.Setup(m => m.DetectPresence(It.IsAny<Image<Gray, byte>>())).Returns(true);
 
-            var propertyName = string.Empty;
-            var detector = new ForegroundMaskBasedPeopleDetector(logger.Object, DetectionSettings.Default.Threshold);
-            detector.PropertyChanged += (_, e) => propertyName = e.PropertyName;
+            var propertiesChanged = new List<string>();
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            detector.PropertyChanged += (_, e) => propertiesChanged.Add(e.PropertyName);
             
-            detector.OnNext(image);
+            detector.OnNext(new Image<Rgb, byte>(1, 1));
 
-            Assert.Equal(nameof(IPeopleDetector.PeopleDetected), propertyName);
+            Assert.Contains(propertiesChanged, s => nameof(IPeopleDetector.PeopleDetected).Equals(s));
         }
 
         [Fact]
         public void NotifyWhenPeopleNotDetected()
         {
-            var image = new Image<Gray, byte>(10, 10);
-            for(var i=0; i < image.Width; i++)
-            for(var j=0; j < image.Height; j++)
-            {
-                image[i,j] = new Gray(0);
-            };
+            decisionMaker.Setup(m => m.DetectPresence(It.IsAny<Image<Gray, byte>>())).Returns(false);
 
-            var propertyName = string.Empty;
-            var detector = new ForegroundMaskBasedPeopleDetector(logger.Object, DetectionSettings.Default.Threshold);
-            detector.PropertyChanged += (_, e) => propertyName = e.PropertyName;
+            var propertiesChanged = new List<string>();
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            detector.PropertyChanged += (_, e) => propertiesChanged.Add(e.PropertyName);
             
-            detector.OnNext(image);
-
-            Assert.Equal(nameof(IPeopleDetector.PeopleDetected), propertyName);
+            detector.OnNext(new Image<Rgb, byte>(1, 1));
+            Assert.Contains(propertiesChanged, s => nameof(IPeopleDetector.PeopleDetected).Equals(s));
         }
-
-        [Fact]
-        public void NotifyWhenDetectionIsNotPossible()
-        {
-            var propertyName = string.Empty;
-            var detector = new ForegroundMaskBasedPeopleDetector(logger.Object, DetectionSettings.Default.Threshold);
-            detector.PropertyChanged += (_, e) => propertyName = e.PropertyName;
-            
-            detector.OnNext(new Image<Gray, byte>(1,1));
-
-            Assert.Equal(nameof(IPeopleDetector.PeopleDetected), propertyName);
-        }
-        
+     
         [Fact]
         public void SetPeopleDetectedToNullWhenStreamEnds()
         {
-            var detector = new ForegroundMaskBasedPeopleDetector(logger.Object, DetectionSettings.Default.Threshold);
-            detector.OnNext(new Image<Gray, byte>(1,1));
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            detector.OnNext(new Image<Rgb, byte>(1,1));
 
             detector.OnCompleted();
             Assert.Null(detector.PeopleDetected);
@@ -107,8 +72,8 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void SetPeopleDetectedToNullWhenStreamErrorsOut()
         {
-            var detector = new ForegroundMaskBasedPeopleDetector(logger.Object, DetectionSettings.Default.Threshold);
-            detector.OnNext(new Image<Gray, byte>(1,1));
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            detector.OnNext(new Image<Rgb, byte>(1,1));
 
             detector.OnError(new System.Exception());
             Assert.Null(detector.PeopleDetected);
@@ -117,11 +82,77 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void SetPeopleDetectedToNullOnReset()
         {
-            var detector = new ForegroundMaskBasedPeopleDetector(logger.Object, DetectionSettings.Default.Threshold);
-            detector.OnNext(new Image<Gray, byte>(1,1));
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            detector.OnNext(new Image<Rgb, byte>(1,1));
 
             detector.Reset();
             Assert.Null(detector.PeopleDetected);
+        }
+
+
+        [Fact]
+        public void RaisePropertyChangedWhenMaskChanged()
+        {
+            var propertiesChanged = new List<string>();
+
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            detector.PropertyChanged += (o, e) => propertiesChanged.Add(e.PropertyName);
+
+            detector.OnNext(new Image<Rgb, byte>(1,1));
+
+            Assert.Contains(propertiesChanged, s => nameof(IBackgroundSubtractionBasedDetector.Mask).Equals(s));
+        }
+
+        [Fact]
+        public void SetMaskToNullWhenStreamEnds()
+        {
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            detector.OnNext(new Image<Rgb, byte>(1,1));
+
+            detector.OnCompleted();
+            Assert.Null(detector.Mask);
+        }
+
+        [Fact]
+        public void SetMaskToNullWhenStreamErrorsOut()
+        {
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            detector.OnNext(new Image<Rgb, byte>(1,1));
+
+            detector.OnError(new System.Exception());
+            Assert.Null(detector.Mask);
+        }
+
+        [Fact]
+        public void SetMaskToNullOnReset()
+        {
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            detector.OnNext(new Image<Rgb, byte>(1,1));
+
+            detector.Reset();
+            Assert.Null(detector.Mask);
+        }
+
+        [Fact]
+        public async Task DropNewFramesIfSubtractorIsStillCalculating()
+        {
+            var maskChanged = 0;
+            subtractor
+                .Setup(s => s.GetForegroundMask(It.IsAny<Image<Rgb, byte>>()))
+                .Returns(() =>
+                {
+                    Task.Delay(TimeSpan.FromMilliseconds(600)).Wait();
+                    return new Image<Gray, byte>(1, 1);
+                })
+                .Verifiable();
+
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            detector.PropertyChanged += (_, e) => maskChanged += nameof(detector.Mask).Equals(e.PropertyName) ? 1 : 0;
+
+            Enumerable.Range(0, 3).ToList().ForEach(_ => Task.Factory.StartNew(() => detector.OnNext(new Image<Rgb, byte>(1, 1))));
+            
+            await Task.Delay(TimeSpan.FromMilliseconds(2000));
+            Assert.Equal(1, maskChanged);
         }
     }
 }
