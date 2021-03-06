@@ -39,9 +39,9 @@ namespace NVs.OccupancySensor.API
             
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc(Configuration["Version"], new OpenApiInfo
+                c.SwaggerDoc(Configuration["ApiVersion"], new OpenApiInfo
                 {
-                    Version = Configuration["Version"],
+                    Version = Configuration["ApiVersion"],
                     Title = "NV's Occupancy Sensor HTTP API",
                     Description = "API for OpenCV-based occupancy detector",
                     Contact = new OpenApiContact
@@ -69,7 +69,7 @@ namespace NVs.OccupancySensor.API
                 app.UseDeveloperExceptionPage();
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint($"/swagger/{Configuration["Version"]}/swagger.json", $"NV's Occupancy Sensor API v. {Configuration["Version"]}");
+                    c.SwaggerEndpoint($"/swagger/{Configuration["ApiVersion"]}/swagger.json", $"NV's Occupancy Sensor API v. {Configuration["ApiVersion"]}");
                 });
             }
 
