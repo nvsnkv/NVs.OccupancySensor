@@ -1,6 +1,6 @@
 namespace NVs.OccupancySensor.CV.Denoising.Denoisers
 {
-    public interface IFastNlMeansDenoisingSettings
+    public interface IFastNlMeansColoredDenoisingSettings
     {
         float H { get; }
 

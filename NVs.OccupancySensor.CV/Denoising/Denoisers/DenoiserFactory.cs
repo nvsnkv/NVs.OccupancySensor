@@ -5,9 +5,9 @@ namespace NVs.OccupancySensor.CV.Denoising.Denoisers
 {
     internal sealed class DenoiserFactory : IDenoiserFactory
     {
-        [NotNull] private IFastNlMeansDenoisingSettings fastNlMeansDenoisingSettings;
+        [NotNull] private IFastNlMeansColoredDenoisingSettings fastNlMeansColoredDenoisingSettings;
 
-        public DenoiserFactory(IFastNlMeansDenoisingSettings fastNlMeansDenoisingSettings) => this.fastNlMeansDenoisingSettings = fastNlMeansDenoisingSettings ?? throw new ArgumentNullException(nameof(fastNlMeansDenoisingSettings));
+        public DenoiserFactory(IFastNlMeansColoredDenoisingSettings fastNlMeansColoredDenoisingSettings) => this.fastNlMeansColoredDenoisingSettings = fastNlMeansColoredDenoisingSettings ?? throw new ArgumentNullException(nameof(fastNlMeansColoredDenoisingSettings));
 
         public IDenoisingStrategy Create([NotNull] string algorithm)
         {
@@ -19,8 +19,8 @@ namespace NVs.OccupancySensor.CV.Denoising.Denoisers
                     case SupportedAlgorithms.None:
                         return new BypassDenoiser();
 
-                    case SupportedAlgorithms.FastNlMeans:
-                        return new FastNlMeansDenoiser(FastNlMeansDenoisingSettings);
+                    case SupportedAlgorithms.FastNlMeansColored:
+                        return new FastNlMeansColoredDenoiser(FastNlMeansColoredDenoisingSettings);
                 }
             }
 
@@ -28,10 +28,10 @@ namespace NVs.OccupancySensor.CV.Denoising.Denoisers
         }
 
         [NotNull]
-        public IFastNlMeansDenoisingSettings FastNlMeansDenoisingSettings
+        public IFastNlMeansColoredDenoisingSettings FastNlMeansColoredDenoisingSettings
         {
-            get => fastNlMeansDenoisingSettings;
-            set => fastNlMeansDenoisingSettings = value ?? throw new ArgumentNullException(nameof(value));
+            get => fastNlMeansColoredDenoisingSettings;
+            set => fastNlMeansColoredDenoisingSettings = value ?? throw new ArgumentNullException(nameof(value));
         }
     }
 }

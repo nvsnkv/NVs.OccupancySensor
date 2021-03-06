@@ -12,25 +12,25 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void CreateBypassDenoiserByDefault()
         {
-            var factory = new DenoiserFactory(FastNlMeansDenoisingSettings.Default);
+            var factory = new DenoiserFactory(FastNlMeansColoredDenoisingSettings.Default);
             var denoiser = factory.Create(DenoisingSettings.Default.Algorithm);
 
             Assert.IsType<BypassDenoiser>(denoiser);
         }
 
         [Fact]
-        public void CreateFastNlMeansDenoiserIfRequested()
+        public void CreateFastNlMeansColoredDenoiserIfRequested()
         {
-            var factory = new DenoiserFactory(FastNlMeansDenoisingSettings.Default);
-            var denoiser = factory.Create("FastNlMeans");
+            var factory = new DenoiserFactory(FastNlMeansColoredDenoisingSettings.Default);
+            var denoiser = factory.Create("FastNlMeansColored");
 
-            Assert.IsType<FastNlMeansDenoiser>(denoiser);
+            Assert.IsType<FastNlMeansColoredDenoiser>(denoiser);
         }
 
         [Fact]
         public void ThrowArgumentExceptionWhenUnknownAlgorithmRequested()
         {
-            var factory = new DenoiserFactory(FastNlMeansDenoisingSettings.Default);
+            var factory = new DenoiserFactory(FastNlMeansColoredDenoisingSettings.Default);
             Assert.Throws<ArgumentException>(() => factory.Create("Unknown"));
         }
     }

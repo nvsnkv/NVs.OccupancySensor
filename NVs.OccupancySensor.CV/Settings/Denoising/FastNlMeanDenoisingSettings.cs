@@ -3,9 +3,9 @@ using NVs.OccupancySensor.CV.Denoising.Denoisers;
 
 namespace NVs.OccupancySensor.CV.Settings.Denoising 
 {
-    public sealed class FastNlMeansDenoisingSettings : IFastNlMeansDenoisingSettings
+    public sealed class FastNlMeansColoredDenoisingSettings : IFastNlMeansColoredDenoisingSettings
     {
-        public FastNlMeansDenoisingSettings(float h, float hColor, int templateWindowSize, int searchWindowSize)
+        public FastNlMeansColoredDenoisingSettings(float h, float hColor, int templateWindowSize, int searchWindowSize)
         {
             H = h;
             HColor = hColor;
@@ -21,6 +21,6 @@ namespace NVs.OccupancySensor.CV.Settings.Denoising
 
         public int SearchWindowSize { get; }
 
-        public static FastNlMeansDenoisingSettings Default { get; } = new FastNlMeansDenoisingSettings(3f, 3f, 7, 21);
+        public static FastNlMeansColoredDenoisingSettings Default { get; } = new FastNlMeansColoredDenoisingSettings(3f, 3f, 7, 21);
     }
 }

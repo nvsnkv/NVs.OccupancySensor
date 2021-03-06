@@ -7,6 +7,6 @@ namespace NVs.OccupancySensor.CV.Denoising.Denoisers
         IDenoisingStrategy Create([NotNull] string algorithm);
 
         [NotNull]
-        IFastNlMeansDenoisingSettings FastNlMeansDenoisingSettings { get; set; }
+        IFastNlMeansColoredDenoisingSettings FastNlMeansColoredDenoisingSettings { get; set; }
     }
 }
