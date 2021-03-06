@@ -21,6 +21,9 @@ namespace NVs.OccupancySensor.CV.Denoising.Denoisers
 
                     case SupportedAlgorithms.FastNlMeansColored:
                         return new FastNlMeansColoredDenoiser(FastNlMeansColoredDenoisingSettings);
+
+                    case SupportedAlgorithms.FastNlMeans:
+                        return new FastNlMeansDenoiser(FastNlMeansColoredDenoisingSettings);
                 }
             }
 

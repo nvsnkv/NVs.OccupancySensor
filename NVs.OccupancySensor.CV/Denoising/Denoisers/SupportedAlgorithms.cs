@@ -3,6 +3,7 @@
     internal enum SupportedAlgorithms
     {
         None,
-        FastNlMeansColored
+        FastNlMeansColored,
+        FastNlMeans
     }
 }
