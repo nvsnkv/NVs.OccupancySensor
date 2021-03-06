@@ -28,7 +28,7 @@ docker run -e "CV:Capture:FrameInterval"="00:00:01" \
   occupancy_sensor
 ```
 #### Swagger
-Application exposes Swagger UI on URL `/swagger/index.html`. This UI allows to explore and interact with HTTP API exposed by this app.
+When built in debug, application exposes Swagger UI on URL `/swagger/index.html`. This UI allows to explore and interact with HTTP API exposed by this app.
 ## Configuration
 There are quite a few things to configure: connection to the camera, image denoising, detection algorithm, sensitivity of the detector and MQTT client. 
 YOu can also tweak a balance between accuracy, performance and resource consumption by tweaking image transformation pipeline settings.
