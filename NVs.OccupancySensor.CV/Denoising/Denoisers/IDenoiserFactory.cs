@@ -8,5 +8,8 @@ namespace NVs.OccupancySensor.CV.Denoising.Denoisers
 
         [NotNull]
         IFastNlMeansColoredDenoisingSettings FastNlMeansColoredDenoisingSettings { get; set; }
+
+        [NotNull]
+        IMedianBlurSettings MedianBlurSettings { get; set; }
     }
 }

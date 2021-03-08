@@ -4,6 +4,7 @@
     {
         None,
         FastNlMeansColored,
-        FastNlMeans
+        FastNlMeans,
+        MedianBlur
     }
 }

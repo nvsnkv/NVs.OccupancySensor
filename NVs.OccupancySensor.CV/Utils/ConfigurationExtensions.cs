@@ -1,6 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
+using NVs.OccupancySensor.CV.Denoising.Denoisers;
 using NVs.OccupancySensor.CV.Settings;
 using NVs.OccupancySensor.CV.Settings.Denoising;
 using NVs.OccupancySensor.CV.Settings.Subtractors;
@@ -67,6 +68,14 @@ namespace NVs.OccupancySensor.CV.Utils
             var section = config.GetSection("CV:Denoising");
 
             return new DenoisingSettings(section?["Algorithm"] ?? DenoisingSettings.Default.Algorithm);
+        }
+
+        internal static IMedianBlurSettings GetMedianBlurDenoisingSettings([NotNull] this IConfiguration config)
+        {
+            if (config == null) throw new ArgumentNullException(nameof(config));
+            var section = config.GetSection("CV:Denoising:MedianBlur");
+
+            return new MedianBlurDenoisingSettings(int.TryParse(section?["K"], out var k) ? k : MedianBlurDenoisingSettings.Default.K);
         }
     }
 }

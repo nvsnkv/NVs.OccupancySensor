@@ -6,8 +6,13 @@ namespace NVs.OccupancySensor.CV.Denoising.Denoisers
     internal sealed class DenoiserFactory : IDenoiserFactory
     {
         [NotNull] private IFastNlMeansColoredDenoisingSettings fastNlMeansColoredDenoisingSettings;
+        [NotNull] private IMedianBlurSettings medianBlurSettings;
 
-        public DenoiserFactory(IFastNlMeansColoredDenoisingSettings fastNlMeansColoredDenoisingSettings) => this.fastNlMeansColoredDenoisingSettings = fastNlMeansColoredDenoisingSettings ?? throw new ArgumentNullException(nameof(fastNlMeansColoredDenoisingSettings));
+        public DenoiserFactory(IFastNlMeansColoredDenoisingSettings fastNlMeansColoredDenoisingSettings, [NotNull] IMedianBlurSettings medianBlurSettings)
+        {
+            this.fastNlMeansColoredDenoisingSettings = fastNlMeansColoredDenoisingSettings ?? throw new ArgumentNullException(nameof(fastNlMeansColoredDenoisingSettings));
+            this.medianBlurSettings = medianBlurSettings ?? throw new ArgumentNullException(nameof(medianBlurSettings));
+        }
 
         public IDenoisingStrategy Create([NotNull] string algorithm)
         {
@@ -24,6 +29,9 @@ namespace NVs.OccupancySensor.CV.Denoising.Denoisers
 
                     case SupportedAlgorithms.FastNlMeans:
                         return new FastNlMeansDenoiser(FastNlMeansColoredDenoisingSettings);
+
+                    case SupportedAlgorithms.MedianBlur:
+                        return new MedianBlurDenoiser(MedianBlurSettings);
                 }
             }
 
@@ -35,6 +43,13 @@ namespace NVs.OccupancySensor.CV.Denoising.Denoisers
         {
             get => fastNlMeansColoredDenoisingSettings;
             set => fastNlMeansColoredDenoisingSettings = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        [NotNull]
+        public IMedianBlurSettings MedianBlurSettings
+        {
+            get => medianBlurSettings;
+            set => medianBlurSettings = value ?? throw new ArgumentNullException(nameof(value));
         }
     }
 }

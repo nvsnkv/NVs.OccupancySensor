@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using NVs.OccupancySensor.CV.Settings;
@@ -172,6 +173,27 @@ namespace NVs.OccupancySensor.CV.Tests
             Assert.Equal(expectedHColor, actual.HColor);
             Assert.Equal(expectedSearchWindowSize, actual.SearchWindowSize);
             Assert.Equal(expectedTemplateWindowSize, actual.TemplateWindowSize);
+        }
+
+        [Theory]
+        [InlineData(false, null)]
+        [InlineData(true, null)]
+        [InlineData(true, "5")]
+        [InlineData(true, "5,5")]
+        [InlineData(true, "five")]
+        public void ReturnSettingsForMedianBlurDenoiser(bool sectionExists, string k)
+        {
+            var section = new Mock<IConfigurationSection>();
+            section.SetupGet(s => s["K"]).Returns(k);
+
+            var config = new Mock<IConfiguration>();
+            config.Setup(c => c.GetSection("CV:Denoising:MedianBlur")).Returns(sectionExists ? section.Object : null);
+
+            var expectedK = int.TryParse(k, out var tk) ? tk : MedianBlurDenoisingSettings.Default.K;
+
+            var actual = config.Object.GetMedianBlurDenoisingSettings();
+
+            Assert.Equal(expectedK, actual.K);
         }
 
         [Theory]
