@@ -1,6 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
+using NVs.OccupancySensor.CV.Denoising.Denoisers;
 using NVs.OccupancySensor.CV.Settings;
 using NVs.OccupancySensor.CV.Settings.Denoising;
 using NVs.OccupancySensor.CV.Settings.Subtractors;
@@ -48,16 +49,16 @@ namespace NVs.OccupancySensor.CV.Utils
                 );
         }
 
-        internal static FastNlMeansDenoisingSettings GetFastNlMeansDenoisingSettings([NotNull] this IConfiguration config)
+        internal static FastNlMeansColoredDenoisingSettings GetFastNlMeansColoredDenoisingSettings([NotNull] this IConfiguration config)
         {
             if (config is null)  throw new ArgumentNullException(nameof(config));
             var section = config.GetSection("CV:Denoising:FastNlMeans");
 
-            return new FastNlMeansDenoisingSettings(
-                float.TryParse(section?["H"], out var h) ? h : FastNlMeansDenoisingSettings.Default.H,
-                float.TryParse(section?["HColor"], out var hColor) ? hColor : FastNlMeansDenoisingSettings.Default.HColor,
-                int.TryParse(section?["TemplateWindowSize"], out var templateWindowSize) ? templateWindowSize : FastNlMeansDenoisingSettings.Default.TemplateWindowSize,
-                int.TryParse(section?["SearchWindowSize"], out var searchWindowSize) ? searchWindowSize : FastNlMeansDenoisingSettings.Default.SearchWindowSize
+            return new FastNlMeansColoredDenoisingSettings(
+                float.TryParse(section?["H"], out var h) ? h : FastNlMeansColoredDenoisingSettings.Default.H,
+                float.TryParse(section?["HColor"], out var hColor) ? hColor : FastNlMeansColoredDenoisingSettings.Default.HColor,
+                int.TryParse(section?["TemplateWindowSize"], out var templateWindowSize) ? templateWindowSize : FastNlMeansColoredDenoisingSettings.Default.TemplateWindowSize,
+                int.TryParse(section?["SearchWindowSize"], out var searchWindowSize) ? searchWindowSize : FastNlMeansColoredDenoisingSettings.Default.SearchWindowSize
                 );
         }
 
@@ -67,6 +68,14 @@ namespace NVs.OccupancySensor.CV.Utils
             var section = config.GetSection("CV:Denoising");
 
             return new DenoisingSettings(section?["Algorithm"] ?? DenoisingSettings.Default.Algorithm);
+        }
+
+        internal static IMedianBlurSettings GetMedianBlurDenoisingSettings([NotNull] this IConfiguration config)
+        {
+            if (config == null) throw new ArgumentNullException(nameof(config));
+            var section = config.GetSection("CV:Denoising:MedianBlur");
+
+            return new MedianBlurDenoisingSettings(int.TryParse(section?["K"], out var k) ? k : MedianBlurDenoisingSettings.Default.K);
         }
     }
 }

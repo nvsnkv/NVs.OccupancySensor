@@ -44,12 +44,19 @@ App uses .Net Core configuration, so you can:
 #### Denoising
 * `CV:Denoising:Algorithm` - denoising algorithm to use. Default is _None_
   * `None` - no denoising performed. The image captured from the camera goes directly to detection logic
-  * `FastNlMeans` - ([FastNlMeansDenoisingColored](https://docs.opencv.org/4.5.1/d5/d69/tutorial_py_non_local_means.html) function used, documentation can be found [here](https://emgu.com/wiki/files/4.5.1/document/html/55cd7112-6814-99e7-76f4-ce3b8b8d0694.htm)).
+  * `FastNlMeans` - ([FastNlMeansDenoising](https://docs.opencv.org/4.5.1/d5/d69/tutorial_py_non_local_means.html) function used, documentation can be found [here](https://emgu.com/wiki/files/4.5.1/document/html/58b1b703-e4a2-94d9-4843-efe674bae0a3.htm)).
+There are several algorithm options that may be adjusted:
+    * `CV:Denoising:FastNlMeans:H` - rational, optional. Default is _3_`erds
+    * `CV:Denoising:FastNlMeans:TemplateWindowSize` - odd integer, optional. Default is _7_
+    * `CV:Denoising:FastNlMeans:SearchWindowSize` - odd integer, optional. Default is _21_
+  * `FastNlMeansColored` - ([FastNlMeansColoredDenoisingColored](https://docs.opencv.org/4.5.1/d5/d69/tutorial_py_non_local_means.html) function used, documentation can be found [here](https://emgu.com/wiki/files/4.5.1/document/html/55cd7112-6814-99e7-76f4-ce3b8b8d0694.htm)).
 There are several algorithm options that may be adjusted:
     * `CV:Denoising:FastNlMeans:H` - rational, optional. Default is _3_`
     * `CV:Denoising:FastNlMeans:HColor` - rational, optional. Default is _3_
     * `CV:Denoising:FastNlMeans:TemplateWindowSize` - odd integer, optional. Default is _7_
     * `CV:Denoising:FastNlMeans:SearchWindowSize` - odd integer, optional. Default is _21_
+  * `MedianBlur` - [MedianBlur](https://emgu.com/wiki/files/4.5.1/document/html/32b54325-0d91-bedb-60b4-910e4c65a8db.htm) function used. The only adjustable parameter is:
+    * `CV:Denoising:MedianBlur:K` - odd integer greater then 1, optional. Default is _3_
 #### Detection
 * `CV:Detection:Threshold` - a rational value between 0 and 1 that defines sensor sensitivity. Bigger values makes detector less sensitive. Default is _0.1_
 * `CV:Detection:Algorithm` - background subtraction algorithm to use. Default is _CNT_.

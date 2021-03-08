@@ -5,11 +5,11 @@ using JetBrains.Annotations;
 
 namespace NVs.OccupancySensor.CV.Denoising.Denoisers
 {
-    internal sealed class FastNlMeansDenoiser : IDenoisingStrategy
+    internal sealed class FastNlMeansColoredDenoiser : IDenoisingStrategy
     {
-        private readonly IFastNlMeansDenoisingSettings settings;
+        private readonly IFastNlMeansColoredDenoisingSettings settings;
 
-        public FastNlMeansDenoiser([NotNull] IFastNlMeansDenoisingSettings settings)
+        public FastNlMeansColoredDenoiser([NotNull] IFastNlMeansColoredDenoisingSettings settings)
         {
             this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
         }

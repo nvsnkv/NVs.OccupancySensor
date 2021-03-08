@@ -27,7 +27,9 @@ namespace NVs.OccupancySensor.CV.Utils
                     s.GetService<IConfiguration>()?.GetCaptureSettings() ?? throw new InvalidOperationException("CaptureSettings were not resolved"),
                     Camera.CreateVideoCapture));
 
-            services.AddSingleton<IDenoiserFactory>(s => new DenoiserFactory(s.GetService<IConfiguration>()?.GetFastNlMeansDenoisingSettings() ?? throw new InvalidOperationException("FastNlMeansDenoising settings dependency was not resolved")));
+            services.AddSingleton<IDenoiserFactory>(s => new DenoiserFactory(
+                s.GetService<IConfiguration>()?.GetFastNlMeansColoredDenoisingSettings() ?? throw new InvalidOperationException("FastNlMeansColoredDenoising settings dependency was not resolved"),
+                s.GetService<IConfiguration>()?.GetMedianBlurDenoisingSettings() ?? throw new InvalidOperationException("MedianBlurDenoising settings dependency was not resolved")));
 
             services.AddSingleton<IDenoiser>(s => new Denoiser(
                 s.GetService<IDenoiserFactory>() ?? throw new InvalidOperationException("DenoiserFactory dependency was not resolved"), 

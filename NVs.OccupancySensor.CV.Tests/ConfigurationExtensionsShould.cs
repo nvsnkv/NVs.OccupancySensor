@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using NVs.OccupancySensor.CV.Settings;
@@ -150,7 +151,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [InlineData(true, "totally", "invalid", "configuration", "given")]
         [InlineData(true, "5", "5", "9", "31")]
         [InlineData(true, "0.1", "9.2", "9", "31")]
-        public void ReturnSettingsForFastNlMeansDenoiser(bool sectionExists, string h, string hColor, string templateWindowSize, string searchWindowSize)
+        public void ReturnSettingsForFastNlMeansColoredDenoiser(bool sectionExists, string h, string hColor, string templateWindowSize, string searchWindowSize)
         {
             var section = new Mock<IConfigurationSection>();
             section.SetupGet(s => s["H"]).Returns(h);
@@ -161,12 +162,12 @@ namespace NVs.OccupancySensor.CV.Tests
             var config = new Mock<IConfiguration>();
             config.Setup(c => c.GetSection("CV:Denoising:FastNlMeans")).Returns(sectionExists ? section.Object : null);
 
-            var expectedH = float.TryParse(h, out var th) ? th : FastNlMeansDenoisingSettings.Default.H;
-            var expectedHColor = float.TryParse(hColor, out var thColor) ? thColor : FastNlMeansDenoisingSettings.Default.HColor;
-            var expectedTemplateWindowSize = int.TryParse(templateWindowSize, out var ttemplateWindowSize) ? ttemplateWindowSize : FastNlMeansDenoisingSettings.Default.TemplateWindowSize;
-            var expectedSearchWindowSize = float.TryParse(searchWindowSize, out var tsearchWindowSize) ? tsearchWindowSize : FastNlMeansDenoisingSettings.Default.SearchWindowSize;
+            var expectedH = float.TryParse(h, out var th) ? th : FastNlMeansColoredDenoisingSettings.Default.H;
+            var expectedHColor = float.TryParse(hColor, out var thColor) ? thColor : FastNlMeansColoredDenoisingSettings.Default.HColor;
+            var expectedTemplateWindowSize = int.TryParse(templateWindowSize, out var ttemplateWindowSize) ? ttemplateWindowSize : FastNlMeansColoredDenoisingSettings.Default.TemplateWindowSize;
+            var expectedSearchWindowSize = float.TryParse(searchWindowSize, out var tsearchWindowSize) ? tsearchWindowSize : FastNlMeansColoredDenoisingSettings.Default.SearchWindowSize;
 
-            var actual = config.Object.GetFastNlMeansDenoisingSettings();
+            var actual = config.Object.GetFastNlMeansColoredDenoisingSettings();
 
             Assert.Equal(expectedH, actual.H);
             Assert.Equal(expectedHColor, actual.HColor);
@@ -177,9 +178,30 @@ namespace NVs.OccupancySensor.CV.Tests
         [Theory]
         [InlineData(false, null)]
         [InlineData(true, null)]
+        [InlineData(true, "5")]
+        [InlineData(true, "5,5")]
+        [InlineData(true, "five")]
+        public void ReturnSettingsForMedianBlurDenoiser(bool sectionExists, string k)
+        {
+            var section = new Mock<IConfigurationSection>();
+            section.SetupGet(s => s["K"]).Returns(k);
+
+            var config = new Mock<IConfiguration>();
+            config.Setup(c => c.GetSection("CV:Denoising:MedianBlur")).Returns(sectionExists ? section.Object : null);
+
+            var expectedK = int.TryParse(k, out var tk) ? tk : MedianBlurDenoisingSettings.Default.K;
+
+            var actual = config.Object.GetMedianBlurDenoisingSettings();
+
+            Assert.Equal(expectedK, actual.K);
+        }
+
+        [Theory]
+        [InlineData(false, null)]
+        [InlineData(true, null)]
         [InlineData(true, "")]
         [InlineData(true, "None")]
-        [InlineData(true, "FastNlMeans")]
+        [InlineData(true, "FastNlMeansColored")]
         [InlineData(true, "banana")]
         public void ReturnSettingsForDenoiser(bool sectionExists, string algorithm)
         {
