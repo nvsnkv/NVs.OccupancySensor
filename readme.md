@@ -5,39 +5,26 @@ Uses background subtraction algorithms to identify if camera sees something whic
 MQTT client supports configuration convention used by Home Assistant [MQTT integration](https://www.home-assistant.io/docs/mqtt/)
 ## How to use it?
 Setup the app to connect it with your camera, MQTT server and have fun!
-Application can be deployed as regular ASP.Net Core application to the Windows host. Dockerfiles in the repository allows to build a linux container with this app for x86_64 and arm32 architectures. 
-#### Docker example
-Build:
-```sh
-#/bin/bash
-docker build -t occupancy_sensor .
-```
-Run:
-```sh
-#!/bin/bash
-docker run -e "CV:Capture:FrameInterval"="00:00:01" \
-  -e "MQTT:ClientId"="sensor_dev" \
-  -e "MQTT:Server"="127.0.0.1" \
-  -e "MQTT:USER"="user" \
-  -e "MQTT:Password"="i have no clue" \
-  -e "StartSensor"="True" \
-  -e "StartMQTT"="True" \
-  --device /dev/video0 \ #video device needs to be added to the container if CV:Capture:Source is not a file or URL
-  -p 40080:80 \ #container exposes port 80 by default
-  --rm \
-  occupancy_sensor
-```
-#### Swagger
-When built in debug, application exposes Swagger UI on URL `/swagger/index.html`. This UI allows to explore and interact with HTTP API exposed by this app.
-## Configuration
-There are quite a few things to configure: connection to the camera, image denoising, detection algorithm, sensitivity of the detector and MQTT client. 
-YOu can also tweak a balance between accuracy, performance and resource consumption by tweaking image transformation pipeline settings.
-This app uses Serilog with file and console sinks so it can also be configured.
-And since it's ASP.Net Core application you can configure it's settings, like "AllowedHosts" etc.
+You can run it as a regular ASP.Net Core application on Windows host (x86_64) or build a docker image to run it on Linux (x86_64 or arm32). Application can use local cameras attached to host, IP cameras (at least the ones which send MJPEG streams) or even a video file.
 
-App uses .Net Core configuration, so you can:
-* update appsettings.json with the values you need
-* override the properties using environment variables
+On a high level, application is doing the following set of activities to find out if someone is present in the room:
+1. Camera captures an image;
+1. Captured image is getting processed by denoising block;
+1. Denoised image is getting processed by detection logic:
+  1. Application builds the foreground mask from the denoised image;
+  1. Foreground mask is getting adjusted using the correction mask to exclude false-positives; 
+  1. Finally, detector computes foreground/background pixel ratio;
+  1. Computed value is getting compared with the threshold: if value is greater than threshold, application decides that someone is present in the room.
+1. Detection results are getting published to MQTT broker by MQTT client.
+## Configuration
+Application has fair amount of configurable items: 
+* Most of the processing steps mentioned above have some settings to tweak, and most of these settings have defaults.
+* Serilog is used to produce the logs.
+* And since it's ASP.Net Core application you can configure it's settings, like "AllowedHosts" etc.
+
+App uses .Net Core configuration, so you can change the settings by:
+* updating appsettings.json with the values you need
+* overriding the properties using environment variables
 #### Camera
 * `CV:Capture:Source` - the source for OpenCV capture. Can be either integer value that identifies your local camera, file path or link to the stream. Default is _"0"_. This value is used to create [EmguCV VideoCapture](http://www.emgu.com/wiki/files/4.4.0/document/html/961857d0-b7ba-53d8-253a-5059bb3bc1df.htm)
 * `CV:Capture:FrameInterval` - the timespan that defines how often application will request new frames from the camera. Default is _100 milliseconds_
@@ -66,6 +53,10 @@ This algorithm has a few settings to tweak ([documentation](https://sagi-z.githu
     * `CV:Detection:CNT:UseHistory` - boolean, optional. Default is _True_
     * `CV:Detection:CNT:MaxPixelStability` - integer, optional. Default is _900_
     * `CV:Detection:CNT:IsParallel` - boolean, optional. Default is _True_
+* `CV:Detection:ForegroundMaskCorrection` - a post-processing correction options, optional. Default is _None_. Valid values are:
+  * `None` - no correction will be performed
+  * `StaticMask` - an additional static mask will be applied to the computed foreground mask. This mode is introduces to handle the cases when borders of the static object are getting marked as foreground on noised images. This mode uses additional parameter:
+    * `CV:Detection:ForegroundMaskCorrection:StaticMask:Location` - a path to the static mask, optional. Default is _"data/correction_mask.bin". Should be 1-bit mask with the same size as incoming video stream.  
 #### MQTT
 Application uses MQTT.Net to build MQTT client. The following settings used to connect application to MQTT broker:
 * `MQTT:ClientId` - the string value that defines client identifier for MQTT client. Required. Does not have a default value
@@ -87,7 +78,36 @@ Thanks to docker, container creation is pretty simple. Use `Dockerfile` in the r
 
 Use `NVs.OccupancySensor.API/Dockerfile` to create x86_64 image. This image works well with Visual Studio and allows to debug a container from the IDE without additional configuration on solution level (you still need to setup docker on your host machine and enable linux containers support). 
 
-Please note that image creation steps contains compilation of OpenCV and EmguCV - it may take significant time to get created. In my case it took about 5 hours to build it on Raspberry Pi 4.
+Please note that image creation steps contain compilation of OpenCV and EmguCV - it may take significant time to get created. In my case it took about 5 hours to build it on Raspberry Pi 4. 
+#### Docker example
+Build:
+```sh
+#/bin/bash
+docker build -t occupancy_sensor .
+```
+Create a volume:
+```sh
+#/bin/bash
+docker volume create occupancy_sensor_data
+```
+Run:
+```sh
+#!/bin/bash
+docker run -e "CV:Capture:FrameInterval"="00:00:01" \
+  -e "MQTT:ClientId"="sensor_dev" \
+  -e "MQTT:Server"="127.0.0.1" \
+  -e "MQTT:USER"="user" \
+  -e "MQTT:Password"="i have no clue" \
+  -e "StartSensor"="True" \
+  -e "StartMQTT"="True" \
+  --device /dev/video0 \ #video device needs to be added to the container if CV:Capture:Source is not a file or URL
+  -p 40080:80 \ #container exposes port 80 by default
+  -v occupancy_sensor_data:/app/data
+  --rm \
+  occupancy_sensor
+```
+#### Swagger
+When built in debug, application exposes Swagger UI on URL `/swagger/index.html`. This UI allows to explore and interact with HTTP API exposed by this app.
 #### Known issues as of January 2021
 * Cross-compilation using `qemu-user-static` on x86_64 machine may fail during dotnet build - dotnet currently does not support QEMU. See [this comment](https://github.com/dotnet/dotnet-docker/issues/1512#issuecomment-562180086) for more details
 * Image creation fails on `apt-get update` when building on "Raspbian 10 GNU/Linux buster" - `libseccomp2` package needs to be updated on host machine to fix the original issue. Please refer to details [here](https://askubuntu.com/questions/1263284/apt-update-throws-signature-error-in-ubuntu-20-04-container-on-arm) and [here](https://github.com/moby/moby/issues/40734) 
