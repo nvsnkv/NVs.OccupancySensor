@@ -5,19 +5,19 @@ namespace NVs.OccupancySensor.CV.Settings
 {
     public sealed class DetectionSettings : IBackgroundSubtractionBasedDetectorSettings
     {
-        public DetectionSettings(double threshold, string dataDir, string algorithm)
+        public DetectionSettings(double threshold, string algorithm, string correctionMask)
         {
             DetectionThreshold = threshold;
-            DataDir = dataDir;
             Algorithm = algorithm;
+            CorrectionMask = correctionMask;
         }
 
         public double DetectionThreshold { get; }
         
-        public string DataDir { get; }
-
         public string Algorithm { get; }
 
-        public static DetectionSettings Default { get; } = new DetectionSettings(0.1d, "data", "CNT");
+        public string CorrectionMask { get; }
+
+        public static DetectionSettings Default { get; } = new DetectionSettings(0.1d, "CNT", "None");
     }
 }
