@@ -8,15 +8,4 @@ namespace NVs.OccupancySensor.CV.Detection.Correction
         Image<Gray, byte> Apply(Image<Gray, byte> source);
     }
 
-    public interface IStatefulCorrectionStrategy : ICorrectionStrategy 
-    {
-        void Load();
-        
-        void Save();
-
-        bool IsLearning  { get; }
-
-        void Reset();
-    }
-
 }
