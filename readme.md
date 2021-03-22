@@ -56,7 +56,7 @@ This algorithm has a few settings to tweak ([documentation](https://sagi-z.githu
 * `CV:Detection:ForegroundMaskCorrection` - a post-processing correction options, optional. Default is _None_. Valid values are:
   * `None` - no correction will be performed
   * `StaticMask` - an additional static mask will be applied to the computed foreground mask. This mode is introduces to handle the cases when borders of the static object are getting marked as foreground on noised images. This mode uses additional parameter:
-    * `CV:Detection:ForegroundMaskCorrection:StaticMask:Location` - a path to the static mask, optional. Default is _"data/correction_mask.bin". Should be 1-bit mask with the same size as incoming video stream.  
+    * `CV:Detection:ForegroundMaskCorrection:StaticMask:PathToFile` - a path to the static mask, optional. Default is _"data/correction_mask.bin". Should be 1-bit mask with the same size as incoming video stream.  
 #### MQTT
 Application uses MQTT.Net to build MQTT client. The following settings used to connect application to MQTT broker:
 * `MQTT:ClientId` - the string value that defines client identifier for MQTT client. Required. Does not have a default value

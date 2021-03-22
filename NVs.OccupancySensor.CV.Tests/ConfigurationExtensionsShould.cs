@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using NVs.OccupancySensor.CV.Settings;
+using NVs.OccupancySensor.CV.Settings.Correction;
 using NVs.OccupancySensor.CV.Settings.Denoising;
 using NVs.OccupancySensor.CV.Settings.Subtractors;
 using NVs.OccupancySensor.CV.Utils;
@@ -229,5 +231,35 @@ namespace NVs.OccupancySensor.CV.Tests
             Assert.Equal(expectedAlgorithm, config.Object.GetDenoisingSettings().Algorithm);
         }
 
+        [Fact]
+        public void ReturnSettingsForStaticMaskCorrection()
+        {
+            var expectedPath = "something_strange/but_absolutely.expected";
+            var section = new Mock<IConfigurationSection>();
+            section.Setup(s => s["PathToFile"]).Returns(expectedPath);
+
+            var config = new Mock<IConfiguration>();
+            config.Setup(c => c.GetSection("CV:Detection:ForegroundMaskCorrection:StaticMask")).Returns(section.Object);
+
+            var settings = config.Object.GetStaticMaskSettings();
+            Assert.Equal(expectedPath, settings.MaskPath);
+        }
+
+        [Fact]
+        public void ReturnDefaultSettingsIfSectionDoesNotExists()
+        {
+            var settings = new Mock<IConfiguration>().Object.GetStaticMaskSettings();
+            Assert.Equal(StaticMaskSettings.Default.MaskPath, settings.MaskPath);
+        }
+
+        [Fact]
+        public void ReturnDefaultPathForStaticMaskCorrectionIfItsNotProvided()
+        {
+            var config = new Mock<IConfiguration>();
+            config.Setup(c => c.GetSection("CV:Detection:ForegroundMaskCorrection:StaticMask")).Returns(new Mock<IConfigurationSection>().Object);
+
+            var settings = config.Object.GetStaticMaskSettings();
+            Assert.Equal(StaticMaskSettings.Default.MaskPath, settings.MaskPath);
+        }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using System;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
-using NVs.OccupancySensor.CV.Denoising.Denoisers;
 using NVs.OccupancySensor.CV.Settings;
+using NVs.OccupancySensor.CV.Settings.Correction;
 using NVs.OccupancySensor.CV.Settings.Denoising;
 using NVs.OccupancySensor.CV.Settings.Subtractors;
 
@@ -70,12 +70,19 @@ namespace NVs.OccupancySensor.CV.Utils
             return new DenoisingSettings(section?["Algorithm"] ?? DenoisingSettings.Default.Algorithm);
         }
 
-        internal static IMedianBlurSettings GetMedianBlurDenoisingSettings([NotNull] this IConfiguration config)
+        internal static MedianBlurDenoisingSettings GetMedianBlurDenoisingSettings([NotNull] this IConfiguration config)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             var section = config.GetSection("CV:Denoising:MedianBlur");
 
             return new MedianBlurDenoisingSettings(int.TryParse(section?["K"], out var k) ? k : MedianBlurDenoisingSettings.Default.K);
+        }
+
+        internal static StaticMaskSettings GetStaticMaskSettings([NotNull] this IConfiguration config)
+        {
+            if (config == null) throw new ArgumentNullException(nameof(config));
+            var section = config.GetSection("CV:Detection:ForegroundMaskCorrection:StaticMask");
+            return new StaticMaskSettings(section?["PathToFile"] ?? StaticMaskSettings.Default.MaskPath);
         }
     }
 }
