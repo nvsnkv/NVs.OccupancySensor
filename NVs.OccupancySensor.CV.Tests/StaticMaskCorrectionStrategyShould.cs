@@ -20,8 +20,7 @@ namespace NVs.OccupancySensor.CV.Tests
             [1, 0] = new Gray(0),
             [1, 1] = new Gray(0)
         };
-
-
+        
         [Fact]
         public void ApplyTheMaskToTheInputImage()
         {
@@ -58,6 +57,42 @@ namespace NVs.OccupancySensor.CV.Tests
 
             var savedMask = new Image<Gray, byte>(MaskPath);
             Assert.Equal(0, savedMask.AbsDiff(mask).CountNonzero()[0]);
+        }
+
+        [Fact]
+        public void UseSolidMaskIfNothingWasLoaded()
+        {
+            var image = new Image<Gray, byte>(2, 2)
+            {
+                [0, 0] = new Gray(0),
+                [0, 1] = new Gray(255),
+                [1, 0] = new Gray(255),
+                [1, 1] = new Gray(0)
+            };
+
+            var result = strategy.Apply(image);
+
+            Assert.Equal(image, result);
+        }
+
+        [Fact]
+        public void UseSolidMaskAfterReset()
+        {
+            var image = new Image<Gray, byte>(2, 2)
+            {
+                [0, 0] = new Gray(0),
+                [0, 1] = new Gray(255),
+                [1, 0] = new Gray(255),
+                [1, 1] = new Gray(0)
+            };
+
+            mask.Save(MaskPath);
+            strategy.Load();
+            strategy.Reset();
+
+            var result = strategy.Apply(image);
+
+            Assert.Equal(image, result);
         }
 
         public void Dispose()
