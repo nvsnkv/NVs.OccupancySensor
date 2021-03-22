@@ -8,5 +8,4 @@ namespace NVs.OccupancySensor.CV.Detection.Correction
 
         void Reset();
     }
-
 }
