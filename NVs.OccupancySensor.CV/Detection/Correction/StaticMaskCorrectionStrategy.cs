@@ -9,12 +9,11 @@ namespace NVs.OccupancySensor.CV.Detection.Correction
 {
     sealed class StaticMaskCorrectionStrategy : IStatefulCorrectionStrategy
     {
-        private static readonly double LearningFactor = 0.1;
         [NotNull] private readonly IStaticMaskSettings settings;
         private readonly ReaderWriterLockSlim maskLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
         private volatile Image<Gray, byte> mask;
-        private volatile bool isLearning;
-
+        private volatile Image<Gray, byte> adjusted;
+        
         public StaticMaskCorrectionStrategy([NotNull] IStaticMaskSettings settings)
         {
             this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
@@ -44,7 +43,7 @@ namespace NVs.OccupancySensor.CV.Detection.Correction
             var result = new Image<Gray, byte>(maskCopy.Width, maskCopy.Height);
             CvInvoke.BitwiseAnd(source, maskCopy, result);
 
-            if (isLearning)
+            if (IsLearning)
             {
                 AdjustMask(source);
             }
@@ -60,7 +59,7 @@ namespace NVs.OccupancySensor.CV.Detection.Correction
         public void Save()
         {
             Mask.Save(settings.MaskPath);
-            isLearning = false;
+            adjusted = null;
         }
 
         public void Reset()
@@ -68,7 +67,7 @@ namespace NVs.OccupancySensor.CV.Detection.Correction
             var copy = Mask;
             if (copy == null) throw new InvalidOperationException("Unable to reset mask if previous mask was not defined!");
             ResetMask(copy.Size);
-            isLearning = true;
+            AdjustMask(Mask);
         }
 
         private Image<Gray, byte> Mask
@@ -88,6 +87,8 @@ namespace NVs.OccupancySensor.CV.Detection.Correction
                 maskLock.ExitWriteLock();
             }
         }
+
+        private bool IsLearning => adjusted != null;
         private void ResetMask(Size size)
         {
             var image = new Image<Gray, byte>(size);
@@ -98,7 +99,13 @@ namespace NVs.OccupancySensor.CV.Detection.Correction
 
         private void AdjustMask(Image<Gray, byte> source)
         {
-            throw new NotImplementedException();
+            if (adjusted == null)
+            {
+                adjusted = new Image<Gray, byte>(source.Size);
+            }
+            
+            adjusted = adjusted.AddWeighted(source, 0.95d, 0.05d, 0d);
+            Mask = adjusted.ThresholdBinaryInv(new Gray(200), new Gray(255));
         }
     }
 }
