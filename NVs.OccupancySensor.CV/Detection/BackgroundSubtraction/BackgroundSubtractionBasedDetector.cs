@@ -7,6 +7,7 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.DecisionMaking;
 using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.Subtractors;
+using NVs.OccupancySensor.CV.Detection.Correction;
 using NVs.OccupancySensor.CV.Utils;
 
 namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
@@ -15,24 +16,28 @@ namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
     {
         private readonly ProcessingLock processingLock = new ProcessingLock();
         private readonly IBackgroundSubtractorFactory factory;
+        [NotNull] private readonly ICorrectionStrategyFactory correctionStrategyFactory;
         private readonly ILogger<BackgroundSubtractionBasedDetector> logger;
         private readonly IDecisionMaker decisionMaker;
 
         private volatile ISubtractionStrategy subtractor;
+        private volatile ICorrectionStrategy corrector;
 
         private bool? peopleDetected;
         private Image<Gray, byte> mask;
         private IBackgroundSubtractionBasedDetectorSettings settings;
 
 
-        public BackgroundSubtractionBasedDetector([NotNull] IBackgroundSubtractorFactory factory, [NotNull] IDecisionMaker decisionMaker, [NotNull] ILogger<BackgroundSubtractionBasedDetector> logger, [NotNull] IBackgroundSubtractionBasedDetectorSettings settings)
+        public BackgroundSubtractionBasedDetector([NotNull] IBackgroundSubtractorFactory factory, [NotNull] ICorrectionStrategyFactory correctionStrategyFactory, [NotNull] IDecisionMaker decisionMaker, [NotNull] ILogger<BackgroundSubtractionBasedDetector> logger, [NotNull] IBackgroundSubtractionBasedDetectorSettings settings)
         {
             this.decisionMaker = decisionMaker ?? throw new ArgumentNullException(nameof(decisionMaker));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
+            this.correctionStrategyFactory = correctionStrategyFactory ?? throw new ArgumentNullException(nameof(correctionStrategyFactory));
             this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
 
             subtractor = this.factory.Create(Settings.Algorithm);
+            corrector = this.correctionStrategyFactory.Create(Settings.CorrectionAlgorithm);
             this.decisionMaker.Settings = Settings;
         }
             
@@ -67,6 +72,9 @@ namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
             {
                 fgMask = subtractor.GetForegroundMask(value);
                 logger.LogInformation("Background subtracted");
+
+                fgMask = corrector.Apply(fgMask);
+                logger.LogInformation("Correction applied");
             }
             catch (Exception e)
             {
@@ -94,6 +102,9 @@ namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
             subtractor.Dispose();
             subtractor = factory.Create(Settings.Algorithm);
             logger.LogInformation($"Subtractor recreated. Algorithm '{Settings.Algorithm}' used");
+
+            corrector = correctionStrategyFactory.Create(Settings.CorrectionAlgorithm);
+            logger.LogInformation($"Corrector recreated. Algorithm '{Settings.CorrectionAlgorithm}' used");
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

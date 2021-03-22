@@ -10,6 +10,7 @@ using NVs.OccupancySensor.CV.Detection;
 using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction;
 using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.DecisionMaking;
 using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.Subtractors;
+using NVs.OccupancySensor.CV.Detection.Correction;
 using NVs.OccupancySensor.CV.Observation;
 using NVs.OccupancySensor.CV.Sense;
 
@@ -42,9 +43,12 @@ namespace NVs.OccupancySensor.CV.Utils
             });
 
             services.AddSingleton<IBackgroundSubtractorFactory>(s => new BackgroundSubtractorFactory(s.GetService<IConfiguration>()?.GetCNTSubtractorSettings() ?? throw new InvalidOperationException("CNTSubtractor settings dependency was not resolved")));
+            services.AddSingleton<ICorrectionStrategyFactory>(s =>
+                new CorrectionStrategyFactory(s.GetService<IConfiguration>()?.GetStaticMaskSettings() ?? throw new InvalidOperationException("ForegroundMaskCorrection settings dependency were not resolved")));
             
             services.AddSingleton<IBackgroundSubtractionBasedDetector>(s => new BackgroundSubtractionBasedDetector(
                 s.GetService<IBackgroundSubtractorFactory>() ?? throw new InvalidOperationException("BackgroundSubtractorFactory dependency was not resolved"),
+                s.GetService<ICorrectionStrategyFactory>() ?? throw new InvalidOperationException("CorrectionStrategyFactory dependency was not resolved"),
                 s.GetService<IDecisionMaker>() ?? throw new InvalidOperationException("DecisionMaker dependency was not resolved!"),
                 s.GetService<ILogger<BackgroundSubtractionBasedDetector>>() ?? throw new InvalidOperationException("BackgroundSubtractionBasedDetector logger dependency was not resolved!"),
                 s.GetService<IConfiguration>()?.GetDetectionSettings() ?? throw new InvalidOperationException("Detection settings were not resolved")

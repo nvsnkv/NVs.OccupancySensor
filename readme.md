@@ -11,10 +11,10 @@ On a high level, application is doing the following set of activities to find ou
 1. Camera captures an image;
 1. Captured image is getting processed by denoising block;
 1. Denoised image is getting processed by detection logic:
-  1. Application builds the foreground mask from the denoised image;
-  1. Foreground mask is getting adjusted using the correction mask to exclude false-positives; 
-  1. Finally, detector computes foreground/background pixel ratio;
-  1. Computed value is getting compared with the threshold: if value is greater than threshold, application decides that someone is present in the room.
+    1. Application builds the foreground mask from the denoised image;
+    1. Foreground mask is getting adjusted using the correction mask to exclude false-positives; 
+    1. Finally, detector computes foreground/background pixel ratio;
+    1. Computed value is getting compared with the threshold: if value is greater than threshold, application decides that someone is present in the room.
 1. Detection results are getting published to MQTT broker by MQTT client.
 ## Configuration
 Application has fair amount of configurable items: 
@@ -30,33 +30,33 @@ App uses .Net Core configuration, so you can change the settings by:
 * `CV:Capture:FrameInterval` - the timespan that defines how often application will request new frames from the camera. Default is _100 milliseconds_
 #### Denoising
 * `CV:Denoising:Algorithm` - denoising algorithm to use. Default is _None_
-  * `None` - no denoising performed. The image captured from the camera goes directly to detection logic
-  * `FastNlMeans` - ([FastNlMeansDenoising](https://docs.opencv.org/4.5.1/d5/d69/tutorial_py_non_local_means.html) function used, documentation can be found [here](https://emgu.com/wiki/files/4.5.1/document/html/58b1b703-e4a2-94d9-4843-efe674bae0a3.htm)).
+    * `None` - no denoising performed. The image captured from the camera goes directly to detection logic
+    * `FastNlMeans` - ([FastNlMeansDenoising](https://docs.opencv.org/4.5.1/d5/d69/tutorial_py_non_local_means.html) function used, documentation can be found [here](https://emgu.com/wiki/files/4.5.1/document/html/58b1b703-e4a2-94d9-4843-efe674bae0a3.htm)).
 There are several algorithm options that may be adjusted:
-    * `CV:Denoising:FastNlMeans:H` - rational, optional. Default is _3_`erds
-    * `CV:Denoising:FastNlMeans:TemplateWindowSize` - odd integer, optional. Default is _7_
-    * `CV:Denoising:FastNlMeans:SearchWindowSize` - odd integer, optional. Default is _21_
-  * `FastNlMeansColored` - ([FastNlMeansColoredDenoisingColored](https://docs.opencv.org/4.5.1/d5/d69/tutorial_py_non_local_means.html) function used, documentation can be found [here](https://emgu.com/wiki/files/4.5.1/document/html/55cd7112-6814-99e7-76f4-ce3b8b8d0694.htm)).
+        * `CV:Denoising:FastNlMeans:H` - rational, optional. Default is _3_`erds
+        * `CV:Denoising:FastNlMeans:TemplateWindowSize` - odd integer, optional. Default is _7_
+        * `CV:Denoising:FastNlMeans:SearchWindowSize` - odd integer, optional. Default is _21_
+    * `FastNlMeansColored` - ([FastNlMeansColoredDenoisingColored](https://docs.opencv.org/4.5.1/d5/d69/tutorial_py_non_local_means.html) function used, documentation can be found [here](https://emgu.com/wiki/files/4.5.1/document/html/55cd7112-6814-99e7-76f4-ce3b8b8d0694.htm)).
 There are several algorithm options that may be adjusted:
-    * `CV:Denoising:FastNlMeans:H` - rational, optional. Default is _3_`
-    * `CV:Denoising:FastNlMeans:HColor` - rational, optional. Default is _3_
-    * `CV:Denoising:FastNlMeans:TemplateWindowSize` - odd integer, optional. Default is _7_
-    * `CV:Denoising:FastNlMeans:SearchWindowSize` - odd integer, optional. Default is _21_
-  * `MedianBlur` - [MedianBlur](https://emgu.com/wiki/files/4.5.1/document/html/32b54325-0d91-bedb-60b4-910e4c65a8db.htm) function used. The only adjustable parameter is:
-    * `CV:Denoising:MedianBlur:K` - odd integer greater then 1, optional. Default is _3_
+        * `CV:Denoising:FastNlMeans:H` - rational, optional. Default is _3_`
+        * `CV:Denoising:FastNlMeans:HColor` - rational, optional. Default is _3_
+        * `CV:Denoising:FastNlMeans:TemplateWindowSize` - odd integer, optional. Default is _7_
+        * `CV:Denoising:FastNlMeans:SearchWindowSize` - odd integer, optional. Default is _21_
+    * `MedianBlur` - [MedianBlur](https://emgu.com/wiki/files/4.5.1/document/html/32b54325-0d91-bedb-60b4-910e4c65a8db.htm) function used. The only adjustable parameter is:
+        * `CV:Denoising:MedianBlur:K` - odd integer greater then 1, optional. Default is _3_
 #### Detection
 * `CV:Detection:Threshold` - a rational value between 0 and 1 that defines sensor sensitivity. Bigger values makes detector less sensitive. Default is _0.1_
 * `CV:Detection:Algorithm` - background subtraction algorithm to use. Default is _CNT_.
-  * `CNT` - [CouNT](https://sagi-z.github.io/BackgroundSubtractorCNT/) subtraction algorithm created by [sagi-z](https://github.com/sagi-z). 
+    * `CNT` - [CouNT](https://sagi-z.github.io/BackgroundSubtractorCNT/) subtraction algorithm created by [sagi-z](https://github.com/sagi-z). 
 This algorithm has a few settings to tweak ([documentation](https://sagi-z.github.io/BackgroundSubtractorCNT/doxygen/html/index.html)):
-    * `CV:Detection:CNT:MinPixelStability` - integer, optional. Default is _15_
-    * `CV:Detection:CNT:UseHistory` - boolean, optional. Default is _True_
-    * `CV:Detection:CNT:MaxPixelStability` - integer, optional. Default is _900_
-    * `CV:Detection:CNT:IsParallel` - boolean, optional. Default is _True_
-* `CV:Detection:ForegroundMaskCorrection` - a post-processing correction options, optional. Default is _None_. Valid values are:
-  * `None` - no correction will be performed
-  * `StaticMask` - an additional static mask will be applied to the computed foreground mask. This mode is introduces to handle the cases when borders of the static object are getting marked as foreground on noised images. This mode uses additional parameter:
-    * `CV:Detection:ForegroundMaskCorrection:StaticMask:PathToFile` - a path to the static mask, optional. Default is _"data/correction_mask.bin". Should be 1-bit mask with the same size as incoming video stream.  
+        * `CV:Detection:CNT:MinPixelStability` - integer, optional. Default is _15_
+        * `CV:Detection:CNT:UseHistory` - boolean, optional. Default is _True_
+        * `CV:Detection:CNT:MaxPixelStability` - integer, optional. Default is _900_
+        * `CV:Detection:CNT:IsParallel` - boolean, optional. Default is _True_
+* `CV:Detection:CorrectionAlgorithm` - a post-processing correction options, optional. Default is _None_. Valid values are:
+    * `None` - no correction will be performed
+    * `StaticMask` - an additional static mask will be applied to the computed foreground mask. This mode is introduces to handle the cases when borders of the static object are getting marked as foreground on noised images. This mode uses additional parameter:
+        * `CV:Detection:ForegroundMaskCorrection:StaticMask:PathToFile` - a path to the static mask, optional. Default is _"data/correction_mask.bin". Should be 1-bit mask with the same size as incoming video stream.    
 #### MQTT
 Application uses MQTT.Net to build MQTT client. The following settings used to connect application to MQTT broker:
 * `MQTT:ClientId` - the string value that defines client identifier for MQTT client. Required. Does not have a default value
@@ -94,20 +94,20 @@ Run:
 ```sh
 #!/bin/bash
 docker run -e "CV:Capture:FrameInterval"="00:00:01" \
-  -e "MQTT:ClientId"="sensor_dev" \
-  -e "MQTT:Server"="127.0.0.1" \
-  -e "MQTT:USER"="user" \
-  -e "MQTT:Password"="i have no clue" \
-  -e "StartSensor"="True" \
-  -e "StartMQTT"="True" \
-  --device /dev/video0 \ #video device needs to be added to the container if CV:Capture:Source is not a file or URL
-  -p 40080:80 \ #container exposes port 80 by default
-  -v occupancy_sensor_data:/app/data
-  --rm \
-  occupancy_sensor
+    -e "MQTT:ClientId"="sensor_dev" \
+    -e "MQTT:Server"="127.0.0.1" \
+    -e "MQTT:USER"="user" \
+    -e "MQTT:Password"="i have no clue" \
+    -e "StartSensor"="True" \
+    -e "StartMQTT"="True" \
+    --device /dev/video0 \ #video device needs to be added to the container if CV:Capture:Source is not a file or URL
+    -p 40080:80 \ #container exposes port 80 by default
+    -v occupancy_sensor_data:/app/data
+    --rm \
+    occupancy_sensor
 ```
 #### Swagger
 When built in debug, application exposes Swagger UI on URL `/swagger/index.html`. This UI allows to explore and interact with HTTP API exposed by this app.
 #### Known issues as of January 2021
 * Cross-compilation using `qemu-user-static` on x86_64 machine may fail during dotnet build - dotnet currently does not support QEMU. See [this comment](https://github.com/dotnet/dotnet-docker/issues/1512#issuecomment-562180086) for more details
-* Image creation fails on `apt-get update` when building on "Raspbian 10 GNU/Linux buster" - `libseccomp2` package needs to be updated on host machine to fix the original issue. Please refer to details [here](https://askubuntu.com/questions/1263284/apt-update-throws-signature-error-in-ubuntu-20-04-container-on-arm) and [here](https://github.com/moby/moby/issues/40734) 
+* Docker image creation fails on `apt-get update` when building on "Raspbian 10 GNU/Linux buster" - `libseccomp2` package needs to be updated on host machine to fix the original issue. Please refer to details [here](https://askubuntu.com/questions/1263284/apt-update-throws-signature-error-in-ubuntu-20-04-container-on-arm) and [here](https://github.com/moby/moby/issues/40734) 

@@ -33,7 +33,7 @@ namespace NVs.OccupancySensor.CV.Utils
             return new DetectionSettings(
                 double.TryParse(section?["Threshold"], out var result) ? result : DetectionSettings.Default.DetectionThreshold,
                 section?["Algorithm"] ?? DetectionSettings.Default.Algorithm,
-                section?["CorrectionMask"] ?? DetectionSettings.Default.CorrectionMask);
+                section?["CorrectionAlgorithm"] ?? DetectionSettings.Default.CorrectionAlgorithm);
         }
 
         internal static CNTSubtractorSettings GetCNTSubtractorSettings([NotNull] this IConfiguration config)

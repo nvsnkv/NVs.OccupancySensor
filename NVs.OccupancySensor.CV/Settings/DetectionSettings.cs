@@ -9,14 +9,14 @@ namespace NVs.OccupancySensor.CV.Settings
         {
             DetectionThreshold = threshold;
             Algorithm = algorithm;
-            CorrectionMask = correctionMask;
+            CorrectionAlgorithm = correctionMask;
         }
 
         public double DetectionThreshold { get; }
         
         public string Algorithm { get; }
 
-        public string CorrectionMask { get; }
+        public string CorrectionAlgorithm { get; }
 
         public static DetectionSettings Default { get; } = new DetectionSettings(0.1d, "CNT", "None");
     }

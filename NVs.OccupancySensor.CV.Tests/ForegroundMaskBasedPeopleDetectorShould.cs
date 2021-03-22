@@ -10,6 +10,7 @@ using NVs.OccupancySensor.CV.Detection;
 using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction;
 using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.DecisionMaking;
 using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.Subtractors;
+using NVs.OccupancySensor.CV.Detection.Correction;
 using NVs.OccupancySensor.CV.Settings;
 using Xunit;
 
@@ -22,6 +23,8 @@ namespace NVs.OccupancySensor.CV.Tests
         private readonly Mock<ILogger<BackgroundSubtractionBasedDetector>> logger = new Mock<ILogger<BackgroundSubtractionBasedDetector>>();
         private readonly Mock<ISubtractionStrategy> subtractor = new Mock<ISubtractionStrategy>();
         private readonly Mock<IBackgroundSubtractorFactory> factory = new Mock<IBackgroundSubtractorFactory>();
+        private readonly Mock<ICorrectionStrategyFactory> correctionFactory = new Mock<ICorrectionStrategyFactory>();
+        private readonly Mock<ICorrectionStrategy> corrector = new Mock<ICorrectionStrategy>();
 
         public BackgroundSubtractionBasedDetectorShould()
         {
@@ -29,7 +32,12 @@ namespace NVs.OccupancySensor.CV.Tests
                 .Setup(s => s.GetForegroundMask(It.IsAny<Image<Rgb, byte>>()))
                 .Returns(new Image<Gray, byte>(1, 1));
 
+            corrector
+                .Setup(s => s.Apply(It.IsAny<Image<Gray, byte>>()))
+                .Returns(new Image<Gray, byte>(1, 1));
+
             factory.Setup(f => f.Create(SupportedAlgorithms.CNT.ToString())).Returns(subtractor.Object);
+            correctionFactory.Setup(f => f.Create(It.IsAny<string>())).Returns(corrector.Object);
         }
 
         [Fact]
@@ -38,7 +46,7 @@ namespace NVs.OccupancySensor.CV.Tests
             decisionMaker.Setup(m => m.DetectPresence(It.IsAny<Image<Gray, byte>>())).Returns(true);
 
             var propertiesChanged = new List<string>();
-            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, correctionFactory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
             detector.PropertyChanged += (_, e) => propertiesChanged.Add(e.PropertyName);
             
             detector.OnNext(new Image<Rgb, byte>(1, 1));
@@ -52,7 +60,7 @@ namespace NVs.OccupancySensor.CV.Tests
             decisionMaker.Setup(m => m.DetectPresence(It.IsAny<Image<Gray, byte>>())).Returns(false);
 
             var propertiesChanged = new List<string>();
-            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, correctionFactory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
             detector.PropertyChanged += (_, e) => propertiesChanged.Add(e.PropertyName);
             
             detector.OnNext(new Image<Rgb, byte>(1, 1));
@@ -62,7 +70,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void SetPeopleDetectedToNullWhenStreamEnds()
         {
-            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, correctionFactory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
             detector.OnNext(new Image<Rgb, byte>(1,1));
 
             detector.OnCompleted();
@@ -72,7 +80,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void SetPeopleDetectedToNullWhenStreamErrorsOut()
         {
-            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, correctionFactory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
             detector.OnNext(new Image<Rgb, byte>(1,1));
 
             detector.OnError(new System.Exception());
@@ -82,7 +90,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void SetPeopleDetectedToNullOnReset()
         {
-            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, correctionFactory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
             detector.OnNext(new Image<Rgb, byte>(1,1));
 
             detector.Reset();
@@ -95,7 +103,7 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var propertiesChanged = new List<string>();
 
-            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, correctionFactory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
             detector.PropertyChanged += (o, e) => propertiesChanged.Add(e.PropertyName);
 
             detector.OnNext(new Image<Rgb, byte>(1,1));
@@ -106,7 +114,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void SetMaskToNullWhenStreamEnds()
         {
-            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, correctionFactory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
             detector.OnNext(new Image<Rgb, byte>(1,1));
 
             detector.OnCompleted();
@@ -116,7 +124,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void SetMaskToNullWhenStreamErrorsOut()
         {
-            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, correctionFactory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
             detector.OnNext(new Image<Rgb, byte>(1,1));
 
             detector.OnError(new System.Exception());
@@ -126,7 +134,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void SetMaskToNullOnReset()
         {
-            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, correctionFactory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
             detector.OnNext(new Image<Rgb, byte>(1,1));
 
             detector.Reset();
@@ -146,7 +154,7 @@ namespace NVs.OccupancySensor.CV.Tests
                 })
                 .Verifiable();
 
-            var detector = new BackgroundSubtractionBasedDetector(factory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
+            var detector = new BackgroundSubtractionBasedDetector(factory.Object, correctionFactory.Object, decisionMaker.Object ,logger.Object, DetectionSettings.Default);
             detector.PropertyChanged += (_, e) => maskChanged += nameof(detector.Mask).Equals(e.PropertyName) ? 1 : 0;
 
             Enumerable.Range(0, 3).ToList().ForEach(_ => Task.Factory.StartNew(() => detector.OnNext(new Image<Rgb, byte>(1, 1))));

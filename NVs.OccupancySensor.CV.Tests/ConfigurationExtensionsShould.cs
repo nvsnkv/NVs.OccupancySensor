@@ -97,11 +97,11 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var section = new Mock<IConfigurationSection>();
             var expectedAlgorithm = "StaticMask";
-            section.SetupGet(s => s["CorrectionMask"]).Returns(expectedAlgorithm);
+            section.SetupGet(s => s["CorrectionAlgorithm"]).Returns(expectedAlgorithm);
             var config = new Mock<IConfiguration>();
             config.Setup(c => c.GetSection("CV:Detection")).Returns(section.Object);
 
-            var actual = config.Object.GetDetectionSettings().CorrectionMask;
+            var actual = config.Object.GetDetectionSettings().CorrectionAlgorithm;
 
             Assert.Equal(expectedAlgorithm, actual);
         }

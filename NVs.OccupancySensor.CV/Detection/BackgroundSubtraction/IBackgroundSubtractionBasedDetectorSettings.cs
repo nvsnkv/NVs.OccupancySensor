@@ -6,6 +6,6 @@ namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
     {
         string Algorithm { get; }
 
-        string CorrectionMask { get; }
+        string CorrectionAlgorithm { get; }
     }
 }
