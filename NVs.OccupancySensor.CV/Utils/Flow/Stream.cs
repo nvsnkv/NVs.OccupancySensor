@@ -5,20 +5,20 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
-namespace NVs.OccupancySensor.CV.Utils
+namespace NVs.OccupancySensor.CV.Utils.Flow
 {
     internal abstract class Stream<T> : IObservable<T>
     {
         private readonly List<IObserver<T>> observers = new List<IObserver<T>>();
         private readonly object observersLock = new object();
-        protected readonly CancellationToken ct;
-        protected readonly ILogger logger;
+        protected readonly CancellationToken Ct;
+        protected readonly ILogger Logger;
 
         protected Stream(CancellationToken ct, [NotNull] ILogger logger)
         {
-            this.ct = ct;
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.ct.Register(() =>
+            this.Ct = ct;
+            this.Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.Ct.Register(() =>
             {
                 logger.LogInformation("Cancellation requested");
                 Notify(o => o.OnCompleted(), true);
@@ -47,9 +47,9 @@ namespace NVs.OccupancySensor.CV.Utils
 
         protected void Notify(Action<IObserver<T>> action, bool ignoreCancellation = false)
         {
-            if (!ignoreCancellation && ct.IsCancellationRequested)
+            if (!ignoreCancellation && Ct.IsCancellationRequested)
             {
-                logger.LogInformation("Cancellation requested before observers were notified");
+                Logger.LogInformation("Cancellation requested before observers were notified");
                 return;
             }
 
@@ -65,24 +65,24 @@ namespace NVs.OccupancySensor.CV.Utils
                 // ReSharper disable once MethodSupportsCancellation - cancellation will be checked inside actions
                 Task.Run(() =>
                 {
-                    if (!ignoreCancellation && ct.IsCancellationRequested)
+                    if (!ignoreCancellation && Ct.IsCancellationRequested)
                     {
-                        logger.LogInformation($"[Observer {observer.GetHashString()}] Cancellation requested before observer was notified");
+                        Logger.LogInformation($"[Observer {observer.GetHashString()}] Cancellation requested before observer was notified");
                         return;
                     }
 
                     try
                     {
                         action(observer);
-                        logger.LogInformation($"[Observer {observer.GetHashString()}] Notification succeeded");
+                        Logger.LogInformation($"[Observer {observer.GetHashString()}] Notification succeeded");
                     }
                     catch (Exception e)
                     {
-                        logger.LogError(e, $"[Observer {observer.GetHashString()}] Unable to notify observer!");
+                        Logger.LogError(e, $"[Observer {observer.GetHashString()}] Unable to notify observer!");
                     }
                 });
             }
-            logger.LogInformation("Notifications submitted");
+            Logger.LogInformation("Notifications submitted");
         }
 
         private sealed class Unsubscriber : IDisposable
