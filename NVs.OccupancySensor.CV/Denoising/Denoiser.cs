@@ -6,6 +6,7 @@ using Emgu.CV.Structure;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.Denoising.Denoisers;
+using NVs.OccupancySensor.CV.Utils;
 using NVs.OccupancySensor.CV.Utils.Flow;
 
 namespace NVs.OccupancySensor.CV.Denoising
@@ -21,10 +22,8 @@ namespace NVs.OccupancySensor.CV.Denoising
             this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
             this.Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
-            OutputStream = new DenoisingStream(factory.Create(settings.Algorithm), CancellationToken.None, logger);
+            OutputStream = new DenoisingStream(factory.Create(settings.Algorithm), Counter, CancellationToken.None, logger);
         }
-
-        public override event PropertyChangedEventHandler PropertyChanged;
 
         [NotNull]
         public IDenoisingSettings Settings
@@ -46,7 +45,7 @@ namespace NVs.OccupancySensor.CV.Denoising
 
         protected override ProcessingStream<Image<Rgb, byte>, Image<Rgb, byte>> CreateStream()
         {
-            return new DenoisingStream(factory.Create(Settings.Algorithm), CancellationToken.None, Logger);
+            return new DenoisingStream(factory.Create(Settings.Algorithm), Counter, CancellationToken.None, Logger);
         }
     }
 }

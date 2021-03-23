@@ -12,7 +12,14 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
         private readonly object streamLock = new object();
         protected ILogger Logger;
         protected volatile ProcessingStream<TIn, TOut> OutputStream;
+        protected readonly Counter Counter;
+
         public IObservable<TOut> Output => OutputStream;
+
+        protected Stage()
+        {
+            Counter = new Counter();
+        }
 
         public void OnCompleted()
         {
@@ -59,6 +66,8 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
             }
         }
 
+        public IStatistics Statistics => Counter;
+
         public virtual event PropertyChangedEventHandler PropertyChanged;
 
         protected void ReplaceStream(ProcessingStream<TIn, TOut> expectedStream, ProcessingStream<TIn, TOut> newStream)
@@ -75,12 +84,12 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
             OnPropertyChanged(nameof(Output));
         }
 
-        protected abstract ProcessingStream<TIn, TOut> CreateStream(); 
-
         [NotifyPropertyChangedInvocator]
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        protected abstract ProcessingStream<TIn, TOut> CreateStream();
     }
 }

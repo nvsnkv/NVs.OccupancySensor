@@ -10,6 +10,7 @@ using Moq;
 using NVs.OccupancySensor.CV.Denoising;
 using NVs.OccupancySensor.CV.Denoising.Denoisers;
 using NVs.OccupancySensor.CV.Tests.Utils;
+using NVs.OccupancySensor.CV.Utils;
 using Xunit;
 
 namespace NVs.OccupancySensor.CV.Tests
@@ -18,7 +19,7 @@ namespace NVs.OccupancySensor.CV.Tests
     {
         private readonly Mock<ILogger> logger = new Mock<ILogger>();
         private readonly Mock<IDenoisingStrategy> strategy = new Mock<IDenoisingStrategy>();
-
+        
         [Fact]
         public async Task ProvideDataForObservers()
         {
@@ -33,7 +34,7 @@ namespace NVs.OccupancySensor.CV.Tests
                 return value;
             });
 
-            var denoiser = new DenoisingStream(strategy.Object, CancellationToken.None, logger.Object);
+            var denoiser = new DenoisingStream(strategy.Object, new Counter(), CancellationToken.None, logger.Object);
             var observer = new TestImageObserver();
 
             using (denoiser.Subscribe(observer))
@@ -56,7 +57,7 @@ namespace NVs.OccupancySensor.CV.Tests
             var expectedImage = new Image<Rgb, byte>(10, 10);
             strategy.Setup(s => s.Denoise(inputImage)).Returns(expectedImage);
 
-            var denoiser = new DenoisingStream(strategy.Object, CancellationToken.None, logger.Object);
+            var denoiser = new DenoisingStream(strategy.Object, new Counter(), CancellationToken.None, logger.Object);
             var observer = new TestImageObserver();
 
             using (denoiser.Subscribe(observer))
@@ -79,7 +80,7 @@ namespace NVs.OccupancySensor.CV.Tests
                 return expectedImage;
             });
 
-            var denoiser = new DenoisingStream(strategy.Object, CancellationToken.None, logger.Object);
+            var denoiser = new DenoisingStream(strategy.Object, new Counter(), CancellationToken.None, logger.Object);
             var observer = new TestImageObserver();
 
             using (denoiser.Subscribe(observer))
@@ -98,7 +99,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public async Task CompleteStreamWhenRequested()
         {
-            var denoiser = new DenoisingStream(strategy.Object, CancellationToken.None, logger.Object);
+            var denoiser = new DenoisingStream(strategy.Object, new Counter(), CancellationToken.None, logger.Object);
             var observer = new TestImageObserver();
 
             using(denoiser.Subscribe(observer))
@@ -115,7 +116,7 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var inputImage = new Image<Rgb, byte>(1, 1);
             strategy.Setup(s => s.Denoise(inputImage)).Throws<TestException>();
-            var denoiser = new DenoisingStream(strategy.Object, CancellationToken.None, logger.Object);
+            var denoiser = new DenoisingStream(strategy.Object, new Counter(), CancellationToken.None, logger.Object);
             var observer = new TestImageObserver();
 
             using(denoiser.Subscribe(observer))
@@ -131,14 +132,14 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void BeNotCompletedByDefault()
         {
-            var denoiser = new DenoisingStream(strategy.Object, CancellationToken.None, logger.Object);
+            var denoiser = new DenoisingStream(strategy.Object, new Counter(), CancellationToken.None, logger.Object);
             Assert.False(denoiser.Completed);
         }
 
         [Fact]
         public void BeCompletedAfterCompletion()
         {
-            var denoiser = new DenoisingStream(strategy.Object, CancellationToken.None, logger.Object);
+            var denoiser = new DenoisingStream(strategy.Object, new Counter(), CancellationToken.None, logger.Object);
             denoiser.Complete();
 
             Assert.True(denoiser.Completed);
