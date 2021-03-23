@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Threading;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using NVs.OccupancySensor.CV.Settings;

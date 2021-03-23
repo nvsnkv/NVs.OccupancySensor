@@ -1,6 +1,6 @@
-﻿using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.DecisionMaking;
+﻿using NVs.OccupancySensor.CV.BackgroundSubtraction.DecisionMaking;
 
-namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction
+namespace NVs.OccupancySensor.CV.BackgroundSubtraction
 {
     public interface IBackgroundSubtractionBasedDetectorSettings : IDecisionMakerSettings
     {

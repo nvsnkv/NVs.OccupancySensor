@@ -1,7 +1,7 @@
 using Emgu.CV;
 using Emgu.CV.Structure;
 
-namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.DecisionMaking
+namespace NVs.OccupancySensor.CV.BackgroundSubtraction.DecisionMaking
 {
     public interface IDecisionMaker
     {

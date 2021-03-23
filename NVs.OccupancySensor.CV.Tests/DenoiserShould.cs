@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Castle.Core.Logging;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;

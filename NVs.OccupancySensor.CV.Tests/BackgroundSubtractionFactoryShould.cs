@@ -1,5 +1,5 @@
 ﻿using System;
-using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.Subtractors;
+using NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors;
 using NVs.OccupancySensor.CV.Settings;
 using NVs.OccupancySensor.CV.Settings.Subtractors;
 using Xunit;

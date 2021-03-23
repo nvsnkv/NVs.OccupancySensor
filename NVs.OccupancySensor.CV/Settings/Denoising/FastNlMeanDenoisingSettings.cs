@@ -1,4 +1,3 @@
-using NVs.OccupancySensor.CV.Denoising;
 using NVs.OccupancySensor.CV.Denoising.Denoisers;
 
 namespace NVs.OccupancySensor.CV.Settings.Denoising 

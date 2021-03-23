@@ -1,6 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
@@ -8,9 +6,9 @@ using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.API.ActionResults;
+using NVs.OccupancySensor.CV.BackgroundSubtraction;
 using NVs.OccupancySensor.CV.Capture;
 using NVs.OccupancySensor.CV.Denoising;
-using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction;
 using NVs.OccupancySensor.CV.Observation;
 using NVs.OccupancySensor.CV.Utils;
 

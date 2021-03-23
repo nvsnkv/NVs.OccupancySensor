@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 using JetBrains.Annotations;
 using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.Correction;
 

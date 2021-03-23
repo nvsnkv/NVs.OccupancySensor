@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using Emgu.CV.Aruco;
 
 namespace NVs.OccupancySensor.CV.Tests.Utils
 {

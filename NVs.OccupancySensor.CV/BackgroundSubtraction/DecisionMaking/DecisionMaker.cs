@@ -4,7 +4,7 @@ using Emgu.CV.Structure;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
-namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.DecisionMaking
+namespace NVs.OccupancySensor.CV.BackgroundSubtraction.DecisionMaking
 {
     internal sealed class DecisionMaker : IDecisionMaker
     {

@@ -1,4 +1,4 @@
-﻿namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.Subtractors
+﻿namespace NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors
 {
     public interface IBackgroundSubtractorFactory
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 
-namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.Subtractors
+namespace NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors
 {
     internal sealed class BackgroundSubtractorFactory : IBackgroundSubtractorFactory
     {

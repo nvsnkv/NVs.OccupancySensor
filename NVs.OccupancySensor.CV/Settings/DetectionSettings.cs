@@ -1,5 +1,4 @@
-﻿using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction;
-using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.DecisionMaking;
+﻿using NVs.OccupancySensor.CV.BackgroundSubtraction;
 
 namespace NVs.OccupancySensor.CV.Settings
 {

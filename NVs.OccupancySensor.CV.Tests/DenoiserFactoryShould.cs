@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestPlatform.Common.Utilities;
 using NVs.OccupancySensor.CV.Denoising.Denoisers;
 using NVs.OccupancySensor.CV.Settings;
 using NVs.OccupancySensor.CV.Settings.Denoising;
