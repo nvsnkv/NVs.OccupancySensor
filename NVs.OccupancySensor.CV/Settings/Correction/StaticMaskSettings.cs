@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using NVs.OccupancySensor.CV.Detection.Correction;
+using NVs.OccupancySensor.CV.Correction;
 
 namespace NVs.OccupancySensor.CV.Settings.Correction
 {

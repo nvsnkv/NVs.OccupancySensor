@@ -2,7 +2,7 @@
 using System.IO;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using NVs.OccupancySensor.CV.Detection.Correction;
+using NVs.OccupancySensor.CV.Correction;
 using NVs.OccupancySensor.CV.Settings.Correction;
 using Xunit;
 

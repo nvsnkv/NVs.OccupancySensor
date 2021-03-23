@@ -27,7 +27,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public async Task BypassImageIfNoDenoisingRequested()
         {
             var denoiser = new Denoiser(factory.Object, new DenoisingSettings(SupportedAlgorithms.None.ToString()), logger.Object);
-            var observer = new TestImageObserver();
+            var observer = new TestImageObserver<Rgb>();
             var expectedImage = new Image<Rgb, byte>(10, 5);
             
             using (denoiser.Output.Subscribe(observer))
@@ -43,8 +43,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public async Task CompleteOutputStreamWhenSourceStreamCompleted()
         {
             var denoiser = new Denoiser(factory.Object, new DenoisingSettings(SupportedAlgorithms.None.ToString()), logger.Object);
-            var observer = new TestImageObserver();
-            var expectedImage = new Image<Rgb, byte>(10, 5);
+            var observer = new TestImageObserver<Rgb>();
             
             using (denoiser.Output.Subscribe(observer))
             {
@@ -59,7 +58,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public async Task ForwardErrors()
         {
             var denoiser = new Denoiser(factory.Object, new DenoisingSettings(SupportedAlgorithms.None.ToString()), logger.Object);
-            var observer = new TestImageObserver();
+            var observer = new TestImageObserver<Rgb>();
             
             using (denoiser.Output.Subscribe(observer))
             {
@@ -74,7 +73,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public async Task CompleteStreamOnReset()
         {
             var denoiser = new Denoiser(factory.Object, new DenoisingSettings(SupportedAlgorithms.None.ToString()), logger.Object);
-            var observer = new TestImageObserver();
+            var observer = new TestImageObserver<Rgb>();
 
             using (denoiser.Output.Subscribe(observer))
             {

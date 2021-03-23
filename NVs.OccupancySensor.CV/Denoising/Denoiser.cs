@@ -17,10 +17,9 @@ namespace NVs.OccupancySensor.CV.Denoising
 
         private IDenoisingSettings settings;
 
-        public Denoiser([NotNull] IDenoiserFactory factory, [NotNull] IDenoisingSettings settings, [NotNull] ILogger<Denoiser> logger)
+        public Denoiser([NotNull] IDenoiserFactory factory, [NotNull] IDenoisingSettings settings, [NotNull] ILogger<Denoiser> logger):base(logger)
         {
             this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
-            this.Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
             OutputStream = new DenoisingStream(factory.Create(settings.Algorithm), Counter, CancellationToken.None, logger);
         }
@@ -35,12 +34,6 @@ namespace NVs.OccupancySensor.CV.Denoising
                 settings = value;
                 OnPropertyChanged();
             }
-        }
-
-        public void Reset()
-        {
-            var stream = CreateStream();
-            ReplaceStream(OutputStream, stream);
         }
 
         protected override ProcessingStream<Image<Rgb, byte>, Image<Rgb, byte>> CreateStream()

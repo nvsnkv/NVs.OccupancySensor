@@ -1,7 +1,7 @@
 using Emgu.CV;
 using Emgu.CV.Structure;
 
-namespace NVs.OccupancySensor.CV.Detection.Correction
+namespace NVs.OccupancySensor.CV.Correction
 {
     internal class BypassCorrectionStrategy : ICorrectionStrategy
     {

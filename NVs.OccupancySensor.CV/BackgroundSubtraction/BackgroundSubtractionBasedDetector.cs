@@ -5,13 +5,14 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
-using NVs.OccupancySensor.CV.BackgroundSubtraction.DecisionMaking;
 using NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors;
-using NVs.OccupancySensor.CV.Detection.Correction;
+using NVs.OccupancySensor.CV.Correction;
+using NVs.OccupancySensor.CV.Detection.DecisionMaking;
 using NVs.OccupancySensor.CV.Utils;
 
 namespace NVs.OccupancySensor.CV.BackgroundSubtraction
 {
+    [Obsolete]
     internal sealed class BackgroundSubtractionBasedDetector : IBackgroundSubtractionBasedDetector, IDisposable
     {
         private readonly ProcessingLock processingLock = new ProcessingLock();

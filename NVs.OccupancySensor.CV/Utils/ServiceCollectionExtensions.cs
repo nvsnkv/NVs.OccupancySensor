@@ -4,13 +4,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.BackgroundSubtraction;
-using NVs.OccupancySensor.CV.BackgroundSubtraction.DecisionMaking;
 using NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors;
 using NVs.OccupancySensor.CV.Capture;
+using NVs.OccupancySensor.CV.Correction;
 using NVs.OccupancySensor.CV.Denoising;
 using NVs.OccupancySensor.CV.Denoising.Denoisers;
 using NVs.OccupancySensor.CV.Detection;
-using NVs.OccupancySensor.CV.Detection.Correction;
+using NVs.OccupancySensor.CV.Detection.DecisionMaking;
 using NVs.OccupancySensor.CV.Observation;
 using NVs.OccupancySensor.CV.Sense;
 

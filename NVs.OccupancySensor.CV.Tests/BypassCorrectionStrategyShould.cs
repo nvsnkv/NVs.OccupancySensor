@@ -1,6 +1,6 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
-using NVs.OccupancySensor.CV.Detection.Correction;
+using NVs.OccupancySensor.CV.Correction;
 using Xunit;
 
 namespace NVs.OccupancySensor.CV.Tests

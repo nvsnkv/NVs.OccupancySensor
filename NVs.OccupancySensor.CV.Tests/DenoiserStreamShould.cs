@@ -35,7 +35,7 @@ namespace NVs.OccupancySensor.CV.Tests
             });
 
             var denoiser = new DenoisingStream(strategy.Object, new Counter(), CancellationToken.None, logger.Object);
-            var observer = new TestImageObserver();
+            var observer = new TestImageObserver<Rgb>();
 
             using (denoiser.Subscribe(observer))
             {
@@ -58,7 +58,7 @@ namespace NVs.OccupancySensor.CV.Tests
             strategy.Setup(s => s.Denoise(inputImage)).Returns(expectedImage);
 
             var denoiser = new DenoisingStream(strategy.Object, new Counter(), CancellationToken.None, logger.Object);
-            var observer = new TestImageObserver();
+            var observer = new TestImageObserver<Rgb>();
 
             using (denoiser.Subscribe(observer))
             {
@@ -81,7 +81,7 @@ namespace NVs.OccupancySensor.CV.Tests
             });
 
             var denoiser = new DenoisingStream(strategy.Object, new Counter(), CancellationToken.None, logger.Object);
-            var observer = new TestImageObserver();
+            var observer = new TestImageObserver<Rgb>();
 
             using (denoiser.Subscribe(observer))
             {
@@ -100,7 +100,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public async Task CompleteStreamWhenRequested()
         {
             var denoiser = new DenoisingStream(strategy.Object, new Counter(), CancellationToken.None, logger.Object);
-            var observer = new TestImageObserver();
+            var observer = new TestImageObserver<Rgb>();
 
             using(denoiser.Subscribe(observer))
             {
@@ -117,7 +117,7 @@ namespace NVs.OccupancySensor.CV.Tests
             var inputImage = new Image<Rgb, byte>(1, 1);
             strategy.Setup(s => s.Denoise(inputImage)).Throws<TestException>();
             var denoiser = new DenoisingStream(strategy.Object, new Counter(), CancellationToken.None, logger.Object);
-            var observer = new TestImageObserver();
+            var observer = new TestImageObserver<Rgb>();
 
             using(denoiser.Subscribe(observer))
             {

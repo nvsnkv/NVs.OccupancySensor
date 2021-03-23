@@ -1,11 +1,11 @@
-﻿using NVs.OccupancySensor.CV.BackgroundSubtraction.DecisionMaking;
+﻿using System;
+using NVs.OccupancySensor.CV.Detection.DecisionMaking;
 
 namespace NVs.OccupancySensor.CV.BackgroundSubtraction
 {
-    public interface IBackgroundSubtractionBasedDetectorSettings : IDecisionMakerSettings
+    [Obsolete]
+    public interface IBackgroundSubtractionBasedDetectorSettings : IDecisionMakerSettings, IBackgroundSubtractorSettings
     {
-        string Algorithm { get; }
-
         string CorrectionAlgorithm { get; }
     }
 }

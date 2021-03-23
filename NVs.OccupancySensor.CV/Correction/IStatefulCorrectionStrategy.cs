@@ -1,4 +1,4 @@
-namespace NVs.OccupancySensor.CV.Detection.Correction
+namespace NVs.OccupancySensor.CV.Correction
 {
     public interface IStatefulCorrectionStrategy : ICorrectionStrategy 
     {

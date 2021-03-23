@@ -1,5 +1,5 @@
 ﻿using System;
-using NVs.OccupancySensor.CV.Detection.Correction;
+using NVs.OccupancySensor.CV.Correction;
 using NVs.OccupancySensor.CV.Settings;
 using NVs.OccupancySensor.CV.Settings.Correction;
 using Xunit;

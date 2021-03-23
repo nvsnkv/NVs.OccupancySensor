@@ -1,4 +1,4 @@
-namespace NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.Correction
+namespace NVs.OccupancySensor.CV.Correction
 {
     public enum CorrectionMask 
     {

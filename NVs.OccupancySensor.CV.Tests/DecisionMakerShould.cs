@@ -2,7 +2,7 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NVs.OccupancySensor.CV.BackgroundSubtraction.DecisionMaking;
+using NVs.OccupancySensor.CV.Detection.DecisionMaking;
 using NVs.OccupancySensor.CV.Settings;
 using Xunit;
 

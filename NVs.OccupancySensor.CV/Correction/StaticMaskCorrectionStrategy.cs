@@ -5,7 +5,7 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using JetBrains.Annotations;
 
-namespace NVs.OccupancySensor.CV.Detection.Correction
+namespace NVs.OccupancySensor.CV.Correction
 {
     sealed class StaticMaskCorrectionStrategy : IStatefulCorrectionStrategy
     {

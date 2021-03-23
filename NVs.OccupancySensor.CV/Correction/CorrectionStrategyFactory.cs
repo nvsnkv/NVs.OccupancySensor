@@ -1,8 +1,7 @@
 using System;
 using JetBrains.Annotations;
-using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.Correction;
 
-namespace NVs.OccupancySensor.CV.Detection.Correction
+namespace NVs.OccupancySensor.CV.Correction
 {
     internal sealed class CorrectionStrategyFactory : ICorrectionStrategyFactory
     {

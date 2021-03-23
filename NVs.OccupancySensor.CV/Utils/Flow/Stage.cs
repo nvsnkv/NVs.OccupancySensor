@@ -10,15 +10,17 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
     {
         private readonly ProcessingLock processingLock = new ProcessingLock();
         private readonly object streamLock = new object();
-        protected ILogger Logger;
+        protected readonly Counter Counter = new Counter();
+        protected readonly ILogger Logger;
+
         protected volatile ProcessingStream<TIn, TOut> OutputStream;
-        protected readonly Counter Counter;
+        
 
         public IObservable<TOut> Output => OutputStream;
 
-        protected Stage()
+        protected Stage([NotNull] ILogger logger)
         {
-            Counter = new Counter();
+            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public void OnCompleted()
@@ -64,6 +66,12 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
             {
                 processingLock.Release();
             }
+        }
+
+        public void Reset()
+        {
+            var stream = CreateStream();
+            ReplaceStream(OutputStream, stream);
         }
 
         public IStatistics Statistics => Counter;
