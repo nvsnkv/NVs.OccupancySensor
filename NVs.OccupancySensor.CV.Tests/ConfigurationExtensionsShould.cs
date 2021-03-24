@@ -83,9 +83,9 @@ namespace NVs.OccupancySensor.CV.Tests
             var expectedAlgorithm = "CNT";
             section.SetupGet(s => s["Algorithm"]).Returns(expectedAlgorithm);
             var config = new Mock<IConfiguration>();
-            config.Setup(c => c.GetSection("CV:Detection")).Returns(section.Object);
+            config.Setup(c => c.GetSection("CV:Subtraction")).Returns(section.Object);
 
-            var actual = config.Object.GetDetectionSettings().Algorithm;
+            var actual = config.Object.GetSubtractionSettings().Algorithm;
 
             Assert.Equal(expectedAlgorithm, actual);
         }
@@ -95,11 +95,11 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var section = new Mock<IConfigurationSection>();
             var expectedAlgorithm = "StaticMask";
-            section.SetupGet(s => s["CorrectionAlgorithm"]).Returns(expectedAlgorithm);
+            section.SetupGet(s => s["Algorithm"]).Returns(expectedAlgorithm);
             var config = new Mock<IConfiguration>();
-            config.Setup(c => c.GetSection("CV:Detection")).Returns(section.Object);
+            config.Setup(c => c.GetSection("CV:Correction")).Returns(section.Object);
 
-            var actual = config.Object.GetDetectionSettings().CorrectionAlgorithm;
+            var actual = config.Object.GetCorrectionSettings().Algorithm;
 
             Assert.Equal(expectedAlgorithm, actual);
         }
@@ -111,9 +111,9 @@ namespace NVs.OccupancySensor.CV.Tests
             var expectedAlgorithm = "CNT";
             section.SetupGet(s => s["Algorithm"]).Returns((string)null);
             var config = new Mock<IConfiguration>();
-            config.Setup(c => c.GetSection("CV:Detection")).Returns(section.Object);
+            config.Setup(c => c.GetSection("CV:Subtraction")).Returns(section.Object);
 
-            var actual = config.Object.GetDetectionSettings().Algorithm;
+            var actual = config.Object.GetSubtractionSettings().Algorithm;
 
             Assert.Equal(expectedAlgorithm, actual);
         }
@@ -125,7 +125,7 @@ namespace NVs.OccupancySensor.CV.Tests
             var config = new Mock<IConfiguration>();
             
 
-            var actual = config.Object.GetDetectionSettings().Algorithm;
+            var actual = config.Object.GetSubtractionSettings().Algorithm;
 
             Assert.Equal(expectedAlgorithm, actual);
         }

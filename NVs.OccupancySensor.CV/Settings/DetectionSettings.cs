@@ -1,22 +1,17 @@
 ﻿using NVs.OccupancySensor.CV.BackgroundSubtraction;
+using NVs.OccupancySensor.CV.Detection;
 
 namespace NVs.OccupancySensor.CV.Settings
 {
-    public sealed class DetectionSettings : IBackgroundSubtractionBasedDetectorSettings
+    public sealed class DetectionSettings : IDetectionSettings
     {
-        public DetectionSettings(double threshold, string algorithm, string correctionMask)
+        public DetectionSettings(double threshold)
         {
             DetectionThreshold = threshold;
-            Algorithm = algorithm;
-            CorrectionAlgorithm = correctionMask;
         }
 
         public double DetectionThreshold { get; }
         
-        public string Algorithm { get; }
-
-        public string CorrectionAlgorithm { get; }
-
-        public static DetectionSettings Default { get; } = new DetectionSettings(0.1d, "CNT", "None");
+        public static DetectionSettings Default { get; } = new DetectionSettings(0.1d);
     }
 }

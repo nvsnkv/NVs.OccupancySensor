@@ -47,5 +47,14 @@ namespace NVs.OccupancySensor.CV.Tests
             factory.Setup(f => f.Create(It.IsAny<string>())).Returns(strategy.Object);
             return new BackgroundSubtractor(factory.Object, settings.Object, logger.Object);
         }
+
+        protected override void SetupLongRunningPayload(TimeSpan delay)
+        {
+            strategy.Setup(s => s.GetForegroundMask(It.IsAny<Image<Rgb, byte>>())).Returns(() =>
+            {
+                Task.Delay(delay).Wait();
+                return new Image<Gray, byte>(1, 1);
+            });
+        }
     }
 }

@@ -7,9 +7,11 @@ using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NVs.OccupancySensor.CV.Capture;
+using NVs.OccupancySensor.CV.Correction;
 using NVs.OccupancySensor.CV.Denoising;
 using NVs.OccupancySensor.CV.Detection;
 using Xunit;
+using IBackgroundSubtractor = NVs.OccupancySensor.CV.BackgroundSubtraction.IBackgroundSubtractor;
 
 namespace NVs.OccupancySensor.CV.Tests
 {
@@ -17,6 +19,8 @@ namespace NVs.OccupancySensor.CV.Tests
     {
         private readonly Mock<ICamera> camera = new Mock<ICamera>();
         private readonly Mock<IDenoiser> denoiser = new Mock<IDenoiser>();
+        private readonly Mock<IBackgroundSubtractor> subtractor = new Mock<IBackgroundSubtractor>();
+        private readonly Mock<ICorrector> corrector = new Mock<ICorrector>();
         private readonly Mock<IPeopleDetector> detector = new Mock<IPeopleDetector>();
         private readonly Mock<ILogger<Sense.OccupancySensor>> logger = new Mock<ILogger<Sense.OccupancySensor>>(); 
 
@@ -24,7 +28,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public void StartCameraOnStart()
         {
             camera.Setup(c => c.Start()).Verifiable("Start was not requested");
-            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, detector.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
 
             sensor.Start();
             camera.Verify();
@@ -34,7 +38,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public void StopCameraOnStop()
         {
             camera.Setup(c => c.Stop()).Verifiable("Stop was not requested");
-            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, detector.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
 
             sensor.Stop();
             camera.Verify();
@@ -44,7 +48,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public void RaiseIsRunningPropertyChangedWhenCameraRaisesCorrespondingPropertyChanged() 
         {
             var propertyName = string.Empty;
-            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, detector.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
             sensor.PropertyChanged += (_, e) => propertyName = e.PropertyName;
 
             camera.Raise(c => c.PropertyChanged += null, new PropertyChangedEventArgs(nameof(ICamera.IsRunning)));
@@ -56,7 +60,7 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             camera.SetupGet(c => c.IsRunning).Returns(false);
             detector.Setup(d => d.Reset()).Verifiable("Reset was not called!");
-            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, detector.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
 
             camera.Raise(c => c.PropertyChanged += null, new PropertyChangedEventArgs(nameof(ICamera.IsRunning)));
             detector.Verify();
@@ -67,7 +71,7 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             camera.SetupGet(c => c.IsRunning).Returns(false);
             denoiser.Setup(d => d.Reset()).Verifiable("Reset was not called!");
-            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, detector.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
 
             camera.Raise(c => c.PropertyChanged += null, new PropertyChangedEventArgs(nameof(ICamera.IsRunning)));
             denoiser.Verify();
@@ -84,7 +88,7 @@ namespace NVs.OccupancySensor.CV.Tests
             denoiser.SetupGet(d => d.Output).Returns(new CameraStream(capture.Object, CancellationToken.None, new Mock<ILogger<CameraStream>>().Object, TimeSpan.FromMilliseconds(100)));
             
             denoiser.Setup(d => d.OnNext(It.IsAny<Image<Rgb,byte>>())).Verifiable("Detect was not called!");
-            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, detector.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
             
             camera.Raise(c => c.PropertyChanged += null, new PropertyChangedEventArgs(nameof(ICamera.IsRunning)));
             
@@ -103,7 +107,7 @@ namespace NVs.OccupancySensor.CV.Tests
             denoiser.SetupGet(d => d.Output).Returns(new CameraStream(capture.Object, CancellationToken.None, new Mock<ILogger<CameraStream>>().Object, TimeSpan.FromMilliseconds(100)));
             
             denoiser.Setup(d => d.OnNext(It.IsAny<Image<Rgb,byte>>())).Verifiable("Detect was not called!");
-            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, detector.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
             
             camera.Raise(c => c.PropertyChanged += null, new PropertyChangedEventArgs(nameof(ICamera.IsRunning)));
             
@@ -115,7 +119,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public void RaisePresenceDetectedPropertyChangedWhenDetectorRaisesCorrespondingPropertyChanged()
         {
             var propertyName = string.Empty;
-            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, detector.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
             sensor.PropertyChanged += (_, e) => propertyName = e.PropertyName;
 
             detector.Raise(d => d.PropertyChanged += null, new PropertyChangedEventArgs(nameof(IPeopleDetector.PeopleDetected)));
@@ -129,7 +133,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public void ReturnSameValueAsPeopleDetectorFromPresenceDetected(bool? expected)
         {
             detector.SetupGet(d => d.PeopleDetected).Returns(expected);
-            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, detector.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
 
             Assert.Equal(expected, sensor.PresenceDetected);
         }
@@ -140,7 +144,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public void ReturnSameValueAsCameraFromIsRunning(bool expected)
         {
             camera.SetupGet(c => c.IsRunning).Returns(expected);
-            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, detector.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
 
             Assert.Equal(expected, sensor.IsRunning);
         }
@@ -149,7 +153,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public void UnsubscribeItselfFromCameraAfterDispose() 
         {
             bool propertyChangedRaised = false;
-            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, detector.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
             sensor.PropertyChanged += (_,__) => propertyChangedRaised = true;
 
             sensor.Dispose();
@@ -162,7 +166,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public void UnsubscribeItselfFromDetectorAfterDispose() 
         {
             bool propertyChangedRaised = false;
-            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, detector.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
             sensor.PropertyChanged += (_,__) => propertyChangedRaised = true;
 
             sensor.Dispose();

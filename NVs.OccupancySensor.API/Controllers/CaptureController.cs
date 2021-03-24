@@ -9,6 +9,7 @@ using NVs.OccupancySensor.API.ActionResults;
 using NVs.OccupancySensor.CV.BackgroundSubtraction;
 using NVs.OccupancySensor.CV.Capture;
 using NVs.OccupancySensor.CV.Denoising;
+using NVs.OccupancySensor.CV.Detection;
 using NVs.OccupancySensor.CV.Observation;
 using NVs.OccupancySensor.CV.Utils;
 
@@ -21,13 +22,13 @@ namespace NVs.OccupancySensor.API.Controllers
     {
         private readonly ICamera camera;
         [NotNull] private readonly IDenoiser denoiser;
-        private readonly IBackgroundSubtractionBasedDetector detector;
+        private readonly IPeopleDetector detector;
         private readonly IImageObserver<Rgb> rgbObserver;
         private readonly IImageObserver<Gray> grayObserver;
 
         private readonly ILogger<CaptureController> logger;
         
-        public CaptureController([NotNull] ICamera camera, [NotNull] IDenoiser denoiser, [NotNull] IBackgroundSubtractionBasedDetector detector, [NotNull] IImageObserver<Rgb> rgbObserver, [NotNull] IImageObserver<Gray> grayObserver, [NotNull] ILogger<CaptureController> logger)
+        public CaptureController([NotNull] ICamera camera, [NotNull] IDenoiser denoiser, [NotNull] IPeopleDetector detector, [NotNull] IImageObserver<Rgb> rgbObserver, [NotNull] IImageObserver<Gray> grayObserver, [NotNull] ILogger<CaptureController> logger)
         {
             this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
             this.denoiser = denoiser ?? throw new ArgumentNullException(nameof(denoiser));

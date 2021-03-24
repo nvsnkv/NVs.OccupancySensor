@@ -15,12 +15,14 @@ namespace NVs.OccupancySensor.CV.Tests
 {
     public sealed class DenoiserShould : StageShould<Rgb,Rgb>
     {
+        private readonly Mock<IDenoisingStrategy> strategy;
         private readonly Denoiser denoiser;
 
-        public DenoiserShould(): this(new Mock<ILogger<Denoiser>>(), new Mock<IDenoiserFactory>()) { }
+        public DenoiserShould(): this(new Mock<ILogger<Denoiser>>(), new Mock<IDenoiserFactory>(), new Mock<IDenoisingStrategy>()) { }
 
-        internal DenoiserShould(Mock<ILogger<Denoiser>> logger, Mock<IDenoiserFactory> factory): this(CreateDenoiser(logger, factory))
+        internal DenoiserShould(Mock<ILogger<Denoiser>> logger, Mock<IDenoiserFactory> factory, Mock<IDenoisingStrategy> strategy): this(CreateDenoiser(logger, factory, strategy))
         {
+            this.strategy = strategy;
         }
 
         internal DenoiserShould(Denoiser denoiser) : base(denoiser)
@@ -44,10 +46,21 @@ namespace NVs.OccupancySensor.CV.Tests
             Assert.Equal(expectedImage, observer.ReceivedItems.Keys.First());
         }
 
-        private static Denoiser CreateDenoiser(Mock<ILogger<Denoiser>> logger, Mock<IDenoiserFactory> factory)
+        private static Denoiser CreateDenoiser(Mock<ILogger<Denoiser>> logger, Mock<IDenoiserFactory> factory,
+            Mock<IDenoisingStrategy> strategy)
         {
-            factory.Setup(f => f.Create(SupportedAlgorithms.None.ToString())).Returns(new BypassDenoiser());
+            strategy.Setup(s => s.Denoise(It.IsAny<Image<Rgb, byte>>())).Returns(new Image<Rgb, byte>(1, 1));
+            factory.Setup(f => f.Create(SupportedAlgorithms.None.ToString())).Returns(strategy.Object);
             return new Denoiser(factory.Object, new DenoisingSettings(SupportedAlgorithms.None.ToString()), logger.Object);
+        }
+
+        protected override void SetupLongRunningPayload(TimeSpan delay)
+        {
+            strategy.Setup(s => s.Denoise(It.IsAny<Image<Rgb, byte>>())).Returns(() =>
+            {
+                Task.Delay(delay).Wait();
+                return new Image<Rgb, byte>(1, 1);
+            });
         }
     }
 }

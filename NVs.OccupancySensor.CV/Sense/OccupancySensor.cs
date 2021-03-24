@@ -3,7 +3,9 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
+using NVs.OccupancySensor.CV.BackgroundSubtraction;
 using NVs.OccupancySensor.CV.Capture;
+using NVs.OccupancySensor.CV.Correction;
 using NVs.OccupancySensor.CV.Denoising;
 using NVs.OccupancySensor.CV.Detection;
 
@@ -14,14 +16,19 @@ namespace NVs.OccupancySensor.CV.Sense
     {
         private readonly ICamera camera;
         private readonly IDenoiser denoiser;
+        [NotNull] private readonly IBackgroundSubtractor subtractor;
+        private readonly ICorrector corrector;
         private readonly IPeopleDetector detector;
         private readonly ILogger<OccupancySensor> logger;
         
-        private IDisposable cameraSubscription;
         private IDisposable denoiserSubscription;
+        private IDisposable subtractorSubscription;
+        private IDisposable correctorSubscription;
+        private IDisposable detectorSubscription;
         private bool isDisposed;
 
-        public OccupancySensor([NotNull] ICamera camera, [NotNull] IDenoiser denoiser, [NotNull] IPeopleDetector detector, [NotNull] ILogger<OccupancySensor> logger)
+        public OccupancySensor([NotNull] ICamera camera, [NotNull] IDenoiser denoiser, [NotNull] IBackgroundSubtractor subtractor,
+            [NotNull] ICorrector corrector, [NotNull] IPeopleDetector detector, [NotNull] ILogger<OccupancySensor> logger)
         {
             this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
             this.camera.PropertyChanged += OnCameraPropertyChanged;
@@ -31,6 +38,8 @@ namespace NVs.OccupancySensor.CV.Sense
 
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.denoiser = denoiser ?? throw new ArgumentNullException(nameof(denoiser));
+            this.subtractor = subtractor ?? throw new ArgumentNullException(nameof(subtractor));
+            this.corrector = corrector ?? throw new ArgumentNullException(nameof(corrector));
         }
 
         public bool? PresenceDetected => detector.PeopleDetected;
@@ -75,15 +84,21 @@ namespace NVs.OccupancySensor.CV.Sense
                     OnPropertyChanged(nameof(IsRunning));
                     if (camera.IsRunning)
                     {
-                        cameraSubscription = camera.Stream.Subscribe(denoiser);
-                        denoiserSubscription = denoiser.Output.Subscribe(detector);
+                        denoiserSubscription = camera.Stream.Subscribe(denoiser);
+                        subtractorSubscription= denoiser.Output.Subscribe(subtractor);
+                        correctorSubscription = subtractor.Output.Subscribe(corrector);
+                        detectorSubscription = corrector.Output.Subscribe(detector);
                     }
                     else
                     {
-                        cameraSubscription?.Dispose();
+                        detectorSubscription?.Dispose();
+                        correctorSubscription?.Dispose();
+                        subtractorSubscription?.Dispose();
                         denoiserSubscription?.Dispose();
 
                         detector.Reset();
+                        corrector.Reset();
+                        subtractor.Reset();
                         denoiser.Reset();
                     }
                     break;
@@ -113,7 +128,9 @@ namespace NVs.OccupancySensor.CV.Sense
             {
                 if (disposing)
                 {
-                    cameraSubscription?.Dispose();
+                    detectorSubscription?.Dispose();
+                    correctorSubscription?.Dispose();
+                    subtractorSubscription?.Dispose();
                     denoiserSubscription?.Dispose();
 
                     camera.PropertyChanged -= OnCameraPropertyChanged;

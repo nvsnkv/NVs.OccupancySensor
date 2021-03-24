@@ -12,7 +12,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public void CreateCntSubtractorByDefault()
         {
             var factory = new BackgroundSubtractorFactory(CNTSubtractorSettings.Default);
-            var subtractor = factory.Create(DetectionSettings.Default.Algorithm);
+            var subtractor = factory.Create(SubtractionSettings.Default.Algorithm);
 
             Assert.IsType<CNTSubtractor>(subtractor);
         }

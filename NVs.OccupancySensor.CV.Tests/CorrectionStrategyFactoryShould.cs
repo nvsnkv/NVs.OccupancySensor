@@ -13,7 +13,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void CreateBypassCorrectorByDefault()
         {
-            Assert.IsType<BypassCorrectionStrategy>(factory.Create(DetectionSettings.Default.CorrectionAlgorithm));
+            Assert.IsType<BypassCorrectionStrategy>(factory.Create(CorrectionSettings.Default.Algorithm));
         }
 
         [Theory]

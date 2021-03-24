@@ -10,11 +10,10 @@ You can run it as a regular ASP.Net Core application on Windows host (x86_64) or
 On a high level, application is doing the following set of activities to find out if someone is present in the room:
 1. Camera captures an image;
 1. Captured image is getting processed by denoising block;
-1. Denoised image is getting processed by detection logic:
-    1. Application builds the foreground mask from the denoised image;
-    1. Foreground mask is getting adjusted using the correction mask to exclude false-positives; 
-    1. Finally, detector computes foreground/background pixel ratio;
-    1. Computed value is getting compared with the threshold: if value is greater than threshold, application decides that someone is present in the room.
+1. Application builds the foreground mask from the denoised image
+1. Foreground mask is getting adjusted using the correction mask to exclude false-positives; 
+1. Finally, detector computes foreground/background pixel ratio;
+1. Computed value is getting compared with the threshold: if value is greater than threshold, application decides that someone is present in the room.
 1. Detection results are getting published to MQTT broker by MQTT client.
 ## Configuration
 Application has fair amount of configurable items: 
@@ -44,19 +43,21 @@ There are several algorithm options that may be adjusted:
         * `CV:Denoising:FastNlMeans:SearchWindowSize` - odd integer, optional. Default is _21_
     * `MedianBlur` - [MedianBlur](https://emgu.com/wiki/files/4.5.1/document/html/32b54325-0d91-bedb-60b4-910e4c65a8db.htm) function used. The only adjustable parameter is:
         * `CV:Denoising:MedianBlur:K` - odd integer greater then 1, optional. Default is _3_
-#### Detection
-* `CV:Detection:Threshold` - a rational value between 0 and 1 that defines sensor sensitivity. Bigger values makes detector less sensitive. Default is _0.1_
-* `CV:Detection:Algorithm` - background subtraction algorithm to use. Default is _CNT_.
+#### Background Subtraction
+* `CV:Subtraction:Algorithm` - background subtraction algorithm to use. Default is _CNT_.
     * `CNT` - [CouNT](https://sagi-z.github.io/BackgroundSubtractorCNT/) subtraction algorithm created by [sagi-z](https://github.com/sagi-z). 
 This algorithm has a few settings to tweak ([documentation](https://sagi-z.github.io/BackgroundSubtractorCNT/doxygen/html/index.html)):
-        * `CV:Detection:CNT:MinPixelStability` - integer, optional. Default is _15_
-        * `CV:Detection:CNT:UseHistory` - boolean, optional. Default is _True_
-        * `CV:Detection:CNT:MaxPixelStability` - integer, optional. Default is _900_
-        * `CV:Detection:CNT:IsParallel` - boolean, optional. Default is _True_
-* `CV:Detection:CorrectionAlgorithm` - a post-processing correction options, optional. Default is _None_. Valid values are:
+        * `CV:Subtraction:CNT:MinPixelStability` - integer, optional. Default is _15_
+        * `CV:Subtraction:CNT:UseHistory` - boolean, optional. Default is _True_
+        * `CV:Subtraction:CNT:MaxPixelStability` - integer, optional. Default is _900_
+        * `CV:Subtraction:CNT:IsParallel` - boolean, optional. Default is _True_
+#### Correction
+* `CV:Correction:Algorithm` - a post-processing correction options, optional. Default is _None_. Valid values are:
     * `None` - no correction will be performed
     * `StaticMask` - an additional static mask will be applied to the computed foreground mask. This mode is introduces to handle the cases when borders of the static object are getting marked as foreground on noised images. This mode uses additional parameter:
-        * `CV:Detection:ForegroundMaskCorrection:StaticMask:PathToFile` - a path to the static mask, optional. Default is _"data/correction_mask.bin". Should be 1-bit mask with the same size as incoming video stream.    
+        * `CV:Correction:StaticMask:PathToFile` - a path to the static mask, optional. Default is _"data/correction_mask.bin"_. Should be 1-bit mask with the same size as incoming video stream.    
+#### Detection
+* `CV:Detection:Threshold` - a rational value between 0 and 1 that defines sensor sensitivity. Bigger values makes detector less sensitive. Default is _0.1_
 #### MQTT
 Application uses MQTT.Net to build MQTT client. The following settings used to connect application to MQTT broker:
 * `MQTT:ClientId` - the string value that defines client identifier for MQTT client. Required. Does not have a default value

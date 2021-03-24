@@ -56,7 +56,28 @@ namespace NVs.OccupancySensor.CV.Tests
             }
 
             Assert.True(observer.StreamCompleted);
-
         }
+
+        [Fact]
+        public async Task DropNewFramesIfSubtractorIsPreviousIsStillInProgress()
+        {
+            SetupLongRunningPayload(TimeSpan.FromMilliseconds(200));
+
+            var observer = new TestImageObserver<TOut>();
+
+            using (stage.Output.Subscribe(observer))
+            {
+                var _ = Task.Run(() => stage.OnNext(new Image<TIn, byte>(1, 1)));
+                _ = Task.Run(() => stage.OnNext(new Image<TIn, byte>(1, 1)));
+                _ = Task.Run(() => stage.OnNext(new Image<TIn, byte>(1, 1)));
+                await Task.Delay(TimeSpan.FromMilliseconds(300));
+            }
+
+            Assert.Single(observer.ReceivedItems);
+            Assert.Equal((ulong)1, stage.Statistics.ProcessedFrames);
+            Assert.Equal((ulong)2, stage.Statistics.DroppedFrames);
+        }
+
+        protected abstract void SetupLongRunningPayload(TimeSpan delay);
     }
 }
