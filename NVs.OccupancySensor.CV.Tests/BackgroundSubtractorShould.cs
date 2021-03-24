@@ -7,23 +7,28 @@ using Moq;
 using NVs.OccupancySensor.CV.BackgroundSubtraction;
 using NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors;
 using NVs.OccupancySensor.CV.Tests.Utils;
+using NVs.OccupancySensor.CV.Utils.Flow;
 using Xunit;
 
 namespace NVs.OccupancySensor.CV.Tests
 {
-    public class BackgroundSubtractorShould
+    public class BackgroundSubtractorShould : StageShould<Rgb, Gray>
     {
-        private readonly Mock<IBackgroundSubtractorFactory> factory = new Mock<IBackgroundSubtractorFactory>();
-        private readonly Mock<ISubtractionStrategy> strategy = new Mock<ISubtractionStrategy>();
-        private readonly Mock<IBackgroundSubtractorSettings> settings = new Mock<IBackgroundSubtractorSettings>();
-        private readonly Mock<ILogger<BackgroundSubtractor>> logger = new Mock<ILogger<BackgroundSubtractor>>();
+        private readonly Mock<ISubtractionStrategy> strategy;
         private readonly BackgroundSubtractor subtractor;
 
-        public BackgroundSubtractorShould()
+
+        public BackgroundSubtractorShould() 
+            : this(new Mock<IBackgroundSubtractorFactory>(), new Mock<ISubtractionStrategy>(), new Mock<IBackgroundSubtractorSettings>(), new Mock<ILogger<BackgroundSubtractor>>()) { }
+        internal BackgroundSubtractorShould(Mock<IBackgroundSubtractorFactory> factory, Mock<ISubtractionStrategy> strategy, Mock<IBackgroundSubtractorSettings> settings, Mock<ILogger<BackgroundSubtractor>> logger) 
+            : this(CreateSubtractor(factory, strategy, settings, logger))
         {
-            strategy.Setup(s => s.GetForegroundMask(It.IsAny<Image<Rgb, byte>>())).Returns(new Image<Gray, byte>(1, 1));
-            factory.Setup(f => f.Create(It.IsAny<string>())).Returns(strategy.Object);
-            subtractor = new BackgroundSubtractor(factory.Object, settings.Object, logger.Object);
+            this.strategy = strategy;
+        }
+
+        internal BackgroundSubtractorShould(BackgroundSubtractor subtractor) : base(subtractor)
+        {
+            this.subtractor = subtractor;
         }
 
         [Fact]
@@ -36,49 +41,11 @@ namespace NVs.OccupancySensor.CV.Tests
             strategy.Verify();
         }
 
-        [Fact]
-        public async Task CompleteOutputStreamWhenSourceStreamCompleted()
+        private static BackgroundSubtractor CreateSubtractor(Mock<IBackgroundSubtractorFactory> factory, Mock<ISubtractionStrategy> strategy, Mock<IBackgroundSubtractorSettings> settings, Mock<ILogger<BackgroundSubtractor>> logger)
         {
-
-            var observer = new TestImageObserver<Gray>();
-            
-            using (subtractor.Output.Subscribe(observer))
-            {
-                await Task.Run(() => subtractor.OnCompleted());
-                await Task.Delay(TimeSpan.FromMilliseconds(100));
-            }
-
-            Assert.True(observer.StreamCompleted);
-        }
-
-        [Fact]
-        public async Task CompleteStreamOnReset()
-        {
-            
-            var observer = new TestImageObserver<Gray>();
-
-            using (subtractor.Output.Subscribe(observer))
-            {
-                await Task.Run(() => subtractor.Reset());
-                await Task.Delay(TimeSpan.FromMilliseconds(100));
-            }
-
-            Assert.True(observer.StreamCompleted);
-        }
-
-        [Fact]
-        public async Task ForwardErrors()
-        {
-            
-            var observer = new TestImageObserver<Gray>();
-            
-            using (subtractor.Output.Subscribe(observer))
-            {
-                await Task.Run(() => subtractor.OnError(new TestException()));
-                await Task.Delay(TimeSpan.FromMilliseconds(100));
-            }
-
-            Assert.IsType<TestException>(observer.Error);
+            strategy.Setup(s => s.GetForegroundMask(It.IsAny<Image<Rgb, byte>>())).Returns(new Image<Gray, byte>(1, 1));
+            factory.Setup(f => f.Create(It.IsAny<string>())).Returns(strategy.Object);
+            return new BackgroundSubtractor(factory.Object, settings.Object, logger.Object);
         }
     }
 }
