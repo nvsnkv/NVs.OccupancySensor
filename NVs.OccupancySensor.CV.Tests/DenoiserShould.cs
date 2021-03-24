@@ -30,22 +30,6 @@ namespace NVs.OccupancySensor.CV.Tests
             this.denoiser = denoiser;
         }
 
-
-        [Fact]
-        public async Task BypassImageIfNoDenoisingRequested()
-        {
-            var observer = new TestImageObserver<Rgb>();
-            var expectedImage = new Image<Rgb, byte>(10, 5);
-            
-            using (denoiser.Output.Subscribe(observer))
-            {
-                await Task.Run(() => denoiser.OnNext(expectedImage));
-                await Task.Delay(TimeSpan.FromMilliseconds(100));
-            }
-
-            Assert.Equal(expectedImage, observer.ReceivedItems.Keys.First());
-        }
-
         private static Denoiser CreateDenoiser(Mock<ILogger<Denoiser>> logger, Mock<IDenoiserFactory> factory,
             Mock<IDenoisingStrategy> strategy)
         {

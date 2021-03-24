@@ -18,6 +18,7 @@ namespace NVs.OccupancySensor.CV.Tests
 
         [Theory]
         [InlineData("None", typeof(BypassCorrectionStrategy))]
+        [InlineData("StaticMask", typeof(StaticMaskCorrectionStrategy))]
 
         public void CreateAppropriateDenoiserWhenRequested(string requestedType, Type expectedType)
         {

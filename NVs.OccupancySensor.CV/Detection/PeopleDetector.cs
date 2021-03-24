@@ -28,12 +28,14 @@ namespace NVs.OccupancySensor.CV.Detection
         {
             logger.LogInformation($"Stream completed, setting {nameof(PeopleDetected)} to null");
             PeopleDetected = null;
+            Mask = null;
         }
 
         public void OnError(Exception error)
         {
             logger.LogWarning($"Received an error from the steam, setting {nameof(PeopleDetected)} to null!");
             PeopleDetected = null;
+            Mask = null;
         }
 
         public void OnNext([NotNull] Image<Gray, byte> value)
@@ -97,6 +99,9 @@ namespace NVs.OccupancySensor.CV.Detection
         {
             threshold = Settings.DetectionThreshold;
             logger.LogInformation($"Reset called. New threshold is {threshold}");
+
+            Mask = null;
+            PeopleDetected = null;
         }
 
         [NotifyPropertyChangedInvocator]

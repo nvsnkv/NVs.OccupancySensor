@@ -144,7 +144,7 @@ namespace NVs.OccupancySensor.CV.Tests
             section.SetupGet(s => s["IsParallel"]).Returns(parallel);
 
             var config = new Mock<IConfiguration>();
-            config.Setup(c => c.GetSection("CV:Detection:CNT")).Returns(sectionExists ? section.Object : null);
+            config.Setup(c => c.GetSection("CV:Subtraction:CNT")).Returns(sectionExists ? section.Object : null);
 
             var expectedMinPixel = sectionExists && int.TryParse(minPixel, out var mps) ? mps : CNTSubtractorSettings.Default.MinPixelStability;
             var expectedMaxPixel = sectionExists && int.TryParse(maxPixel, out var maps) ? maps : CNTSubtractorSettings.Default.MaxPixelStability;
@@ -237,7 +237,7 @@ namespace NVs.OccupancySensor.CV.Tests
             section.Setup(s => s["PathToFile"]).Returns(expectedPath);
 
             var config = new Mock<IConfiguration>();
-            config.Setup(c => c.GetSection("CV:Detection:ForegroundMaskCorrection:StaticMask")).Returns(section.Object);
+            config.Setup(c => c.GetSection("CV:Correction:StaticMask")).Returns(section.Object);
 
             var settings = config.Object.GetStaticMaskSettings();
             Assert.Equal(expectedPath, settings.MaskPath);
@@ -254,7 +254,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public void ReturnDefaultPathForStaticMaskCorrectionIfItsNotProvided()
         {
             var config = new Mock<IConfiguration>();
-            config.Setup(c => c.GetSection("CV:Detection:ForegroundMaskCorrection:StaticMask")).Returns(new Mock<IConfigurationSection>().Object);
+            config.Setup(c => c.GetSection("CV:Correction:StaticMask")).Returns(new Mock<IConfigurationSection>().Object);
 
             var settings = config.Object.GetStaticMaskSettings();
             Assert.Equal(StaticMaskSettings.Default.MaskPath, settings.MaskPath);

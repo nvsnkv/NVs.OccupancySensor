@@ -20,6 +20,9 @@ namespace NVs.OccupancySensor.CV.Correction
                 {
                     case CorrectionMask.None:
                         return new BypassCorrectionStrategy();
+
+                    case CorrectionMask.StaticMask:
+                        return new StaticMaskCorrectionStrategy(StaticMaskSettings);
                 }
             }
 

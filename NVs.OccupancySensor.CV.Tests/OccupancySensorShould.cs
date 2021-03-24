@@ -10,6 +10,7 @@ using NVs.OccupancySensor.CV.Capture;
 using NVs.OccupancySensor.CV.Correction;
 using NVs.OccupancySensor.CV.Denoising;
 using NVs.OccupancySensor.CV.Detection;
+using NVs.OccupancySensor.CV.Tests.Utils;
 using Xunit;
 using IBackgroundSubtractor = NVs.OccupancySensor.CV.BackgroundSubtraction.IBackgroundSubtractor;
 
@@ -22,7 +23,14 @@ namespace NVs.OccupancySensor.CV.Tests
         private readonly Mock<IBackgroundSubtractor> subtractor = new Mock<IBackgroundSubtractor>();
         private readonly Mock<ICorrector> corrector = new Mock<ICorrector>();
         private readonly Mock<IPeopleDetector> detector = new Mock<IPeopleDetector>();
-        private readonly Mock<ILogger<Sense.OccupancySensor>> logger = new Mock<ILogger<Sense.OccupancySensor>>(); 
+        private readonly Mock<ILogger<Sense.OccupancySensor>> logger = new Mock<ILogger<Sense.OccupancySensor>>();
+
+        public OccupancySensorShould()
+        {
+            denoiser.SetupGet(d => d.Output).Returns(new Mock<IObservable<Image<Rgb, byte>>>().Object);
+            subtractor.SetupGet(d => d.Output).Returns(new Mock<IObservable<Image<Gray, byte>>>().Object);
+            corrector.SetupGet(d => d.Output).Returns(new Mock<IObservable<Image<Gray, byte>>>().Object);
+        }
 
         [Fact]
         public void StartCameraOnStart()

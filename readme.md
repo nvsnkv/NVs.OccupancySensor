@@ -55,7 +55,7 @@ This algorithm has a few settings to tweak ([documentation](https://sagi-z.githu
 * `CV:Correction:Algorithm` - a post-processing correction options, optional. Default is _None_. Valid values are:
     * `None` - no correction will be performed
     * `StaticMask` - an additional static mask will be applied to the computed foreground mask. This mode is introduces to handle the cases when borders of the static object are getting marked as foreground on noised images. This mode uses additional parameter:
-        * `CV:Correction:StaticMask:PathToFile` - a path to the static mask, optional. Default is _"data/correction_mask.bin"_. Should be 1-bit mask with the same size as incoming video stream.    
+        * `CV:Correction:StaticMask:PathToFile` - a path to the static mask, optional. Default is _"data/correction_mask.bmp"_. Should be a bi-colored (black and white) bitmap.
 #### Detection
 * `CV:Detection:Threshold` - a rational value between 0 and 1 that defines sensor sensitivity. Bigger values makes detector less sensitive. Default is _0.1_
 #### MQTT

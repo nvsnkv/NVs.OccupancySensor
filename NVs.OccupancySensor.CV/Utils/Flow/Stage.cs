@@ -44,6 +44,7 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
             if (!processingLock.Acquire())
             {
                 Logger.LogWarning("Previously started operation is still in progress, the frame will be dropped!");
+                Counter.IncreaseDropped();
                 return;
             }
 
