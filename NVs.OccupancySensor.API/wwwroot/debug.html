@@ -25,9 +25,10 @@
         }
 
         iframe {
-            width: 800px;
-            height: 600px;
+            width: 400px;
+            height: 300px;
             float: left;
+            zoom: 0.5
         }
     </style>
 </head>
@@ -35,15 +36,23 @@
 <ul>
     <li><a href="/debug.html">Refresh</a></li>
     <li><a href="/swagger" target="_blank">Swagger</a></li>
-    <li><a href="/capture/frame-raw.jpg" target="_blank">Capture Raw Frame</a></li>    
-    <li><a href="/capture/frame-denoised.jpg" target="_blank">Capture Denoised Frame</a></li>
-    <li><a href="/capture/frame.jpg" target="_blank">Capture Resulting Frame</a></li>
     <li><a href="/healthcheck" target="_blank">Health Check</a></li>
+    <li><a href="/healthcheck/stats" target="_blank">Stats</a></li>
     <li><a href="/healthcheck/versionadv" target="_blank">Version Info</a></li>
+    <li><a href="/healthcheck/emgucvbuildinfo" target="_blank">EmguCV Build Info</a></li>
+</ul>
+<ul>
+    <li><a href="/frame/frame.jpg" target="_blank">Capture Resulting Frame</a></li>
+    <li><a href="/frame/frame-corrected.jpg" target="_blank">Capture Denoised Frame</a></li>
+    <li><a href="/frame/frame-subtracted.jpg" target="_blank">Capture Denoised Frame</a></li>
+    <li><a href="/frame/frame-denoised.jpg" target="_blank">Capture Denoised Frame</a></li>
+    <li><a href="/frame/frame-raw.jpg" target="_blank">Capture Raw Frame</a></li>
 </ul>
 <div></div>
-<iframe src="/capture/stream.mjpeg"></iframe>
-<iframe src="/capture/stream-denoised.mjpeg"></iframe>
-<iframe src="/capture/stream-raw.mjpeg"></iframe>
+<iframe src="/stream/stream.mjpeg"></iframe>
+<iframe src="/stream/stream-corrected.mjpeg"></iframe>
+<iframe src="/stream/stream-subtracted.mjpeg"></iframe>
+<iframe src="/stream/stream-denoised.mjpeg"></iframe>
+<iframe src="/stream/stream-raw.mjpeg"></iframe>
 </body>
 </html>

@@ -1,4 +1,5 @@
 using System;
+using Emgu.CV.Structure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -7,7 +8,14 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using NVs.OccupancySensor.API.Formatters;
+using NVs.OccupancySensor.API.Models;
 using NVs.OccupancySensor.API.MQTT;
+using NVs.OccupancySensor.CV.BackgroundSubtraction;
+using NVs.OccupancySensor.CV.Capture;
+using NVs.OccupancySensor.CV.Correction;
+using NVs.OccupancySensor.CV.Denoising;
+using NVs.OccupancySensor.CV.Detection;
+using NVs.OccupancySensor.CV.Observation;
 using NVs.OccupancySensor.CV.Sense;
 using NVs.OccupancySensor.CV.Utils;
 using Serilog;
@@ -30,6 +38,11 @@ namespace NVs.OccupancySensor.API
             services
                 .AddPresenceDetection()
                 .AddControllers(o => o.OutputFormatters.Add(new RgbImageOutputFormatter()));
+
+            services.AddSingleton<Streams>(s => new Streams(s.GetService<ICamera>(), s.GetService<IDenoiser>(),
+                s.GetService<IBackgroundSubtractor>(), s.GetService<ICorrector>(), s.GetService<IPeopleDetector>()));
+            
+            services.AddScoped<Observers>(s => new Observers(s.GetService<IImageObserver<Rgb>>(), s.GetService<IImageObserver<Gray>>()));
 
             services.AddSingleton<IMqttAdapter>(s => new HomeAssistantMqttAdapter(
                 s.GetService<IOccupancySensor>() ?? throw new InvalidOperationException("OccupancySensor was not resolved!"), 
