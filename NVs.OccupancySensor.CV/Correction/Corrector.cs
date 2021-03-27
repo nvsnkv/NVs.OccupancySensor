@@ -13,16 +13,19 @@ namespace NVs.OccupancySensor.CV.Correction
         private readonly ICorrectionStrategyFactory factory;
         [NotNull] private ICorrectionSettings settings;
 
-        public Corrector([NotNull] ICorrectionStrategyFactory factory, [NotNull] ICorrectionSettings settings, [NotNull] ILogger<Corrector> logger) : base(logger)
+        public Corrector([NotNull] ICorrectionStrategyFactory factory, [NotNull] ICorrectionStrategyManager manager, [NotNull] ICorrectionSettings settings, [NotNull] ILogger<Corrector> logger) : base(logger)
         {
             this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
+            this.StrategyManager = manager ?? throw new ArgumentNullException(nameof(manager));
             this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
             OutputStream = CreateStream();
         }
 
         protected override ProcessingStream<Image<Gray, byte>, Image<Gray, byte>> CreateStream()
         {
-            return new CorrectionStream(factory.Create(Settings.Algorithm), Counter, CancellationToken.None, Logger);
+            var strategy = factory.Create(Settings.Algorithm);
+            StrategyManager.SetStrategy(strategy);
+            return new CorrectionStream(strategy, Counter, CancellationToken.None, Logger);
         }
         
         [NotNull]
@@ -31,5 +34,8 @@ namespace NVs.OccupancySensor.CV.Correction
             get => settings;
             set => settings = value ?? throw new ArgumentNullException(nameof(value));
         }
+
+        [NotNull]
+        public ICorrectionStrategyManager StrategyManager { get; }
     }
 }

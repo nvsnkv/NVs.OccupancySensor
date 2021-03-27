@@ -48,8 +48,11 @@ namespace NVs.OccupancySensor.CV.Utils
             services.AddSingleton<ICorrectionStrategyFactory>(s =>
                 new CorrectionStrategyFactory(s.GetService<IConfiguration>()?.GetStaticMaskSettings() ?? throw new InvalidOperationException("ForegroundMaskCorrection settings dependency were not resolved")));
 
+            services.AddSingleton<ICorrectionStrategyManager>(new CorrectionStrategyManager());
+
             services.AddSingleton<ICorrector>(s => new Corrector(
                 s.GetService<ICorrectionStrategyFactory>() ?? throw new InvalidOperationException("CorrectionStrategyFactory dependency was not resolved!"),
+                s.GetService<ICorrectionStrategyManager>() ?? throw new InvalidOperationException("CorrectionStrategy manager dependency was not resolved!"),
                 s.GetService<IConfiguration>()?.GetCorrectionSettings() ?? throw new InvalidOperationException("Correction settings were not resolved!"),
                 s.GetService<ILogger<Corrector>>() ?? throw new InvalidOperationException("Corrector logger dependency was not resolved")));
 

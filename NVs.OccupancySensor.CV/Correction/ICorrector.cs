@@ -13,6 +13,8 @@ namespace NVs.OccupancySensor.CV.Correction
 
     IStatistics Statistics { get; }
 
+    ICorrectionStrategyManager StrategyManager { get; }
+
     void Reset();
     }
 }
