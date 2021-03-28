@@ -50,18 +50,21 @@ namespace NVs.OccupancySensor.API.Controllers
         {
             var builder = new StringBuilder();
             builder.AppendFormat("Camera: {0}", streams.Camera.IsRunning ? "Running" : "Stopped");
+            builder.AppendLine();
             AppendStage(builder, nameof(streams.Denoiser), streams.Denoiser.Statistics);
             AppendStage(builder, nameof(streams.Subtractor), streams.Subtractor.Statistics);
             AppendStage(builder, nameof(streams.Corrector), streams.Corrector.Statistics);
             builder.AppendFormat("Sensor: {0}", sensor.IsRunning ? "Running" : "Stopped");
+            builder.AppendLine();
             builder.AppendFormat("MQTT Adapter: {0}", adapter.IsRunning ? "Running" : "Stopped");
-
+            
             return builder.ToString();
         }
 
         private void AppendStage(StringBuilder builder, string stageName, IStatistics statistics)
         {
             builder.Append($"{stageName}: processed {statistics.ProcessedFrames} frames, dropped {statistics.DroppedFrames} frames, {statistics.Errors} errors occurred.");
+            builder.AppendLine();
         }
 
         [HttpGet("versionadv")]

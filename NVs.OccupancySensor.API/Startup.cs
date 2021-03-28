@@ -37,7 +37,7 @@ namespace NVs.OccupancySensor.API
         {
             services
                 .AddPresenceDetection()
-                .AddControllers(o => o.OutputFormatters.Add(new RgbImageOutputFormatter()));
+                .AddControllers(o => o.OutputFormatters.Add(new ImageOutputFormatter()));
 
             services.AddSingleton<Streams>(s => new Streams(s.GetService<ICamera>(), s.GetService<IDenoiser>(),
                 s.GetService<IBackgroundSubtractor>(), s.GetService<ICorrector>(), s.GetService<IPeopleDetector>()));

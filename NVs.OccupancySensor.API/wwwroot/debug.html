@@ -25,10 +25,9 @@
         }
 
         iframe {
-            width: 400px;
-            height: 300px;
+            width: 1920px;
+            height: 1080px;
             float: left;
-            zoom: 0.5
         }
     </style>
 </head>
@@ -41,18 +40,19 @@
     <li><a href="/healthcheck/versionadv" target="_blank">Version Info</a></li>
     <li><a href="/healthcheck/emgucvbuildinfo" target="_blank">EmguCV Build Info</a></li>
 </ul>
+<div></div>
 <ul>
     <li><a href="/frame/frame.jpg" target="_blank">Capture Resulting Frame</a></li>
-    <li><a href="/frame/frame-corrected.jpg" target="_blank">Capture Denoised Frame</a></li>
-    <li><a href="/frame/frame-subtracted.jpg" target="_blank">Capture Denoised Frame</a></li>
+    <li><a href="/frame/frame-corrected.jpg" target="_blank">Capture Corrected Frame</a></li>
+    <li><a href="/frame/frame-subtracted.jpg" target="_blank">Capture Subtracted Frame</a></li>
     <li><a href="/frame/frame-denoised.jpg" target="_blank">Capture Denoised Frame</a></li>
     <li><a href="/frame/frame-raw.jpg" target="_blank">Capture Raw Frame</a></li>
 </ul>
 <div></div>
-<iframe src="/stream/stream.mjpeg"></iframe>
-<iframe src="/stream/stream-corrected.mjpeg"></iframe>
-<iframe src="/stream/stream-subtracted.mjpeg"></iframe>
-<iframe src="/stream/stream-denoised.mjpeg"></iframe>
-<iframe src="/stream/stream-raw.mjpeg"></iframe>
+<iframe src="/streams/stream.mjpeg"></iframe>
+<iframe src="/streams/stream-corrected.mjpeg"></iframe>
+<iframe src="/streams/stream-subtracted.mjpeg"></iframe>
+<iframe src="/streams/stream-denoised.mjpeg"></iframe>
+<iframe src="/streams/stream-raw.mjpeg"></iframe>
 </body>
 </html>
