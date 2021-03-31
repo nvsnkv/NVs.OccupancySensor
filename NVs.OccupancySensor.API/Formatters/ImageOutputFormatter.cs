@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
@@ -24,6 +25,12 @@ namespace NVs.OccupancySensor.API.Formatters
         public override async Task WriteResponseBodyAsync(OutputFormatterWriteContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+
+            if (context.Object is null)
+            {
+                context.HttpContext.Response.StatusCode = (int)HttpStatusCode.NoContent;
+                return;
+            }
 
             var bytes = context.Object switch
             {
