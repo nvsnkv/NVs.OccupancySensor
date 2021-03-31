@@ -13,7 +13,7 @@ using NVs.OccupancySensor.CV.Utils;
 namespace NVs.OccupancySensor.API.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/v1/[controller]")]
     public sealed class StreamsController : ControllerBase
     {
         [NotNull] private readonly Streams streams;

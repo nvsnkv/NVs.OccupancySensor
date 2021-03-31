@@ -35,7 +35,7 @@ namespace NVs.OccupancySensor.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(o => o.AddDefaultPolicy(p => p.AllowAnyOrigin()));
+            services.AddCors(o => o.AddPolicy("AllowAll", p => p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
             services
                 .AddPresenceDetection()
@@ -54,9 +54,9 @@ namespace NVs.OccupancySensor.API
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc(Configuration["ApiVersion"], new OpenApiInfo
+                c.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Version = Configuration["ApiVersion"],
+                    Version = "v1",
                     Title = "NV's Occupancy Sensor HTTP API",
                     Description = "API for OpenCV-based occupancy detector",
                     Contact = new OpenApiContact
@@ -77,7 +77,7 @@ namespace NVs.OccupancySensor.API
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseCors();
+            app.UseCors("AllowAll");
             app.UseSwagger();
 
             if (env.IsDevelopment())
@@ -85,7 +85,7 @@ namespace NVs.OccupancySensor.API
                 app.UseDeveloperExceptionPage();
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint($"/swagger/{Configuration["ApiVersion"]}/swagger.json", $"NV's Occupancy Sensor API v. {Configuration["ApiVersion"]}");
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "NV's Occupancy Sensor API v1");
                 });
             }
 

@@ -5,7 +5,7 @@ using NVs.OccupancySensor.API.MQTT;
 namespace NVs.OccupancySensor.API.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/v1/[controller]")]
     public sealed class MqttAdapterController : ControllerBase
     {
         private readonly IMqttAdapter adapter;

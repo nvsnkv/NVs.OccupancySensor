@@ -11,47 +11,50 @@ using NVs.OccupancySensor.CV.Utils;
 
 namespace NVs.OccupancySensor.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
-    public class CorrectionController : ControllerBase
+    public class CorrectionMaskController : ControllerBase
     {
         private readonly ICorrectionStrategyManager manager;
-        private readonly ILogger<CorrectionController> logger;
+        private readonly ILogger<CorrectionMaskController> logger;
         private readonly IConfiguration config;
 
-        public CorrectionController([NotNull] ICorrectionStrategyManager manager, [NotNull] ILogger<CorrectionController> logger, [NotNull] IConfiguration config)
+        public CorrectionMaskController([NotNull] ICorrectionStrategyManager manager, [NotNull] ILogger<CorrectionMaskController> logger, [NotNull] IConfiguration config)
         {
             this.manager = manager ?? throw new ArgumentNullException(nameof(manager));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.config = config ?? throw new ArgumentNullException(nameof(config));
         }
 
-        [HttpGet("[action]")]
-        public bool CanManageStrategy()
+        
+        [HttpPost("[action]")]
+        public void Load()
         {
-            logger.LogDebug("CanManageStrategy called");
-            return manager.CanManage;
+            logger.LogDebug("Load called");
+            if (manager.CanManage)
+            {
+                manager.LoadState();
+            }
         }
 
         [HttpPost("[action]")]
-        public void LoadStrategyState()
+        public void Save()
         {
-            logger.LogDebug("LoadStrategyState called");
-            manager.LoadState();
+            logger.LogDebug("Save called");
+            if (manager.CanManage)
+            {
+                manager.SaveState();
+            }
         }
 
-        [HttpPost("[action]")]
-        public void SaveStrategyState()
+        [HttpDelete]
+        public void Reset()
         {
-            logger.LogDebug("SaveStrategyState called");
-            manager.SaveState();
-        }
-
-        [HttpPost("[action]")]
-        public void ResetStrategyState()
-        {
-            logger.LogDebug("ResetStrategyState called");
-            manager.ResetState();
+            logger.LogDebug("Reset called");
+            if (manager.CanManage)
+            {
+                manager.ResetState();
+            }
         }
         
         [HttpGet]
