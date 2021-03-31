@@ -119,6 +119,65 @@ namespace NVs.OccupancySensor.CV.Tests
             Assert.Equal(0, result.GetAverage().Intensity);
         }
 
+        [Fact] public void AccumulateFramesDuringAdjustment()
+        {
+            var ultraRareImage = new Image<Gray, byte>(2, 2)
+            {
+                [0, 0] = new Gray(0),
+                [0, 1] = new Gray(255),
+                [1, 0] = new Gray(0),
+                [1, 1] = new Gray(0)
+            };
+
+            var rareImage = new Image<Gray, byte>(2, 2)
+            {
+                [0, 0] = new Gray(0),
+                [0, 1] = new Gray(0),
+                [1, 0] = new Gray(255),
+                [1, 1] = new Gray(255)
+            };
+
+            var frequentImage = new Image<Gray, byte>(2, 2)
+            {
+                [0, 0] = new Gray(255),
+                [0, 1] = new Gray(0),
+                [1, 0] = new Gray(255),
+                [1, 1] = new Gray(0)
+            };
+
+            var testImage = new Image<Gray, byte>(2, 2)
+            {
+                [0, 0] = new Gray(255),
+                [0, 1] = new Gray(0),
+                [1, 0] = new Gray(255),
+                [1, 1] = new Gray(255)
+            };
+
+            strategy.Apply(frequentImage);
+            strategy.Reset();
+
+            strategy.Apply(ultraRareImage);
+
+            var counter = 0;
+            while (counter++ < 5)
+            {
+                strategy.Apply(rareImage);
+            }
+            
+            while (counter++ < 100000)
+            {
+                strategy.Apply(frequentImage);
+            }
+
+            strategy.Save();
+
+            var result = strategy.Apply(testImage);
+            Assert.Equal(0, result.GetAverage().Intensity);
+
+            result = strategy.Apply(ultraRareImage);
+            Assert.True(0 < result.GetAverage().Intensity);
+        }
+
         [Fact]
         public void StopMaskAdjustmentWhenSaveRequested()
         {

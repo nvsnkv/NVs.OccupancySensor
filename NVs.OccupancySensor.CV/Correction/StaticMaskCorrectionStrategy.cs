@@ -12,7 +12,7 @@ namespace NVs.OccupancySensor.CV.Correction
         [NotNull] private readonly IStaticMaskSettings settings;
         private readonly ReaderWriterLockSlim maskLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
         private volatile Image<Gray, byte> mask;
-        private volatile Image<Gray, byte> adjusted;
+        private volatile Image<Gray, float> adjusted;
         
         public StaticMaskCorrectionStrategy([NotNull] IStaticMaskSettings settings)
         {
@@ -101,11 +101,11 @@ namespace NVs.OccupancySensor.CV.Correction
         {
             if (adjusted == null)
             {
-                adjusted = new Image<Gray, byte>(source.Size);
+                adjusted = new Image<Gray, float>(source.Size);
             }
             
-            adjusted = adjusted.AddWeighted(source, 0.95d, 0.05d, 0d);
-            Mask = adjusted.ThresholdBinaryInv(new Gray(200), new Gray(255));
+            CvInvoke.Accumulate(source, adjusted);
+            Mask = adjusted.ThresholdBinaryInv(new Gray(1020), new Gray(255)).Convert<Gray, byte>();
         }
     }
 }
