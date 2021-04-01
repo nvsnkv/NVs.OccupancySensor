@@ -7,13 +7,36 @@ MQTT client supports configuration convention used by Home Assistant [MQTT integ
 Setup the app to connect it with your camera, MQTT server and have fun!
 You can run it as a regular ASP.Net Core application on Windows host (x86_64) or build a docker image to run it on Linux (x86_64 or arm32). Application can use local cameras attached to host, IP cameras (at least the ones which send MJPEG streams) or even a video file.
 
-On a high level, application is doing the following set of activities to find out if someone is present in the room:
+## Getting Started
+### Prerequisites
+#### Hardware
+Place your camera in the area you'd like to monitor.
+Find an appropriate host machine that will run the app. Depending on configuration, application may consume significant amount of CPU and RAM, so it would be hard to provide a _minimal_ and _recommended_ configurations.
+It works on Raspberry Pi 4 with 4 Gb RAM, so you can try something similar or more powerful.
+This application does not provide anything that can control external devices or send notifications to end users out of the box. A home automation server with MQTT support would be required to setup various integrations which depends on someone's precense in the room. In most of the cases having a separate host for home automation server would be recommended option.
+
+#### Software
+Prepare your favorite API Explorer. [swagger-ui](https://swagger.io/docs/open-source-tools/swagger-ui/usage/installation/) or [Postman](https://www.postman.com/) will work.
+Application OpenAPI definition that can be downloaded from path `/swagger/v1/swagger.json`. This format can be consumed by varios API testing tools.
+Depending on the hosting option you prefer, you'll need either [.Net Core 3.1 SDK](https://dotnet.microsoft.com/download/dotnet/thank-you/sdk-3.1.407-windows-x64-installer) or [Docker](https://docs.docker.com/get-docker/) installed on the host to build and run application.
+
+#### Patience (optional)
+In case you chose to use Docker, please ensure that you can spend couple of hours building the image. Compilation of EmguCV is the part of Docker image and it may take several hours if you're doing it on weak device.
+
+### Building the application
+Nothing special here - either build it using `dotnet build` or `docker build`. The example for Docker can be found below
+
+### Configuration
+TBD
+
+## Concept
+On a high level, application is doing the following actions to find out if someone is present in the room:
 1. Camera captures an image;
 1. Captured image is getting processed by denoising block;
-1. Application builds the foreground mask from the denoised image
-1. Foreground mask is getting adjusted using the correction mask to exclude false-positives; 
+1. Application builds the foreground mask from the denoised image;
+1. Foreground mask is getting adjusted using the correction mask to exclude false-positives (TV screen, edges of objects...); 
 1. Finally, detector computes foreground/background pixel ratio;
-1. Computed value is getting compared with the threshold: if value is greater than threshold, application decides that someone is present in the room.
+1. Computed value is getting compared with the threshold: if value is greater than threshold, application decides that someone is present in the room;
 1. Detection results are getting published to MQTT broker by MQTT client.
 ## Configuration
 Application has fair amount of configurable items: 
@@ -32,7 +55,7 @@ App uses .Net Core configuration, so you can change the settings by:
     * `None` - no denoising performed. The image captured from the camera goes directly to detection logic
     * `FastNlMeans` - ([FastNlMeansDenoising](https://docs.opencv.org/4.5.1/d5/d69/tutorial_py_non_local_means.html) function used, documentation can be found [here](https://emgu.com/wiki/files/4.5.1/document/html/58b1b703-e4a2-94d9-4843-efe674bae0a3.htm)).
 There are several algorithm options that may be adjusted:
-        * `CV:Denoising:FastNlMeans:H` - rational, optional. Default is _3_`erds
+        * `CV:Denoising:FastNlMeans:H` - rational, optional. Default is _3_`
         * `CV:Denoising:FastNlMeans:TemplateWindowSize` - odd integer, optional. Default is _7_
         * `CV:Denoising:FastNlMeans:SearchWindowSize` - odd integer, optional. Default is _21_
     * `FastNlMeansColored` - ([FastNlMeansColoredDenoisingColored](https://docs.opencv.org/4.5.1/d5/d69/tutorial_py_non_local_means.html) function used, documentation can be found [here](https://emgu.com/wiki/files/4.5.1/document/html/55cd7112-6814-99e7-76f4-ce3b8b8d0694.htm)).
@@ -54,7 +77,7 @@ This algorithm has a few settings to tweak ([documentation](https://sagi-z.githu
 #### Correction
 * `CV:Correction:Algorithm` - a post-processing correction options, optional. Default is _None_. Valid values are:
     * `None` - no correction will be performed
-    * `StaticMask` - an additional static mask will be applied to the computed foreground mask. This mode is introduces to handle the cases when borders of the static object are getting marked as foreground on noised images. This mode uses additional parameter:
+    * `StaticMask` - an additional static mask will be applied to the computed foreground mask. This mode uses additional parameter:
         * `CV:Correction:StaticMask:PathToFile` - a path to the static mask, optional. Default is _"data/correction_mask.bmp"_. Should be a bi-colored (black and white) bitmap.
 #### Detection
 * `CV:Detection:Threshold` - a rational value between 0 and 1 that defines sensor sensitivity. Bigger values makes detector less sensitive. Default is _0.1_
@@ -72,8 +95,7 @@ Application uses MQTT.Net to build MQTT client. The following settings used to c
 This app uses Serilog to capture logs. Please refer to the documentation for [Serilog.Settings.Configuration](https://github.com/serilog/serilog-settings-configuration).
 Startup process gets logged to `startup.ndjson` file in the application working directory. Rolling interval is set to 1 day for this log. Application will keep last 10 startup.ndjson log files. This behaviour is hardcoded.
 #### Version
-* `Version` field in appsettings.json is not actually a setting :) . MQTT adapter sends it to Home Assistant as a part of configuration topic. It is also used in Swagger as API version.
-* `ApiVersion` defines the version of HTTP API. Used to generate OpenAPI Specification.
+* `Version` field in appsettings.json is not actually a setting :) . MQTT adapter sends it to Home Assistant as a part of configuration topic.
 ## Building notes
 Thanks to docker, container creation is pretty simple. Use `Dockerfile` in the repository root to create an arm32 image. 
 
