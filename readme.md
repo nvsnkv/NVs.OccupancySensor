@@ -1,9 +1,9 @@
 # NV's Occupancy Sensor
-## What's that?
-Containerized ASP.Net Core application and MQTT client that uses computer vision to identify someone's presence in the room.
+## What's That?
+Containerized open-source ASP.Net Core application and MQTT client that uses computer vision to identify someone's presence in the room.
 Uses background subtraction algorithms to identify if camera sees something which is not a part of furnishings.
 MQTT client supports configuration convention used by Home Assistant [MQTT integration](https://www.home-assistant.io/docs/mqtt/)
-## How to use it?
+## How to Use It?
 Setup the app to connect it with your camera, MQTT server and have fun!
 You can run it as a regular ASP.Net Core application on Windows host (x86_64) or build a docker image to run it on Linux (x86_64 or arm32). Application can use local cameras attached to host, IP cameras (at least the ones which send MJPEG streams) or even a video file.
 
@@ -11,22 +11,25 @@ You can run it as a regular ASP.Net Core application on Windows host (x86_64) or
 ### Prerequisites
 #### Hardware
 Place your camera in the area you'd like to monitor.
+
 Find an appropriate host machine that will run the app. Depending on configuration, application may consume significant amount of CPU and RAM, so it would be hard to provide a _minimal_ and _recommended_ configurations.
 It works on Raspberry Pi 4 with 4 Gb RAM, so you can try something similar or more powerful.
+
 This application does not provide anything that can control external devices or send notifications to end users out of the box. A home automation server with MQTT support would be required to setup various integrations which depends on someone's precense in the room. In most of the cases having a separate host for home automation server would be recommended option.
 
 #### Software
 Prepare your favorite API Explorer. [swagger-ui](https://swagger.io/docs/open-source-tools/swagger-ui/usage/installation/) or [Postman](https://www.postman.com/) will work.
 Application OpenAPI definition that can be downloaded from path `/swagger/v1/swagger.json`. This format can be consumed by varios API testing tools.
+
 Depending on the hosting option you prefer, you'll need either [.Net Core 3.1 SDK](https://dotnet.microsoft.com/download/dotnet/thank-you/sdk-3.1.407-windows-x64-installer) or [Docker](https://docs.docker.com/get-docker/) installed on the host to build and run application.
 
 #### Patience (optional)
 In case you chose to use Docker, please ensure that you can spend couple of hours building the image. Compilation of EmguCV is the part of Docker image and it may take several hours if you're doing it on weak device.
 
-### Building the application
-Nothing special here - either build it using `dotnet build` or `docker build`. The example for Docker can be found below
+### Building the Application
+Nothing special here - either build it using `dotnet build` or `docker build`. The example for Docker can be found below.
 
-### Configuration
+### Quick Setup
 TBD
 
 ## Concept
