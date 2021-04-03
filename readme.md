@@ -44,7 +44,7 @@ Nothing special here - either build it using `dotnet build` or `docker build`. T
 9. If everything is fine, update `StartSensor` and `StartMQTT` settings to _True_ to enable automated start after reboots.
 10. Read the docs below
 # Docs
-## Concept
+## Configuration
 On a high level, application is doing the following actions to find out if someone is present in the room:
 1. Camera captures an image;
 1. Captured image is getting processed by denoising block;
@@ -53,7 +53,7 @@ On a high level, application is doing the following actions to find out if someo
 1. Finally, detector computes foreground/background pixel ratio;
 1. Computed value is getting compared with the threshold: if value is greater than threshold, application decides that someone is present in the room;
 1. Detection results are getting published to MQTT broker by MQTT client.
-## Configuration
+
 Application has fair amount of configurable items: 
 * Most of the processing steps mentioned above have some settings to tweak, and most of these settings have defaults;
 * Serilog is used to produce the logs;
