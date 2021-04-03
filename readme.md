@@ -18,7 +18,7 @@ It works on Raspberry Pi 4 with 4 Gb RAM, so you can try something similar or mo
 This application does not provide anything that can control external devices or send notifications to end users out of the box. A home automation server with MQTT support would be required to setup various integrations which depends on someone's precense in the room. In most of the cases having a separate host for home automation server would be recommended option.
 
 #### Software
-Prepare your favorite API Explorer. [swagger-ui](https://swagger.io/docs/open-source-tools/swagger-ui/usage/installation/) or [Postman](https://www.postman.com/) will work.
+Prepare your favorite API Explorer. [Swagger-UI](https://swagger.io/docs/open-source-tools/swagger-ui/usage/installation/) or [Postman](https://www.postman.com/) will work.
 Application produces OpenAPI definition that can be downloaded from path `/swagger/v1/swagger.json`. This format can be consumed by varios API testing tools.
 
 Depending on the hosting option you prefer, you'll need either [.Net Core 3.1 SDK](https://dotnet.microsoft.com/download/dotnet/thank-you/sdk-3.1.407-windows-x64-installer) or [Docker](https://docs.docker.com/get-docker/) installed on the host to build and run application.
@@ -36,7 +36,7 @@ Nothing special here - either build it using `dotnet build` or `docker build`. T
     2. Ensure MQTT settings are correct;
 2. Deploy the application;
 3. Open `/debug.html` URL in your favorite browser. If application was successfully deployed you should see the debug page;
-4. Start the sensor by making a POST HTTP request to `/api/v1/Sensor/Start`. You can download API definition from `/swagger/v1/swagger.json` and use API explorer like Swagger-UI or postman to simplify requests submission;
+4. Start the sensor by making a POST HTTP request to `/api/v1/Sensor/Start`. You can download API definition from `/swagger/v1/swagger.json` and use API explorer like Swagger-UI or Postman to simplify requests submission;
 5. Refresh the debug page;
 6. Adjust the position of your camera using the translations on the debug page;
 7. Start MQTT adapter by making a POST HTTP request to `/api/v1/MQTTAdapter/Start`;
