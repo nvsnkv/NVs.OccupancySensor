@@ -6,7 +6,7 @@ using NVs.OccupancySensor.CV.Sense;
 namespace NVs.OccupancySensor.API.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/v1/[controller]")]
     public sealed class SensorController : ControllerBase
     {
         private readonly IOccupancySensor sensor;

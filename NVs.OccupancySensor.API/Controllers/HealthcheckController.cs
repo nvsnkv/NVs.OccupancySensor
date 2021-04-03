@@ -13,7 +13,7 @@ using NVs.OccupancySensor.CV.Utils;
 namespace NVs.OccupancySensor.API.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/v1/[controller]")]
     public sealed class HealthcheckController : ControllerBase
     {
         [NotNull] private readonly ILogger<HealthcheckController> logger;
@@ -73,10 +73,9 @@ namespace NVs.OccupancySensor.API.Controllers
             logger.Log(LogLevel.Trace, "VersionAdv called");
 
             var version = configuration["Version"];
-            var apiVersion = configuration["ApiVersion"];
             var emguVersion = typeof(CvInvoke).Assembly.GetName().Version;
 
-            return $"App version: {version}{Environment.NewLine}API version: {apiVersion}{Environment.NewLine}EmguCV version: {emguVersion}";
+            return $"App version: {version}{Environment.NewLine}EmguCV version: {emguVersion}";
         }
 
         [HttpGet("emgucvbuildinfo")]

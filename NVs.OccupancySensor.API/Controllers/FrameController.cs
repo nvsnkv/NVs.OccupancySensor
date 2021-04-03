@@ -10,7 +10,7 @@ using NVs.OccupancySensor.API.Models;
 namespace NVs.OccupancySensor.API.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/v1/[controller]")]
     public class FrameController : ControllerBase
     {
         [NotNull] private readonly Streams streams;
