@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
-using NVs.OccupancySensor.CV.Utils;
+using NVs.OccupancySensor.CV.Utils.Flow;
 
 namespace NVs.OccupancySensor.CV.Capture
 {
@@ -27,18 +26,18 @@ namespace NVs.OccupancySensor.CV.Capture
               
         private async Task QueryFrames()
         {
-            while (!ct.IsCancellationRequested)
+            while (!Ct.IsCancellationRequested)
             {
-                logger.LogInformation($"Capturing frame {framesCaptured + 1}");
+                Logger.LogInformation($"Capturing frame {framesCaptured + 1}");
                 Mat frame;
                 try
                 {
                     frame = videoCapture.QueryFrame();
-                    logger.LogInformation("Got new frame");
+                    Logger.LogInformation("Got new frame");
                 }
                 catch (Exception e)
                 {
-                    logger.LogError(e, "Unable to query frame!");
+                    Logger.LogError(e, "Unable to query frame!");
                     Notify(o => o.OnError(e));
                     Notify(o => o.OnCompleted());
 
@@ -51,31 +50,31 @@ namespace NVs.OccupancySensor.CV.Capture
                     try
                     {
                         image = frame.ToImage<Rgb, byte>();
-                        logger.LogInformation("Frame successfully converted to image!");
+                        Logger.LogInformation("Frame successfully converted to image!");
                     }
                     catch (Exception e)
                     {
-                        logger.LogError(e, "Failed to convert frame to image!");
+                        Logger.LogError(e, "Failed to convert frame to image!");
                         throw;
                     }
                     Notify(o => o.OnNext(image));
                 }
                 else
                 {
-                    logger.LogWarning("null frame received");
+                    Logger.LogWarning("null frame received");
                 }
 
                 
                 ++framesCaptured;
-                logger.LogInformation($"Frame {framesCaptured} processed");
+                Logger.LogInformation($"Frame {framesCaptured} processed");
                 
                 if (framesCaptured == int.MaxValue - 1)
                 {
-                    logger.LogInformation("Resetting captured frames counter since it reached int.MaxValue - 1");
+                    Logger.LogInformation("Resetting captured frames counter since it reached int.MaxValue - 1");
                     framesCaptured = 0;
                 }
                 
-                await Task.Delay(frameInterval, ct);
+                await Task.Delay(frameInterval, Ct);
             }
         }
     }

@@ -1,5 +1,5 @@
 ﻿using System;
-using NVs.OccupancySensor.CV.Detection.BackgroundSubtraction.Subtractors;
+using NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors;
 using NVs.OccupancySensor.CV.Settings;
 using NVs.OccupancySensor.CV.Settings.Subtractors;
 using Xunit;
@@ -12,7 +12,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public void CreateCntSubtractorByDefault()
         {
             var factory = new BackgroundSubtractorFactory(CNTSubtractorSettings.Default);
-            var subtractor = factory.Create(DetectionSettings.Default.Algorithm);
+            var subtractor = factory.Create(SubtractionSettings.Default.Algorithm);
 
             Assert.IsType<CNTSubtractor>(subtractor);
         }

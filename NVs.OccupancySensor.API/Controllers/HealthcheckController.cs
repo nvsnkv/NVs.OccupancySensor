@@ -1,26 +1,28 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Text;
 using Emgu.CV;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using NVs.OccupancySensor.API.Models;
 using NVs.OccupancySensor.API.MQTT;
 using NVs.OccupancySensor.CV.Sense;
+using NVs.OccupancySensor.CV.Utils;
 
 namespace NVs.OccupancySensor.API.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/v1/[controller]")]
     public sealed class HealthcheckController : ControllerBase
     {
-        private readonly ILogger<HealthcheckController> logger;
-        private readonly IConfiguration configuration;
-        private readonly IOccupancySensor sensor;
-        private readonly IMqttAdapter adapter;
+        [NotNull] private readonly ILogger<HealthcheckController> logger;
+        [NotNull] private readonly IConfiguration configuration;
+        [NotNull] private readonly IOccupancySensor sensor;
+        [NotNull] private readonly IMqttAdapter adapter;
+        [NotNull] private readonly Streams streams;
 
-        public HealthcheckController([NotNull] ILogger<HealthcheckController> logger, [NotNull] IConfiguration configuration, [NotNull] IOccupancySensor sensor, [NotNull] IMqttAdapter adapter)
+        public HealthcheckController([NotNull] ILogger<HealthcheckController> logger, [NotNull] IConfiguration configuration, [NotNull] IOccupancySensor sensor, [NotNull] IMqttAdapter adapter, [NotNull] Streams streams)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
@@ -30,17 +32,39 @@ namespace NVs.OccupancySensor.API.Controllers
             this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             this.sensor = sensor ?? throw new ArgumentNullException(nameof(sensor));
             this.adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
+            this.streams = streams ?? throw new ArgumentNullException(nameof(streams));
         }
 
         [HttpGet]
         public string Get()
         {
             logger.Log(LogLevel.Trace, "Healthcheck called");
-            var builder = new StringBuilder();
-            builder.AppendFormat("Sensor: {0}{1}", sensor.IsRunning ? "Running" : "Stopped", Environment.NewLine);
-            builder.AppendFormat("MQTT Adapter: {0}{1}", adapter.IsRunning ? "Running" : "Stopped", Environment.NewLine);
+            var ok = streams.Camera.Stream != null && streams.Denoiser.Output != null &&
+                     streams.Subtractor.Output != null && streams.Corrector.Output != null;
 
+            return ok ? "OK" : "FAIL";
+        }
+
+        [HttpGet("stats")]
+        public string Stats()
+        {
+            var builder = new StringBuilder();
+            builder.AppendFormat("Camera: {0}", streams.Camera.IsRunning ? "Running" : "Stopped");
+            builder.AppendLine();
+            AppendStage(builder, nameof(streams.Denoiser), streams.Denoiser.Statistics);
+            AppendStage(builder, nameof(streams.Subtractor), streams.Subtractor.Statistics);
+            AppendStage(builder, nameof(streams.Corrector), streams.Corrector.Statistics);
+            builder.AppendFormat("Sensor: {0}", sensor.IsRunning ? "Running" : "Stopped");
+            builder.AppendLine();
+            builder.AppendFormat("MQTT Adapter: {0}", adapter.IsRunning ? "Running" : "Stopped");
+            
             return builder.ToString();
+        }
+
+        private void AppendStage(StringBuilder builder, string stageName, IStatistics statistics)
+        {
+            builder.Append($"{stageName}: processed {statistics.ProcessedFrames} frames, dropped {statistics.DroppedFrames} frames, {statistics.Errors} errors occurred.");
+            builder.AppendLine();
         }
 
         [HttpGet("versionadv")]
@@ -49,32 +73,17 @@ namespace NVs.OccupancySensor.API.Controllers
             logger.Log(LogLevel.Trace, "VersionAdv called");
 
             var version = configuration["Version"];
+            var emguVersion = typeof(CvInvoke).Assembly.GetName().Version;
 
-            var psi = new ProcessStartInfo("sh", "-c \"uname -a\"")
-            {
-                RedirectStandardError = true,
-                RedirectStandardOutput = true
-            };
+            return $"App version: {version}{Environment.NewLine}EmguCV version: {emguVersion}";
+        }
 
-            var proc = new Process() { StartInfo = psi };
-            proc.Start();
-
-            var hostInfo = "Host: unable to detect - process is running more then 1 sec";
-            if (proc.WaitForExit(1000))
-            {
-                if (proc.ExitCode == 0)
-                {
-                    hostInfo = "Host: " + proc.StandardOutput.ReadToEnd();
-                }
-                else
-                {
-                    hostInfo = "Host: unable to detect - " + proc.StandardError.ReadToEnd();
-                }
-            }
-
+        [HttpGet("emgucvbuildinfo")]
+        public string EmguCvBuildInfo()
+        {
             var emguCvBuild = CvInvoke.BuildInformation;
 
-            return $"Version: {version}" + Environment.NewLine + hostInfo + Environment.NewLine + "EmguCV Build information:" + Environment.NewLine + emguCvBuild;
+            return $"EmguCV Build information:{Environment.NewLine}{emguCvBuild}";
         }
     }
 }

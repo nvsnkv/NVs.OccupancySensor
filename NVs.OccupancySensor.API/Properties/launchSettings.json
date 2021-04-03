@@ -20,7 +20,7 @@
     "NVs.OccupacySensor.API": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "healthcheck",
+      "launchUrl": "debug.html",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

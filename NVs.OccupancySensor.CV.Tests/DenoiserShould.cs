@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Castle.Core.Logging;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
@@ -14,77 +13,38 @@ using Xunit;
 
 namespace NVs.OccupancySensor.CV.Tests
 {
-    public sealed class DenoiserShould
+    public sealed class DenoiserShould : StageShould<Rgb,Rgb>
     {
-        private readonly Mock<ILogger<Denoiser>> logger = new Mock<ILogger<Denoiser>>();
-        private readonly Mock<IDenoiserFactory> factory = new Mock<IDenoiserFactory>();
+        private readonly Mock<IDenoisingStrategy> strategy;
+        private readonly Denoiser denoiser;
 
-        public DenoiserShould()
+        public DenoiserShould(): this(new Mock<ILogger<Denoiser>>(), new Mock<IDenoiserFactory>(), new Mock<IDenoisingStrategy>()) { }
+
+        internal DenoiserShould(Mock<ILogger<Denoiser>> logger, Mock<IDenoiserFactory> factory, Mock<IDenoisingStrategy> strategy): this(CreateDenoiser(logger, factory, strategy))
         {
-            factory.Setup(f => f.Create(SupportedAlgorithms.None.ToString())).Returns(new BypassDenoiser());
+            this.strategy = strategy;
         }
 
-        [Fact]
-        public async Task BypassImageIfNoDenoisingRequested()
+        internal DenoiserShould(Denoiser denoiser) : base(denoiser)
         {
-            var denoiser = new Denoiser(factory.Object, new DenoisingSettings(SupportedAlgorithms.None.ToString()), logger.Object);
-            var observer = new TestImageObserver();
-            var expectedImage = new Image<Rgb, byte>(10, 5);
-            
-            using (denoiser.Output.Subscribe(observer))
-            {
-                await Task.Run(() => denoiser.OnNext(expectedImage));
-                await Task.Delay(TimeSpan.FromMilliseconds(100));
-            }
-
-            Assert.Equal(expectedImage, observer.ReceivedItems.Keys.First());
+            this.denoiser = denoiser;
         }
 
-        [Fact]
-        public async Task CompleteOutputStreamWhenSourceStreamCompleted()
+        private static Denoiser CreateDenoiser(Mock<ILogger<Denoiser>> logger, Mock<IDenoiserFactory> factory,
+            Mock<IDenoisingStrategy> strategy)
         {
-            var denoiser = new Denoiser(factory.Object, new DenoisingSettings(SupportedAlgorithms.None.ToString()), logger.Object);
-            var observer = new TestImageObserver();
-            var expectedImage = new Image<Rgb, byte>(10, 5);
-            
-            using (denoiser.Output.Subscribe(observer))
-            {
-                await Task.Run(() => denoiser.OnCompleted());
-                await Task.Delay(TimeSpan.FromMilliseconds(100));
-            }
-
-            Assert.True(observer.StreamCompleted);
+            strategy.Setup(s => s.Denoise(It.IsAny<Image<Rgb, byte>>())).Returns(new Image<Rgb, byte>(1, 1));
+            factory.Setup(f => f.Create(SupportedAlgorithms.None.ToString())).Returns(strategy.Object);
+            return new Denoiser(factory.Object, new DenoisingSettings(SupportedAlgorithms.None.ToString()), logger.Object);
         }
 
-        [Fact]
-        public async Task ForwardErrors()
+        protected override void SetupLongRunningPayload(TimeSpan delay)
         {
-            var denoiser = new Denoiser(factory.Object, new DenoisingSettings(SupportedAlgorithms.None.ToString()), logger.Object);
-            var observer = new TestImageObserver();
-            
-            using (denoiser.Output.Subscribe(observer))
+            strategy.Setup(s => s.Denoise(It.IsAny<Image<Rgb, byte>>())).Returns(() =>
             {
-                await Task.Run(() => denoiser.OnError(new TestException()));
-                await Task.Delay(TimeSpan.FromMilliseconds(100));
-            }
-
-            Assert.IsType<TestException>(observer.Error);
-        }
-
-        [Fact]
-        public async Task CompleteStreamOnReset()
-        {
-            var denoiser = new Denoiser(factory.Object, new DenoisingSettings(SupportedAlgorithms.None.ToString()), logger.Object);
-            var observer = new TestImageObserver();
-
-            using (denoiser.Output.Subscribe(observer))
-            {
-                await Task.Run(() => denoiser.Reset());
-                await Task.Delay(TimeSpan.FromMilliseconds(100));
-            }
-
-            Assert.True(observer.StreamCompleted);
-
+                Task.Delay(delay).Wait();
+                return new Image<Rgb, byte>(1, 1);
+            });
         }
     }
 }

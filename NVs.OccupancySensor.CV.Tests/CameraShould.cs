@@ -29,7 +29,7 @@ namespace NVs.OccupancySensor.CV.Tests
             captureMock.Setup(c => c.QueryFrame()).Returns(() => new Image<Rgb, byte>(100,100).Mat);
 
             var camera = new Camera(cameraLogger.Object, streamLogger.Object, CaptureSettings.Default, _ => captureMock.Object);
-            var observer = new TestImageObserver();
+            var observer = new TestImageObserver<Rgb>();
 
             camera.Settings = settings;
 
@@ -43,6 +43,27 @@ namespace NVs.OccupancySensor.CV.Tests
             Assert.True(11 >= observer.ReceivedItems.Count);
             Assert.True(9 <= observer.ReceivedItems.Count);
         }
+
+        [Fact]
+        public async Task StopAutomaticallyIfVideoStreamFails()
+        {
+            var captureMock = new Mock<VideoCapture>(MockBehavior.Default, 0, VideoCapture.API.Any);
+            captureMock.Setup(c => c.QueryFrame()).Throws<TestException>();
+
+            var camera = new Camera(cameraLogger.Object, streamLogger.Object, CaptureSettings.Default, _ => captureMock.Object);
+            var observer = new TestImageObserver<Rgb>();
+            
+            camera.Start();
+            using (camera.Stream.Subscribe(observer))
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(500));
+            }
+
+            Assert.IsType<TestException>(observer.Error);
+            Assert.False(camera.IsRunning);
+        }
+
+
     }
 
     public sealed class CameraShould
@@ -98,7 +119,7 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var camera = new Camera(cameraLogger.Object, streamLogger.Object, CaptureSettings.Default, Camera.CreateVideoCapture);
             var logger = new PropertyChangedLogger();
-            var observer = new TestImageObserver();
+            var observer = new TestImageObserver<Rgb>();
 
             camera.PropertyChanged += logger.OnPropertyChanged;
 
@@ -176,25 +197,6 @@ namespace NVs.OccupancySensor.CV.Tests
 
             Assert.Throws<TestException>(() => camera.Start());
             cameraLogger.Verify();
-        }
-
-        [Fact]
-        public async Task StopAutomaticallyIfVideoStreamFails()
-        {
-            var captureMock = new Mock<VideoCapture>(MockBehavior.Default, 0, VideoCapture.API.Any);
-            captureMock.Setup(c => c.QueryFrame()).Throws<TestException>();
-
-            var camera = new Camera(cameraLogger.Object, streamLogger.Object, CaptureSettings.Default, _ => captureMock.Object);
-            var observer = new TestImageObserver();
-            
-            camera.Start();
-            using (camera.Stream.Subscribe(observer))
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(500));
-            }
-
-            Assert.IsType<TestException>(observer.Error);
-            Assert.False(camera.IsRunning);
         }
 
         [Fact]
