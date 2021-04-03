@@ -30,7 +30,12 @@ In case you chose to use Docker, please ensure that you can spend couple of hour
 Nothing special here - either build it using `dotnet build` or `docker build`. The example for Docker can be found below.
 
 ### Quick Setup
-TBD
+1. Build application
+1. Update a few required settings
+    1. Ensure `CV:Capture:Source` is set to the proper source
+    2. Ensure MQTT settings are correct
+2. Deploy the application
+3. Navigate to /
 
 ## Concept
 On a high level, application is doing the following actions to find out if someone is present in the room:
@@ -88,9 +93,9 @@ This algorithm has a few settings to tweak ([documentation](https://sagi-z.githu
 Application uses MQTT.Net to build MQTT client. The following settings used to connect application to MQTT broker:
 * `MQTT:ClientId` - the string value that defines client identifier for MQTT client. Required. Does not have a default value
 * `MQTT:Server` - IP address or DNS name of MQTT server. Required. Does not have a default value
-* `MQTT:Port` - TCP port of MQTT server. Default is _1883_
-* `MQTT:User` - username used to authenticate client on the server. Does not have a default value
-* `MQTT:Password` - password used to authenticate client on the server. Does not have a default value
+* `MQTT:Port` - TCP port of MQTT server. Optional. Default is _1883_
+* `MQTT:User` - username used to authenticate client on the server. Required. Does not have a default value
+* `MQTT:Password` - password used to authenticate client on the server. Required. Does not have a default value
 #### Startup
 * `StartSensor` - boolean toggle to start sensor on startup. Default _False_
 * `StartMQTT` - boolean toggle to start MQTT client on startup. Default _False_
