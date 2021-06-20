@@ -17,6 +17,8 @@ namespace NVs.OccupancySensor.API.MQTT
             User = section["User"] ?? throw new InvalidOperationException("MQTT:User field is not defined in configuration!");
             Password = section["Password"] ?? throw new InvalidOperationException("MQTT:Password field is not defined in configuration!");
             Version = configuration["Version"] ?? throw new InvalidOperationException("Version field is not defined in configuration!");
+
+            ReconnectSettings = new ReconnectSettings(configuration);
         }
 
         public string ClientId { get; }
@@ -30,5 +32,7 @@ namespace NVs.OccupancySensor.API.MQTT
         public string Password { get; }
 
         public string Version { get; }
+
+        public ReconnectSettings ReconnectSettings { get; }
     }
 }
