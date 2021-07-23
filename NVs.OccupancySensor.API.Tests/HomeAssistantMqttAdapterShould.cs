@@ -1,3 +1,4 @@
+using System;
 using Moq;
 using Xunit;
 using NVs.OccupancySensor.CV.Sense;
@@ -24,6 +25,7 @@ namespace NVs.OccupancySensor.API.Tests
         private readonly Mock<IOccupancySensor> sensor = new Mock<IOccupancySensor>();
         private readonly Mock<ILogger<HomeAssistantMqttAdapter>> logger = new Mock<ILogger<HomeAssistantMqttAdapter>>();
         private readonly Mock<IMqttClient> client = new Mock<IMqttClient>();
+        private readonly Mock<IDisposable> watchdog = new Mock<IDisposable>();
         private readonly Mock<IConfiguration> config = new Mock<IConfiguration>();
         private readonly string expectedClientId = "AClientId";
         private readonly string expectedServer = "mqtt";
@@ -63,6 +65,16 @@ namespace NVs.OccupancySensor.API.Tests
             
             adapter.Dispose();
             client.Verify();
+        }
+
+        [Fact]
+        public void DisposeWatchdogOnDispose()
+        {
+            watchdog.Setup(c => c.Dispose()).Verifiable("Dispose was not called!");
+            var adapter = new HomeAssistantMqttAdapter(sensor.Object, logger.Object, CreateClient, new AdapterSettings(config.Object));
+
+            adapter.Dispose();
+            watchdog.Verify();
         }
 
         [Fact]
@@ -234,6 +246,6 @@ namespace NVs.OccupancySensor.API.Tests
             client.Verify();
         }
 
-        private IMqttClient CreateClient() => client.Object;
+        private (IMqttClient, IDisposable) CreateClient() => (client.Object, watchdog.Object);
     }
 }
