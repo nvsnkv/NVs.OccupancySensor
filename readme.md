@@ -99,10 +99,13 @@ This algorithm has a few settings to tweak ([documentation](https://sagi-z.githu
 #### MQTT
 Application uses MQTT.Net to build MQTT client. The following settings used to connect application to MQTT broker:
 * `MQTT:ClientId` - the string value that defines client identifier for MQTT client. Required. Does not have a default value
-* `MQTT:Server` - IP address or DNS name of MQTT server. Required. Does not have a default value
-* `MQTT:Port` - TCP port of MQTT server. Optional. Default is _1883_
-* `MQTT:User` - username used to authenticate client on the server. Required. Does not have a default value
-* `MQTT:Password` - password used to authenticate client on the server. Required. Does not have a default value
+* `MQTT:Server` - string that containts IP address or DNS name of MQTT server. Required. Does not have a default value
+* `MQTT:Port` - integer, TCP port of MQTT server. Optional. Default is _1883_
+* `MQTT:User` - string, username used to authenticate client on the server. Required. Does not have a default value
+* `MQTT:Password` - string, password used to authenticate client on the server. Required. Does not have a default value
+* `MQTT:Reconnect:AttemptsCount` - integer, count of attemps to automatically reconnect to the server if connection was lost. Default is _0_
+* `MQTT:Reconnect:IntervalBetweenAttempts` - time span, base delay detween two attemps. Application uses progressive delays, multiplying this value to the current attempt number. Default is _00:00:00_
+
 #### Startup
 * `StartSensor` - boolean toggle to start sensor on startup. Default _False_
 * `StartMQTT` - boolean toggle to start MQTT client on startup. Default _False_
