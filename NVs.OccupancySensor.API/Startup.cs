@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using NVs.OccupancySensor.API.Formatters;
 using NVs.OccupancySensor.API.Models;
 using NVs.OccupancySensor.API.MQTT;
+using NVs.OccupancySensor.API.MQTT.Watchdog;
 using NVs.OccupancySensor.CV.BackgroundSubtraction;
 using NVs.OccupancySensor.CV.Capture;
 using NVs.OccupancySensor.CV.Correction;
@@ -49,7 +50,9 @@ namespace NVs.OccupancySensor.API
             services.AddSingleton<IMqttAdapter>(s => new HomeAssistantMqttAdapter(
                 s.GetService<IOccupancySensor>() ?? throw new InvalidOperationException("OccupancySensor was not resolved!"),
                 s.GetService<ILogger<HomeAssistantMqttAdapter>>() ?? throw new InvalidOperationException("Logger for HomeAssistantMqttAdapter was not resolved!"),
-                HomeAssistantMqttAdapter.CreateClient,
+                HomeAssistantMqttAdapter.CreateClient(
+                    new WatchdogSettings(s.GetService<IConfiguration>() ?? throw new InvalidOperationException("Configuration was not resolved!")),
+                    s.GetService<ILogger<Watchdog>>() ?? throw new InvalidOperationException("Watchdog loggrer was not resolved!")),
                 new AdapterSettings(s.GetService<IConfiguration>() ?? throw new InvalidOperationException("Configuration was not resolved!"))));
 
             services.AddSwaggerGen(c =>
