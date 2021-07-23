@@ -34,6 +34,7 @@ Nothing special here - either build it using `dotnet build` or `docker build`. T
 1. Update a few required settings:
     1. Ensure `CV:Capture:Source` is set to the proper source;
     2. Ensure MQTT settings are correct;
+    3. Set `StreamingAllowed` to _True_ to enable video translations on debug page;
 2. Deploy the application;
 3. Open `/debug.html` URL in your favorite browser. If application was successfully deployed you should see the debug page;
 4. Start the sensor by making a POST HTTP request to `/api/v1/Sensor/Start`. You can download API definition from `/swagger/v1/swagger.json` and use API explorer like Swagger-UI or postman to simplify requests submission;
@@ -41,8 +42,9 @@ Nothing special here - either build it using `dotnet build` or `docker build`. T
 6. Adjust the position of your camera using the translations on the debug page;
 7. Start MQTT adapter by making a POST HTTP request to `/api/v1/MQTTAdapter/Start`;
 8. Ensure that sensor started to publish MQTT topics to the server;
-9. If everything is fine, update `StartSensor` and `StartMQTT` settings to _True_ to enable automated start after reboots.
-10. Read the docs below
+9. If everything is fine, set `StreamingAllowed` to _False_ to improve your privacy;
+10. Additionaly, update `StartSensor` and `StartMQTT` settings to _True_ to enable automated start after reboots;
+11. Read the docs below.
 # Docs
 ## Concept
 On a high level, application is doing the following actions to find out if someone is present in the room:
@@ -109,6 +111,7 @@ Application uses MQTT.Net to build MQTT client. The following settings used to c
 #### Startup
 * `StartSensor` - boolean toggle to start sensor on startup. Default _False_
 * `StartMQTT` - boolean toggle to start MQTT client on startup. Default _False_
+* `StreamingAllowed` - boolean toggle to enable or disble streaming of incoming video and processed results. Default _False_
 #### Logging
 This app uses Serilog to capture logs, with `File` and `Console` sinks available. Please refer to the documentation for [Serilog.Settings.Configuration](https://github.com/serilog/serilog-settings-configuration).
 Startup process gets logged to `startup.ndjson` file in the application working directory. Rolling interval is set to 1 day for this log. Application will keep last 10 startup.ndjson log files. This behaviour is hardcoded.
