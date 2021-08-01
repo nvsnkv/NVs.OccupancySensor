@@ -6,6 +6,7 @@ using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using NVs.OccupancySensor.API.ActionFilters;
 using NVs.OccupancySensor.API.Models;
 
 namespace NVs.OccupancySensor.API.Controllers
@@ -28,6 +29,7 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
+        [IfStreamingAllowed]
         [Produces("image/jpeg")]
         [Route("frame-denoised.jpg")]
         public async Task<Image<Rgb,byte>> GetDenoisedFrame()
@@ -46,6 +48,7 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
+        [IfStreamingAllowed]
         [Produces("image/jpeg")]
         [Route("frame-subtracted.jpg")]
         public async Task<Image<Gray,byte>> GetSubtractedFrame()
@@ -64,6 +67,7 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
+        [IfStreamingAllowed]
         [Produces("image/jpeg")]
         [Route("frame-corrected.jpg")]
         public async Task<Image<Gray,byte>> GetCorrectedFrame()
@@ -83,6 +87,7 @@ namespace NVs.OccupancySensor.API.Controllers
 
         
         [HttpGet]
+        [IfStreamingAllowed]
         [Produces("image/jpeg")]
         [Route("frame-raw.jpg")]
         public async Task<Image<Rgb,byte>> GetRawFrame()
