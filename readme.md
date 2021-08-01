@@ -1,4 +1,4 @@
-# NV's Occupancy Sensor
+# NV's [Computer Vision] Room Occupancy Sensor
 ## What's That?
 Containerized open-source ASP.Net Core application and MQTT client that uses computer vision to identify someone's presence in the room.
 Uses background subtraction algorithms to identify if camera sees something which is not a part of furnishings.
@@ -18,8 +18,8 @@ It works on Raspberry Pi 4 with 4 Gb RAM, so you can try something similar or mo
 This application does not provide anything that can control external devices or send notifications to end users out of the box. A home automation server with MQTT support would be required to setup various integrations which depends on someone's precense in the room. In most of the cases having a separate host for home automation server would be recommended option.
 
 #### Software
-Prepare your favorite API Explorer. [swagger-ui](https://swagger.io/docs/open-source-tools/swagger-ui/usage/installation/) or [Postman](https://www.postman.com/) will work.
-Application OpenAPI definition that can be downloaded from path `/swagger/v1/swagger.json`. This format can be consumed by varios API testing tools.
+Prepare your favorite API Explorer. [Swagger-UI](https://swagger.io/docs/open-source-tools/swagger-ui/usage/installation/) or [Postman](https://www.postman.com/) will work.
+Application produces OpenAPI definition that can be downloaded from path `/swagger/v1/swagger.json`. This format can be consumed by varios API testing tools.
 
 Depending on the hosting option you prefer, you'll need either [.Net Core 3.1 SDK](https://dotnet.microsoft.com/download/dotnet/thank-you/sdk-3.1.407-windows-x64-installer) or [Docker](https://docs.docker.com/get-docker/) installed on the host to build and run application.
 
@@ -37,7 +37,7 @@ Nothing special here - either build it using `dotnet build` or `docker build`. T
     3. Set `StreamingAllowed` to _True_ to enable video translations on debug page;
 2. Deploy the application;
 3. Open `/debug.html` URL in your favorite browser. If application was successfully deployed you should see the debug page;
-4. Start the sensor by making a POST HTTP request to `/api/v1/Sensor/Start`. You can download API definition from `/swagger/v1/swagger.json` and use API explorer like Swagger-UI or postman to simplify requests submission;
+4. Start the sensor by making a POST HTTP request to `/api/v1/Sensor/Start`. You can download API definition from `/swagger/v1/swagger.json` and use API explorer like Swagger-UI or Postman to simplify requests submission;
 5. Refresh the debug page;
 6. Adjust the position of your camera using the translations on the debug page;
 7. Start MQTT adapter by making a POST HTTP request to `/api/v1/MQTTAdapter/Start`;
@@ -46,7 +46,7 @@ Nothing special here - either build it using `dotnet build` or `docker build`. T
 10. Additionaly, update `StartSensor` and `StartMQTT` settings to _True_ to enable automated start after reboots;
 11. Read the docs below.
 # Docs
-## Concept
+## Configuration
 On a high level, application is doing the following actions to find out if someone is present in the room:
 1. Camera captures an image;
 1. Captured image is getting processed by denoising block;
@@ -55,7 +55,7 @@ On a high level, application is doing the following actions to find out if someo
 1. Finally, detector computes foreground/background pixel ratio;
 1. Computed value is getting compared with the threshold: if value is greater than threshold, application decides that someone is present in the room;
 1. Detection results are getting published to MQTT broker by MQTT client.
-## Configuration
+
 Application has fair amount of configurable items: 
 * Most of the processing steps mentioned above have some settings to tweak, and most of these settings have defaults;
 * Serilog is used to produce the logs;

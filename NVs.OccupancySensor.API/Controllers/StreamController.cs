@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using NVs.OccupancySensor.API.ActionFilters;
 using NVs.OccupancySensor.API.ActionResults;
 using NVs.OccupancySensor.API.Models;
 using NVs.OccupancySensor.CV.Utils;
@@ -21,7 +21,7 @@ namespace NVs.OccupancySensor.API.Controllers
         [NotNull] private readonly Observers observers;
         [NotNull] private readonly IConfiguration config;
         [NotNull] private readonly ILogger<StreamsController> logger;
-        
+
         public StreamsController([NotNull] Streams streams, [NotNull] Observers observers, [NotNull] ILogger<StreamsController> logger, [NotNull] IConfiguration config)
         {
             this.streams = streams ?? throw new ArgumentNullException(nameof(streams));
@@ -29,86 +29,88 @@ namespace NVs.OccupancySensor.API.Controllers
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.config = config ?? throw new ArgumentNullException(nameof(config));
         }
-        
+
         [HttpGet]
+        [IfStreamingAllowed]
         [Route("stream-raw.mjpeg")]
         public IActionResult GetRawStream()
         {
             logger.LogDebug("GetRawStream called");
-
-            if (!streams.Camera.IsRunning || !IsStreamingAllowed) 
+            
+            if (streams.Camera.IsRunning)
             {
-                return NoContent();
+                var stream = streams.Camera.Stream;
+                return GetMjpegRgbStreamContent(stream);
             }
 
-            var stream = streams.Camera.Stream;
-            return GetMjpegRgbStreamContent(stream);
+            return NoContent();
         }
 
-
         [HttpGet]
+        [IfStreamingAllowed]
         [Route("stream-denoised.mjpeg")]
         public IActionResult GetDenoisedStream()
         {
             logger.LogDebug("GetDenoisedStream called");
 
-            if (!streams.Camera.IsRunning || !IsStreamingAllowed) 
+            if (streams.Camera.IsRunning)
             {
-                return NoContent();
+                var stream = streams.Denoiser.Output;
+                return GetMjpegRgbStreamContent(stream);
             }
 
-            var stream = streams.Denoiser.Output;
-            return GetMjpegRgbStreamContent(stream);
+            return NoContent();
         }
 
         [HttpGet]
+        [IfStreamingAllowed]
         [Route("stream-subtracted.mjpeg")]
         public IActionResult GetSubtractedStream()
         {
             logger.LogDebug("GetSubtractedStream called");
 
-            if (!streams.Camera.IsRunning || !IsStreamingAllowed) 
+            if (streams.Camera.IsRunning)
             {
-                return NoContent();
+                var stream = streams.Subtractor.Output;
+                return GetMjpegGrayStreamContent(stream);
             }
 
-            var stream = streams.Subtractor.Output;
-            return GetMjpegGrayStreamContent(stream);
+            return NoContent();
         }
 
         [HttpGet]
+        [IfStreamingAllowed]
         [Route("stream-corrected.mjpeg")]
         public IActionResult GetCorrectedStream()
         {
             logger.LogDebug("GetCorrectedStream called");
 
-            if (!streams.Camera.IsRunning || !IsStreamingAllowed) 
+            if (streams.Camera.IsRunning)
             {
-                return NoContent();
+                var stream = streams.Corrector.Output;
+                return GetMjpegGrayStreamContent(stream);
             }
 
-            var stream = streams.Corrector.Output;
-            return GetMjpegGrayStreamContent(stream);
+            return NoContent();
         }
-        
+
         [HttpGet]
+        [IfStreamingAllowed]
         [Route("stream.mjpeg")]
         public IActionResult GetStream()
         {
             logger.LogDebug($"GetStream called");
 
-            if (!streams.Camera.IsRunning || !IsStreamingAllowed) 
+            if (streams.Camera.IsRunning)
             {
-                return NoContent();
+                var stream = streams.Detector.ToObservable(nameof(streams.Detector.Mask), () => streams.Detector.Mask);
+                return GetMjpegGrayStreamContent(stream);
             }
 
-            var stream = streams.Detector.ToObservable(nameof(streams.Detector.Mask), () => streams.Detector.Mask);
-            return GetMjpegGrayStreamContent(stream);
+            return NoContent();
         }
 
-        private bool IsStreamingAllowed => bool.TryParse(config["StreamingAllowed"], out var b) && b;
-
-        private IActionResult GetMjpegRgbStreamContent(IObservable<Image<Rgb,byte>> stream)
+        private IActionResult GetMjpegRgbStreamContent(IObservable<Image<Rgb, byte>> stream)
         {
             var unsubscriber = stream?.Subscribe(observers.Rgb);
 
@@ -121,8 +123,8 @@ namespace NVs.OccupancySensor.API.Controllers
                 async cts => (await observers.Rgb.GetImage())?.ToJpegData(),
                 () => unsubscriber.Dispose());
         }
-        
-        private IActionResult GetMjpegGrayStreamContent(IObservable<Image<Gray,byte>> stream)
+
+        private IActionResult GetMjpegGrayStreamContent(IObservable<Image<Gray, byte>> stream)
         {
             var unsubscriber = stream?.Subscribe(observers.Gray);
 
