@@ -37,12 +37,13 @@ namespace NVs.OccupancySensor.API.MQTT
         private readonly IOccupancySensor sensor;
         private readonly ILogger<HomeAssistantMqttAdapter> logger;
         private readonly IMqttClient client;
+        private readonly IDisposable watchdog;
         private readonly IMqttClientOptions options;
         private readonly Messages messages;
-
+        
         private volatile bool isRunning;
-
-        public HomeAssistantMqttAdapter([NotNull] IOccupancySensor sensor, [NotNull] ILogger<HomeAssistantMqttAdapter> logger, [NotNull] Func<IMqttClient> createClient, [NotNull] AdapterSettings settings)
+        
+        public HomeAssistantMqttAdapter([NotNull] IOccupancySensor sensor, [NotNull] ILogger<HomeAssistantMqttAdapter> logger, [NotNull] Func<(IMqttClient, IDisposable)> createClient, [NotNull] AdapterSettings settings)
         {
             if (createClient is null)
             {
@@ -56,7 +57,7 @@ namespace NVs.OccupancySensor.API.MQTT
 
             try
             {
-                client = createClient();
+                (client, watchdog) = createClient();
                 options = new MqttClientOptionsBuilder()
                     .WithClientId(settings.ClientId)
                     .WithTcpServer(settings.Server, settings.Port)
@@ -337,11 +338,22 @@ namespace NVs.OccupancySensor.API.MQTT
         public void Dispose()
         {
             sensor.PropertyChanged -= SensorOnPropertyChanged;
-            client.UseApplicationMessageReceivedHandler((IMqttApplicationMessageReceivedHandler)null);
+            watchdog.Dispose();
 
+            client.UseApplicationMessageReceivedHandler((IMqttApplicationMessageReceivedHandler)null);
             client.Dispose();
+            
         }
 
-        public static IMqttClient CreateClient() => ClientFactory.CreateMqttClient();
+        public static Func<(IMqttClient, IDisposable)> CreateClient([NotNull] WatchdogSettings watchdogSettings, [NotNull] ILogger<Watchdog.Watchdog> watchdogLogger)
+        {
+            if (watchdogSettings == null) throw new ArgumentNullException(nameof(watchdogSettings));
+            if (watchdogLogger == null) throw new ArgumentNullException(nameof(watchdogLogger));
+
+            var client = ClientFactory.CreateMqttClient();
+            var watchdog = new Watchdog.Watchdog(client, watchdogLogger, watchdogSettings);
+
+            return () => (client, watchdog);
+        }
     }
 }

@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using NVs.OccupancySensor.API.Formatters;
 using NVs.OccupancySensor.API.Models;
 using NVs.OccupancySensor.API.MQTT;
+using NVs.OccupancySensor.API.MQTT.Watchdog;
 using NVs.OccupancySensor.CV.BackgroundSubtraction;
 using NVs.OccupancySensor.CV.Capture;
 using NVs.OccupancySensor.CV.Correction;
@@ -41,15 +42,23 @@ namespace NVs.OccupancySensor.API
                 .AddPresenceDetection()
                 .AddControllers(o => o.OutputFormatters.Add(new ImageOutputFormatter()));
 
-            services.AddSingleton<Streams>(s => new Streams(s.GetService<ICamera>(), s.GetService<IDenoiser>(),
-                s.GetService<IBackgroundSubtractor>(), s.GetService<ICorrector>(), s.GetService<IPeopleDetector>()));
+            services.AddSingleton<Streams>(s => new Streams(
+                s.GetService<ICamera>() ?? throw new InvalidOperationException("Camera was not resolved!"), 
+                s.GetService<IDenoiser>() ?? throw new InvalidOperationException("Denoiser was not resolved!"),
+                s.GetService<IBackgroundSubtractor>() ?? throw new InvalidOperationException("BackgroundSubtractor was not resolved!"), 
+                s.GetService<ICorrector>() ?? throw new InvalidOperationException("Corrector was not resolved!"), 
+                s.GetService<IPeopleDetector>() ?? throw new InvalidOperationException("PeopleDetector was not resolved!")));
 
-            services.AddScoped<Observers>(s => new Observers(s.GetService<IImageObserver<Rgb>>(), s.GetService<IImageObserver<Gray>>()));
+            services.AddScoped<Observers>(s => new Observers(
+                s.GetService<IImageObserver<Rgb>>() ?? throw new InvalidOperationException("Rgb observer was not resolved!"), 
+                s.GetService<IImageObserver<Gray>>() ?? throw new InvalidOperationException("Gray observer was not resolved!")));
 
             services.AddSingleton<IMqttAdapter>(s => new HomeAssistantMqttAdapter(
                 s.GetService<IOccupancySensor>() ?? throw new InvalidOperationException("OccupancySensor was not resolved!"),
                 s.GetService<ILogger<HomeAssistantMqttAdapter>>() ?? throw new InvalidOperationException("Logger for HomeAssistantMqttAdapter was not resolved!"),
-                HomeAssistantMqttAdapter.CreateClient,
+                HomeAssistantMqttAdapter.CreateClient(
+                    new WatchdogSettings(s.GetService<IConfiguration>() ?? throw new InvalidOperationException("Configuration was not resolved!")),
+                    s.GetService<ILogger<Watchdog>>() ?? throw new InvalidOperationException("Watchdog loggrer was not resolved!")),
                 new AdapterSettings(s.GetService<IConfiguration>() ?? throw new InvalidOperationException("Configuration was not resolved!"))));
 
             services.AddSwaggerGen(c =>
