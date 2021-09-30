@@ -36,14 +36,14 @@ namespace NVs.OccupancySensor.API.Controllers
         public IActionResult GetRawStream()
         {
             logger.LogDebug("GetRawStream called");
-            
-            if (streams.Camera.IsRunning)
+
+            if (!streams.Camera.IsRunning || !IsStreamingAllowed)
             {
-                var stream = streams.Camera.Stream;
-                return GetMjpegRgbStreamContent(stream);
+                return NoContent();
             }
 
-            return NoContent();
+            var stream = streams.Camera.Stream;
+            return GetMjpegRgbStreamContent(stream);
         }
 
         [HttpGet]
@@ -53,13 +53,13 @@ namespace NVs.OccupancySensor.API.Controllers
         {
             logger.LogDebug("GetDenoisedStream called");
 
-            if (streams.Camera.IsRunning)
+            if (!streams.Camera.IsRunning || !IsStreamingAllowed)
             {
-                var stream = streams.Denoiser.Output;
-                return GetMjpegRgbStreamContent(stream);
+                return NoContent();
             }
 
-            return NoContent();
+            var stream = streams.Denoiser.Output;
+            return GetMjpegRgbStreamContent(stream);
         }
 
         [HttpGet]
@@ -69,13 +69,13 @@ namespace NVs.OccupancySensor.API.Controllers
         {
             logger.LogDebug("GetSubtractedStream called");
 
-            if (streams.Camera.IsRunning)
+            if (!streams.Camera.IsRunning || !IsStreamingAllowed)
             {
-                var stream = streams.Subtractor.Output;
-                return GetMjpegGrayStreamContent(stream);
+                return NoContent();
             }
 
-            return NoContent();
+            var stream = streams.Subtractor.Output;
+            return GetMjpegGrayStreamContent(stream);
         }
 
         [HttpGet]
@@ -85,13 +85,13 @@ namespace NVs.OccupancySensor.API.Controllers
         {
             logger.LogDebug("GetCorrectedStream called");
 
-            if (streams.Camera.IsRunning)
+            if (!streams.Camera.IsRunning || !IsStreamingAllowed)
             {
-                var stream = streams.Corrector.Output;
-                return GetMjpegGrayStreamContent(stream);
+                return NoContent();
             }
 
-            return NoContent();
+            var stream = streams.Corrector.Output;
+            return GetMjpegGrayStreamContent(stream);
         }
 
         [HttpGet]
@@ -101,13 +101,13 @@ namespace NVs.OccupancySensor.API.Controllers
         {
             logger.LogDebug($"GetStream called");
 
-            if (streams.Camera.IsRunning)
+            if (!streams.Camera.IsRunning || !IsStreamingAllowed)
             {
-                var stream = streams.Detector.ToObservable(nameof(streams.Detector.Mask), () => streams.Detector.Mask);
-                return GetMjpegGrayStreamContent(stream);
+                return NoContent();
             }
 
-            return NoContent();
+            var stream = streams.Detector.ToObservable(nameof(streams.Detector.Mask), () => streams.Detector.Mask);
+            return GetMjpegGrayStreamContent(stream);
         }
 
         private IActionResult GetMjpegRgbStreamContent(IObservable<Image<Rgb, byte>> stream)
@@ -137,5 +137,7 @@ namespace NVs.OccupancySensor.API.Controllers
                 async cts => (await observers.Gray.GetImage())?.ToJpegData(),
                 () => unsubscriber.Dispose());
         }
+
+        private bool IsStreamingAllowed => bool.TryParse(config["StreamingAllowed"], out var b) && b;
     }
 }
