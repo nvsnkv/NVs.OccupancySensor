@@ -116,10 +116,6 @@ namespace NVs.OccupancySensor.API.Tests
             .Returns(() => Task.FromResult(new MqttClientPublishResult()))
             .Verifiable("Switch config was not published!");
 
-            client.Setup(c => c.PublishAsync(It.Is<MqttApplicationMessage>(m => comparer.Equals(m, expectedMessages.ServiceAvailable)), It.IsAny<CancellationToken>()))
-            .Returns(() => Task.FromResult(new MqttClientPublishResult()))
-            .Verifiable("Service available was not published!");
-
             var adapter = new HomeAssistantMqttAdapter(sensor.Object, logger.Object, CreateClient, new AdapterSettings(config.Object));
             await adapter.Start();
 
@@ -127,15 +123,11 @@ namespace NVs.OccupancySensor.API.Tests
         }
 
         [Fact]
-        public async Task SendLWTsWhenStopped()
+        public async Task SendNotificationWhenStopped()
         {
             client.Setup(c => c.PublishAsync(It.Is<MqttApplicationMessage>(m => comparer.Equals(m, expectedMessages.SensorUnavailable)), It.IsAny<CancellationToken>()))
             .Returns(() => Task.FromResult(new MqttClientPublishResult()))
             .Verifiable("Sensor unavailable was not published!");
-
-            client.Setup(c => c.PublishAsync(It.Is<MqttApplicationMessage>(m => comparer.Equals(m, expectedMessages.ServiceUnavailable)), It.IsAny<CancellationToken>()))
-            .Returns(() => Task.FromResult(new MqttClientPublishResult()))
-            .Verifiable("Service unavailable was not published!");
 
             sensor.Setup(s => s.Start()).Verifiable("Start was not called!");
 
