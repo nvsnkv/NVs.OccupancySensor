@@ -61,6 +61,7 @@ namespace NVs.OccupancySensor.API.MQTT
                 options = new MqttClientOptionsBuilder()
                     .WithClientId(settings.ClientId)
                     .WithTcpServer(settings.Server, settings.Port)
+                    .WithWillMessage(messages.SensorUnavailable)
                     .WithCredentials(settings.User, settings.Password)
                     .Build();
 
@@ -261,9 +262,6 @@ namespace NVs.OccupancySensor.API.MQTT
 
                 logger.LogInformation("Config messages successfully published.");
 
-                EnsureResultSuccessful(await client.PublishAsync(messages.ServiceAvailable));
-                logger.LogInformation("Service state successfully updated.");
-
                 await client.PublishAsync(sensor.IsRunning
                     ? messages.ServiceEnabled
                     : messages.ServiceDisabled
@@ -325,7 +323,6 @@ namespace NVs.OccupancySensor.API.MQTT
             try
             {
                 await client.PublishAsync(messages.SensorUnavailable);
-                await client.PublishAsync(messages.ServiceUnavailable);
                 logger.LogInformation("Last will and testament successfully published.");
             }
             catch (Exception e)
