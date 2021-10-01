@@ -9,9 +9,6 @@ namespace NVs.OccupancySensor.API.MQTT
     {
         public readonly IEnumerable<MqttApplicationMessage> Configs;
         
-        public readonly MqttApplicationMessage ServiceAvailable;
-        public readonly MqttApplicationMessage ServiceUnavailable;
-        
         public readonly MqttApplicationMessage SensorAvailable;
         public readonly MqttApplicationMessage SensorUnavailable;
 
@@ -67,7 +64,6 @@ namespace NVs.OccupancySensor.API.MQTT
                         name = "Service", 
                         state_topic = $"homeassistant/switch/nvs_occupancy_sensor/{instanceId}/state",
                         command_topic = ServiceCommandTopic,
-                        availability_topic = $"homeassistant/switch/nvs_occupancy_sensor/{instanceId}/availability",
                         payload_off = "OFF",
                         payload_on = "ON",
                         unique_id = $"id_{instanceId}_service",
@@ -77,16 +73,6 @@ namespace NVs.OccupancySensor.API.MQTT
                     .Build()
             };
 
-            ServiceAvailable = new MqttApplicationMessageBuilder()
-                .WithTopic($"homeassistant/switch/nvs_occupancy_sensor/{instanceId}/availability")
-                .WithPayload("online")
-                .Build();
-            
-            ServiceUnavailable = new MqttApplicationMessageBuilder()
-                .WithTopic($"homeassistant/switch/nvs_occupancy_sensor/{instanceId}/availability")
-                .WithPayload("offline")
-                .Build();
-            
             SensorAvailable = new MqttApplicationMessageBuilder()
                 .WithTopic($"homeassistant/binary_sensor/nvs_occupancy_sensor/{instanceId}/availability")
                 .WithPayload("online")
