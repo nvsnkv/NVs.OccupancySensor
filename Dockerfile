@@ -42,7 +42,10 @@ RUN dotnet restore "NVs.OccupancySensor.CV/NVs.OccupancySensor.CV.csproj"
 RUN dotnet restore "NVs.OccupancySensor.API/NVs.OccupancySensor.API.csproj"
 COPY . .
 WORKDIR "/src/NVs.OccupancySensor.API"
-RUN dotnet build "NVs.OccupancySensor.API.csproj" -c Release -o /app/build -r linux-arm
+RUN dotnet build "NVs.OccupancySensor.API.csproj" -c Release -o /app/build -r linux-arm --no-restore
+
+FROM build AS test
+RUN dotnet test --no-build
 
 FROM build AS publish
 RUN dotnet publish "NVs.OccupancySensor.API.csproj" -c Release -o /app/publish -r linux-arm
