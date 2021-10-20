@@ -8,7 +8,9 @@ on:
       - .github/**
   pull_request:
     branches: [ develop ]
-  workflow_dispatch:
+    paths-ignore:
+      - readme.md
+      - .github/**
 
 jobs:
 
