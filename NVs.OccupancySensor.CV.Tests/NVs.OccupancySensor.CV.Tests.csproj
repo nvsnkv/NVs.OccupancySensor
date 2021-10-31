@@ -8,8 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="Divergic.Logging.Xunit" Version="3.6.0" />
-    <PackageReference Include="Emgu.CV" Version="4.5.1.4349" />
-    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.5.1.4349" />
+    <PackageReference Include="Emgu.CV" Version="4.5.3.4721" />
+    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.5.3.4721" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
     <PackageReference Include="Moq" Version="4.16.1" />
     <PackageReference Include="xunit" Version="2.4.1" />

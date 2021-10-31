@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Emgu.CV" Version="4.5.4.4788" />
-    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.5.4.4788" />
+    <PackageReference Include="Emgu.CV" Version="4.5.3.4721" />
+    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.5.3.4721" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.11.1" />
     <PackageReference Include="MQTTnet" Version="3.0.16" />
     <PackageReference Include="Serilog.AspNetCore" Version="4.1.0" />

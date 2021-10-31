@@ -11,6 +11,7 @@ using Moq;
 using NVs.OccupancySensor.CV.Observation;
 using NVs.OccupancySensor.CV.Tests.Utils;
 using Xunit;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace NVs.OccupancySensor.CV.Tests
 {
