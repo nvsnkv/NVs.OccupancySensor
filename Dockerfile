@@ -11,9 +11,8 @@ ENV DOTNET_ROOT=/usr/share/dotnet
 ENV PATH="$PATH:/usr/share/dotnet"
 WORKDIR /vendor
 RUN apt-get install -y git
-RUN git clone https://github.com/emgucv/emgucv emgucv
+RUN git clone --depth 1 --branch 4.5.3 https://github.com/emgucv/emgucv
 WORKDIR /vendor/emgucv
-RUN git checkout 4.5.3
 RUN git submodule update --init --recursive
 WORKDIR /vendor/emgucv/platforms/ubuntu/20.04
 RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
