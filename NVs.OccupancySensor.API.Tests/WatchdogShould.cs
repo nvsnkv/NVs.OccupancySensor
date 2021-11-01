@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
 using Moq;
 using MQTTnet.Client;
 using MQTTnet.Client.Connecting;
@@ -28,7 +29,16 @@ namespace NVs.OccupancySensor.API.Tests
         public WatchdogShould()
         {
             client.SetupSet(c => c.DisconnectedHandler = It.IsAny<IMqttClientDisconnectedHandler>()).Callback<IMqttClientDisconnectedHandler>(val => handler = val);
+            client.Setup(c => c.Options).Returns(new MqttClientOptions());
             config.Setup(s => s.GetSection("MQTT:Reconnect")).Returns(retriesSection.Object);
+        }
+
+        private MqttClientConnectResult GetExpectedResult(MqttClientConnectResultCode code)
+        {
+            var result = new MqttClientConnectResult();
+            typeof(MqttClientConnectResult).GetProperty("ResultCode")!.SetValue(result, code);
+
+            return result;
         }
 
         [Fact]
@@ -36,11 +46,11 @@ namespace NVs.OccupancySensor.API.Tests
         {
             retriesSection.Setup(s => s["AttemptsCount"]).Returns("1");
             client.Setup(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(),It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(new MqttClientAuthenticateResult() { ResultCode = MqttClientConnectResultCode.Success }))
+                .Returns(Task.FromResult(GetExpectedResult(MqttClientConnectResultCode.Success)))
                 .Verifiable("Reconnect was called!");
 
             var _ = new Watchdog(client.Object, logger.Object, new WatchdogSettings(config.Object));
-            await handler.HandleDisconnectedAsync(new MqttClientDisconnectedEventArgs(true, new Exception("Test exception"), new MqttClientAuthenticateResult(), MqttClientDisconnectReason.NormalDisconnection));
+            await handler.HandleDisconnectedAsync(new MqttClientDisconnectedEventArgs(true, new Exception("Test exception"), new MqttClientConnectResult(), MqttClientDisconnectReason.NormalDisconnection));
 
             client.Verify(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Never);
         }
@@ -52,10 +62,10 @@ namespace NVs.OccupancySensor.API.Tests
         {
             retriesSection.Setup(s => s["AttemptsCount"]).Returns(retriesCount);
             client.Setup(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(new MqttClientAuthenticateResult() { ResultCode = MqttClientConnectResultCode.Success }))
+                .Returns(Task.FromResult(GetExpectedResult(MqttClientConnectResultCode.Success)))
                 .Verifiable("Reconnect was called!");
             var _ = new Watchdog(client.Object, logger.Object, new WatchdogSettings(config.Object));
-            await handler.HandleDisconnectedAsync(new MqttClientDisconnectedEventArgs(true, new Exception("Test exception"), new MqttClientAuthenticateResult(), MqttClientDisconnectReason.ProtocolError));
+            await handler.HandleDisconnectedAsync(new MqttClientDisconnectedEventArgs(true, new Exception("Test exception"), new MqttClientConnectResult(), MqttClientDisconnectReason.ProtocolError));
 
             client.Verify(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Never);
         }
@@ -65,11 +75,11 @@ namespace NVs.OccupancySensor.API.Tests
         {
             retriesSection.Setup(s => s["AttemptsCount"]).Returns("2");
             client.Setup(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(new MqttClientAuthenticateResult() { ResultCode = MqttClientConnectResultCode.ServerUnavailable }))
+                .Returns(Task.FromResult(GetExpectedResult(MqttClientConnectResultCode.ServerUnavailable)))
                 .Verifiable("Reconnect was not called!");
 
             var _ = new Watchdog(client.Object, logger.Object, new WatchdogSettings(config.Object));
-            await handler.HandleDisconnectedAsync(new MqttClientDisconnectedEventArgs(true, new Exception("Test exception"), new MqttClientAuthenticateResult(), MqttClientDisconnectReason.ProtocolError));
+            await handler.HandleDisconnectedAsync(new MqttClientDisconnectedEventArgs(true, new Exception("Test exception"), new MqttClientConnectResult(), MqttClientDisconnectReason.ProtocolError));
 
             client.Verify(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
         }
@@ -82,13 +92,13 @@ namespace NVs.OccupancySensor.API.Tests
 
             var reconnectsRequested = 0;
             client.Setup(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>()))
-                .Returns(() => Task.FromResult(new MqttClientAuthenticateResult() { ResultCode = reconnectsRequested++ > 0 ? MqttClientConnectResultCode.Success : MqttClientConnectResultCode.ServerUnavailable }))
+                .Returns(() => Task.FromResult(GetExpectedResult(reconnectsRequested++ > 0 ? MqttClientConnectResultCode.Success : MqttClientConnectResultCode.ServerUnavailable)))
                 .Verifiable("Reconnect was not called!");
 
             var _ = new Watchdog(client.Object, logger.Object, new WatchdogSettings(config.Object));
             var sw = new Stopwatch();
             sw.Start();
-            await handler.HandleDisconnectedAsync(new MqttClientDisconnectedEventArgs(true, new Exception("Test exception"), new MqttClientAuthenticateResult(), MqttClientDisconnectReason.ProtocolError));
+            await handler.HandleDisconnectedAsync(new MqttClientDisconnectedEventArgs(true, new Exception("Test exception"), new MqttClientConnectResult(), MqttClientDisconnectReason.ProtocolError));
             sw.Stop();
 
             client.Verify(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
@@ -102,14 +112,14 @@ namespace NVs.OccupancySensor.API.Tests
             retriesSection.Setup(s => s["IntervalBetweenAttempts"]).Returns("00:00:06");
 
             client.Setup(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(new MqttClientAuthenticateResult() { ResultCode = MqttClientConnectResultCode.Success }))
+                .Returns(Task.FromResult(GetExpectedResult(MqttClientConnectResultCode.Success)))
                 .Verifiable();
 
             var _ = new Watchdog(client.Object, logger.Object, new WatchdogSettings(config.Object));
 
             Task.WaitAll(
-                handler.HandleDisconnectedAsync(new MqttClientDisconnectedEventArgs(true, new Exception("Test exception"), new MqttClientAuthenticateResult(), MqttClientDisconnectReason.UnspecifiedError)),
-                handler.HandleDisconnectedAsync(new MqttClientDisconnectedEventArgs(true, new Exception("Test exception"), new MqttClientAuthenticateResult(), MqttClientDisconnectReason.ServerBusy))
+                handler.HandleDisconnectedAsync(new MqttClientDisconnectedEventArgs(true, new Exception("Test exception"), new MqttClientConnectResult(), MqttClientDisconnectReason.UnspecifiedError)),
+                handler.HandleDisconnectedAsync(new MqttClientDisconnectedEventArgs(true, new Exception("Test exception"), new MqttClientConnectResult(), MqttClientDisconnectReason.ServerBusy))
                 );
 
             client.Verify(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Once);

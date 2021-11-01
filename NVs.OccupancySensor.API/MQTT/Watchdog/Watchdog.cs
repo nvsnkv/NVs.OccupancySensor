@@ -53,7 +53,7 @@ namespace NVs.OccupancySensor.API.MQTT.Watchdog
                         var delay = (attemptsMade + 1) * settings.Interval;
                         await Task.Delay(delay, cts.Token);
 
-                        var result = await client.ConnectAsync(client.Options, cts.Token);
+                        var result = await client.ReconnectAsync(cts.Token);
                         if (result.ResultCode == MqttClientConnectResultCode.Success)
                         {
                             attemptsMade = 0;

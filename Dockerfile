@@ -11,14 +11,14 @@ ENV DOTNET_ROOT=/usr/share/dotnet
 ENV PATH="$PATH:/usr/share/dotnet"
 WORKDIR /vendor
 RUN apt-get install -y git
-RUN git clone --depth 1 --branch 4.5.3 https://github.com/emgucv/emgucv
+RUN git clone --depth 1 --branch 4.5.4 https://github.com/emgucv/emgucv
 WORKDIR /vendor/emgucv
 RUN git submodule update --init --recursive
 WORKDIR /vendor/emgucv/platforms/ubuntu/20.04
 RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
 RUN apt-get install -y sudo
-RUN yes | ./apt_install_dependency.sh
-RUN ./cmake_configure.sh
+RUN yes | ./apt_install_dependency
+RUN ./cmake_configure
 
 FROM deps as emgucv
 WORKDIR /libs
