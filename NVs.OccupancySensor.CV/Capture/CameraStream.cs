@@ -61,7 +61,7 @@ namespace NVs.OccupancySensor.CV.Capture
                 }
                 else
                 {
-                    Logger.LogWarning("null frame received");
+                    Logger.LogInformation("null frame received!");
                 }
 
                 
