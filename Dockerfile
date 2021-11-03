@@ -17,6 +17,8 @@ RUN git submodule update --init --recursive
 WORKDIR /vendor/emgucv/platforms/ubuntu/20.04
 RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
 RUN apt-get install -y sudo
+RUN sed -s 's/sudo apt-get install/sudo apt-get install libgstreamer1.0-dev/g' ./apt_install_dependency
+RUN sed -s 's/-DBUILD_opencv_python3:BOOL=FALSE/-DBUILD_opencv_python3:BOOL=FALSE -DWITH_GSTREAMER:BOOL=TRUE/g' ./cmake_configure
 RUN yes | ./apt_install_dependency
 RUN ./cmake_configure
 

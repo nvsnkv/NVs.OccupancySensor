@@ -135,7 +135,7 @@ namespace NVs.OccupancySensor.CV.Capture
             cts = new CancellationTokenSource();
 
             capture = createVideoCaptureFunc(Settings);
-
+            
             stream = new CameraStream(capture, cts.Token, streamLogger, Settings.FrameInterval);
             stream.Subscribe(errorObserver);
             logger.LogInformation("Stream has been created");
@@ -192,7 +192,7 @@ namespace NVs.OccupancySensor.CV.Capture
         public static VideoCapture CreateVideoCapture(CaptureSettings settings)
         {
             return int.TryParse(settings.Source, out var camIndex)
-                ? new VideoCapture(camIndex)
+                ? new VideoCapture(camIndex, VideoCapture.API.Gstreamer)
                 : new VideoCapture(settings.Source);
         }
     }
