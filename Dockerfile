@@ -14,15 +14,17 @@ RUN apt-get install -y git
 RUN git clone --depth 1 --branch 4.5.4 https://github.com/emgucv/emgucv
 WORKDIR /vendor/emgucv
 RUN git submodule update --init --recursive
-WORKDIR /vendor/emgucv/platforms/ubuntu/20.04
 RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
+WORKDIR /vendor/emgucv/platforms/ubuntu/20.04
+RUN sed -i '/libgstreamer1.0-dev/libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev/g' ./apt_install_dependency
+RUN sed -i '/-DWITH_EIGEN:BOOL=TRUE/-DWITH_GSTREAMER:BOOL=TRUE -DWITH_EIGEN:BOOL=TRUE/g' ./cmake_configure
+
+FROM deps AS emgucv-configure
 RUN apt-get install -y sudo
-RUN sed -s 's/sudo apt-get install/sudo apt-get install libgstreamer1.0-dev/g' ./apt_install_dependency
-RUN sed -s 's/-DBUILD_opencv_python3:BOOL=FALSE/-DBUILD_opencv_python3:BOOL=FALSE -DWITH_GSTREAMER:BOOL=TRUE/g' ./cmake_configure
 RUN yes | ./apt_install_dependency
 RUN ./cmake_configure
 
-FROM deps as emgucv
+FROM emgucv-configure AS emgucv
 WORKDIR /libs
 COPY --from=deps /vendor/emgucv/libs .
 RUN mv arm/* .
