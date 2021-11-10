@@ -1,0 +1,3 @@
+FROM scratch
+ADD raspbian.image.tar.xz /
+ENV DEBIAN_FRONTEND noninteractive

@@ -23,12 +23,13 @@ Prepare your favorite API Explorer. [Swagger-UI](https://swagger.io/docs/open-so
 Application produces OpenAPI definition that can be downloaded from path `/swagger/v1/swagger.json`. This format can be consumed by varios API testing tools.
 
 Depending on the hosting option you prefer, you'll need either [.Net Core 3.1 SDK](https://dotnet.microsoft.com/download/dotnet/thank-you/sdk-3.1.407-windows-x64-installer) or [Docker](https://docs.docker.com/get-docker/) installed on the host to build and run application.
+If you're planning to build a docker image for raspberry-pi you'll need to also have `debootstrap` installed on build machine - there is no good base image for raspberry so we'll our own during the build.
 
 #### Patience (optional)
 In case you chose to use Docker, please ensure that you can spend couple of hours building the image. Compilation of EmguCV is the part of Docker image and it may take several hours if you're doing it on weak device.
 
 ### Building the Application
-Nothing special here - either build it using `dotnet build` or `docker build`. The example for Docker can be found below.
+Nothing special here - either build it using `dotnet build` or `docker build`. Examples for Docker can be found below.
 
 ### Quick Setup
 1. Build application;
@@ -151,6 +152,22 @@ docker run -e "CV:Capture:FrameInterval"="00:00:01" \
     --rm \
     occupancy_sensor
 ```
+#### Building the image for Raspberry Pi
+Main `Dockerfile` in the repo creates the container that works well with remote or USB cameras attached to the host device.
+In case you want to use Raspberry Pi with default camera connected you need to compile OpenCV differently - otherwise it won't detect Pi camera.
+To do it, you can use `Dockerfile-pi` file in the repository root. Unfortunately as of 2021 there is no suitable Raspbian base image on dockerhub, but no worries - we'll create a base one :)
+Instruction is quite simple:
+1. install `debootstrap` package to your host Raspbian system
+2. use `./raspbian/build-base.sh` script to create base image. The scripts have a lot of copy-paste from [this repo](https://github.com/schachr/docker-raspbian-stretch) (thanks to [schachr](https://github.com/schachr)!)
+3. once base image is ready, build `Dockerfile-pi` from repository root
+```
+#!/bin/sh
+cd raspberry-pi
+./build-base.sh
+cd ..
+Docker build -f Dockerfile-pi .
+```
+
 #### Swagger
 When built in debug, application exposes Swagger UI on URL `/swagger/index.html`. This UI allows to explore and interact with HTTP API exposed by this app.
 #### Known issues as of January 2021
