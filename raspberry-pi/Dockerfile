@@ -1,6 +1,6 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-FROM occ-sensor-paspbian-base AS deps
+FROM occ-sensor-buildd AS deps
 RUN apt-get update;
 RUN apt-get install -y wget
 WORKDIR /usr/share/dotnet
@@ -14,8 +14,9 @@ RUN apt-get install -y git
 RUN git clone --depth 1 --branch 4.5.4 https://github.com/emgucv/emgucv
 WORKDIR /vendor/emgucv
 RUN git submodule update --init --recursive
-WORKDIR /vendor/emgucv/platforms/raspbian
+WORKDIR /vendor/emgucv/platforms/raspberry_pi_os
 RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
+RUN apt-get install -y sudo
 RUN yes | ./apt_install_dependency
 RUN ./cmake_configure
 

@@ -3,8 +3,8 @@ set -e
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 
 dir="raspbian"
-rootfsDir="raspbian"
-tarFile="raspbian.image.tar.xz"
+rootfsDir="raspbian-minbase"
+tarFile="raspbian.image-minbase.tar.xz"
 mkdir -p "$rootfsDir"
 
 (
