@@ -134,7 +134,7 @@ Use `raspberry-pi/rebuild_all.sh` to create an image for raspberry-pi. Please no
 Build:
 ```sh
 #!/bin/bash
-./raspberry-pi/rebuild_all.sh
+sudo ./raspberry-pi/rebuild_all.sh
 ```
 Create a volume:
 ```sh

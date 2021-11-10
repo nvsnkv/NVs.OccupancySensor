@@ -3,13 +3,13 @@ set -e
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 
 dir="raspbian"
-rootfsDir="raspbian-minbase"
-tarFile="raspbian.image-minbase.tar.xz"
+rootfsDir="raspbian-buildd"
+tarFile="raspbian.image-buildd.tar.xz"
 mkdir -p "$rootfsDir"
 
 (
 	set -x
-	/usr/sbin/debootstrap --no-check-gpg --arch=armhf --verbose --variant='minbase' --include='iproute,iputils-ping' stretch "$rootfsDir" http://archive.raspbian.org/raspbian/
+	/usr/sbin/debootstrap --no-check-gpg --arch=armhf --verbose --variant='buildd' --include='iproute,iputils-ping' stretch "$rootfsDir" http://archive.raspbian.org/raspbian/
 )
 
 # now for some Docker-specific tweaks
