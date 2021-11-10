@@ -34,7 +34,7 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:6.0 AS build
 WORKDIR /src
 COPY ["NVs.OccupancySensor.API/NVs.OccupancySensor.API.csproj", "NVs.OccupancySensor.API/"]
 RUN dotnet restore "NVs.OccupancySensor.API/NVs.OccupancySensor.API.csproj"
