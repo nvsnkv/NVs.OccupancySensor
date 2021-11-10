@@ -3,6 +3,7 @@
 FROM arm32v7/ubuntu:20.04 AS deps
 RUN apt-get update;
 RUN apt-get install -y wget
+RUN update-ca-certificates -f
 WORKDIR /usr/share/dotnet
 WORKDIR /usr/share
 RUN wget https://download.visualstudio.microsoft.com/download/pr/1f85b038-9917-4d0a-8485-5dc86510eec7/a7555924fe292c6c2140893f066abe65/dotnet-sdk-6.0.100-linux-arm.tar.gz -O /usr/share/sdk.tar.gz
