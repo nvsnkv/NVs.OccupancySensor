@@ -4,14 +4,11 @@ on:
   push:
     branches: [ master ]
     paths-ignore:
-      - readme.md
-      - .github/**
+      - ./**/*
   pull_request:
-    branches: [ develop ]
+    branches: [ master ]
     paths-ignore:
-      - readme.md
-      - .github/**
-
+      - ./**/*
 jobs:
 
   build:
