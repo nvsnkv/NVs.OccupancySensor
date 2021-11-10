@@ -5,7 +5,7 @@ RUN apt-get update;
 RUN apt-get install -y wget
 WORKDIR /usr/share/dotnet
 WORKDIR /usr/share
-RUN wget https://download.visualstudio.microsoft.com/download/pr/2178c8a1-ad48-4e51-9ddd-4e3ab64d1f0e/68746abefadf62be43ca525653c915a1/dotnet-sdk-3.1.405-linux-arm.tar.gz -O /usr/share/sdk.tar.gz
+RUN wget https://download.visualstudio.microsoft.com/download/pr/1f85b038-9917-4d0a-8485-5dc86510eec7/a7555924fe292c6c2140893f066abe65/dotnet-sdk-6.0.100-linux-arm.tar.gz -O /usr/share/sdk.tar.gz
 RUN tar zxf /usr/share/sdk.tar.gz -C /usr/share/dotnet
 ENV DOTNET_ROOT=/usr/share/dotnet
 ENV PATH="$PATH:/usr/share/dotnet"
