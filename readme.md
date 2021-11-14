@@ -29,12 +29,7 @@ If you're planning to build a docker image for raspberry-pi you'll need to also 
 In case you chose to use Docker, please ensure that you can spend couple of hours building the image. Compilation of EmguCV is the part of building procedure for Linux distros and it may take several hours if you're doing it on weak device.
 
 ### Building the Application
-There's nothing special for Windows system - projects already contains all necessary dependencies to create the app. Just run `dotnet build` to get assemblies.
-
-If you're planning to use it on Linux system, you need to ensure that OpenCV is compiled on target system before starting the app. Follow the steps from [EmguCV isntallation guide - Linux](https://emgu.com/wiki/index.php/Download_And_Installation#Linux) to get a custom version of OpenCV compiled together with EmguCV assemblies, and then build this app.
-
-There is also an option to create docker image for Raspberry Pi, which consists of base images creation, compilation of EmguCV and application itself.
-Use `raspberry-pi/rebuild_all.sh` to create base and target image. 
+TBD
 
 ### Quick Setup
 1. Build application;
@@ -125,17 +120,8 @@ Startup process gets logged to `startup.ndjson` file in the application working 
 #### Version
 * `Version` field in appsettings.json is not actually a setting :) . MQTT adapter sends it to Home Assistant as a part of configuration topic.
 ## Building notes
-Thanks to docker, container creation is pretty simple.  
+TBD
 
-Use `NVs.OccupancySensor.API/Dockerfile` to create x86_64 image. This image works well with Visual Studio and allows to debug a container from the IDE without additional configuration on solution level (you still need to setup docker on your host machine and enable linux containers support). 
-
-Use `raspberry-pi/rebuild_all.sh` to create an image for raspberry-pi. Please note that you need a Debian-based system and arm32 host. Image creation steps contain compilation of OpenCV and EmguCV - it may take significant time to get created. In my case it took about 3 hours to build it on Raspberry Pi 4. 
-#### Docker example
-Build:
-```sh
-#!/bin/bash
-sudo ./raspberry-pi/rebuild_all.sh
-```
 Create a volume:
 ```sh
 #!/bin/bash

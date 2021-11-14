@@ -1,6 +1,4 @@
-#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-FROM occ-sensor-buildd AS deps
+FROM debian:bullseye-backports AS deps
 RUN apt-get update;
 RUN apt-get install -y wget
 WORKDIR /usr/share/dotnet
