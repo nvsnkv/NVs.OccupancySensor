@@ -338,6 +338,8 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
 /NVs.OccupancySensor.CV.Tests/coveragereport
 appsettings.development.json
-/NVs.OccupancySensor.API/startup_log20210207.ndjson
+/app
+*startup_log*

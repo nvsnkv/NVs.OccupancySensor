@@ -11,6 +11,21 @@
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "NVs.OccupancySensor.API",
+                "-c", "Release",
+                "-r", "linux-arm",
+                "--no-self-contained",
+                "-o", "app",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
         }
     ]
 }
