@@ -7,7 +7,7 @@ namespace NVs.OccupancySensor.CV.Tests.Utils
 {
     internal class TestImageObserver<T> : IObserver<Image<T, byte>> where T : struct, IColor
     {
-        public Dictionary<Image<T, byte>, DateTime> ReceivedItems { get; } = new Dictionary<Image<T, byte>, DateTime>();
+        public Dictionary<Image<T, byte>, DateTime> ReceivedItems { get; } = new();
 
         public bool StreamCompleted { get; private set; }
 

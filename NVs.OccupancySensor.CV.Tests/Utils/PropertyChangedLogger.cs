@@ -6,7 +6,7 @@ namespace NVs.OccupancySensor.CV.Tests.Utils
 {
     internal class PropertyChangedLogger
     {
-        public readonly Dictionary<object, IDictionary<DateTime, string>> Notifications = new Dictionary<object, IDictionary<DateTime, string>>();
+        public readonly Dictionary<object, IDictionary<DateTime, string>> Notifications = new();
 
         public void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {

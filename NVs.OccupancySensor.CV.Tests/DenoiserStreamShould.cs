@@ -17,8 +17,8 @@ namespace NVs.OccupancySensor.CV.Tests
 {
     public sealed class DenoisingStreamShould
     {
-        private readonly Mock<ILogger> logger = new Mock<ILogger>();
-        private readonly Mock<IDenoisingStrategy> strategy = new Mock<IDenoisingStrategy>();
+        private readonly Mock<ILogger> logger = new();
+        private readonly Mock<IDenoisingStrategy> strategy = new();
         
         [Fact]
         public async Task ProvideDataForObservers()

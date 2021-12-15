@@ -16,8 +16,8 @@ namespace NVs.OccupancySensor.CV.Tests
     [Collection("Run Exclusively")]
     public sealed class CameraShouldExclusively
     {
-        private readonly Mock<ILogger<Camera>> cameraLogger = new Mock<ILogger<Camera>>();
-        private readonly Mock<ILogger<CameraStream>> streamLogger = new Mock<ILogger<CameraStream>>();
+        private readonly Mock<ILogger<Camera>> cameraLogger = new();
+        private readonly Mock<ILogger<CameraStream>> streamLogger = new();
         
         [Fact]
         //TODO: redesign blinking test
@@ -68,8 +68,8 @@ namespace NVs.OccupancySensor.CV.Tests
 
     public sealed class CameraShould
     {
-        private readonly Mock<ILogger<Camera>> cameraLogger = new Mock<ILogger<Camera>>();
-        private readonly Mock<ILogger<CameraStream>> streamLogger = new Mock<ILogger<CameraStream>>();
+        private readonly Mock<ILogger<Camera>> cameraLogger = new();
+        private readonly Mock<ILogger<CameraStream>> streamLogger = new();
 
         [Fact]
         public void NotifyWhenItWasStarted()

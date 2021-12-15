@@ -12,8 +12,8 @@ namespace NVs.OccupancySensor.CV.Tests
     public sealed class StaticMaskCorrectionStrategyShould : IDisposable
     {
         private static readonly string MaskPath = "mask.bmp";
-        private readonly StaticMaskCorrectionStrategy strategy = new StaticMaskCorrectionStrategy(new StaticMaskSettings(MaskPath));
-        private readonly Image<Gray, byte> mask = new Image<Gray, byte>(2, 2)
+        private readonly StaticMaskCorrectionStrategy strategy = new(new StaticMaskSettings(MaskPath));
+        private readonly Image<Gray, byte> mask = new(2, 2)
         {
             [0, 0] = new Gray(255),
             [0, 1] = new Gray(255),
@@ -26,10 +26,10 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var image = new Image<Gray, byte>(2, 2)
             {
-                [0, 0] = new Gray(0),
-                [0, 1] = new Gray(255),
-                [1, 0] = new Gray(255),
-                [1, 1] = new Gray(0)
+                [0, 0] = new(0),
+                [0, 1] = new(255),
+                [1, 0] = new(255),
+                [1, 1] = new(0)
             };
 
             mask.Save(MaskPath);
@@ -64,10 +64,10 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var image = new Image<Gray, byte>(2, 2)
             {
-                [0, 0] = new Gray(0),
-                [0, 1] = new Gray(255),
-                [1, 0] = new Gray(255),
-                [1, 1] = new Gray(0)
+                [0, 0] = new(0),
+                [0, 1] = new(255),
+                [1, 0] = new(255),
+                [1, 1] = new(0)
             };
 
             var result = strategy.Apply(image);
@@ -80,10 +80,10 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var image = new Image<Gray, byte>(2, 2)
             {
-                [0, 0] = new Gray(0),
-                [0, 1] = new Gray(255),
-                [1, 0] = new Gray(255),
-                [1, 1] = new Gray(0)
+                [0, 0] = new(0),
+                [0, 1] = new(255),
+                [1, 0] = new(255),
+                [1, 1] = new(0)
             };
 
             mask.Save(MaskPath);
@@ -100,10 +100,10 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var image = new Image<Gray, byte>(2, 2)
             {
-                [0, 0] = new Gray(255),
-                [0, 1] = new Gray(0),
-                [1, 0] = new Gray(0),
-                [1, 1] = new Gray(0)
+                [0, 0] = new(255),
+                [0, 1] = new(0),
+                [1, 0] = new(0),
+                [1, 1] = new(0)
             };
 
             strategy.Apply(image);
@@ -123,34 +123,34 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var ultraRareImage = new Image<Gray, byte>(2, 2)
             {
-                [0, 0] = new Gray(0),
-                [0, 1] = new Gray(255),
-                [1, 0] = new Gray(0),
-                [1, 1] = new Gray(0)
+                [0, 0] = new(0),
+                [0, 1] = new(255),
+                [1, 0] = new(0),
+                [1, 1] = new(0)
             };
 
             var rareImage = new Image<Gray, byte>(2, 2)
             {
-                [0, 0] = new Gray(0),
-                [0, 1] = new Gray(0),
-                [1, 0] = new Gray(255),
-                [1, 1] = new Gray(255)
+                [0, 0] = new(0),
+                [0, 1] = new(0),
+                [1, 0] = new(255),
+                [1, 1] = new(255)
             };
 
             var frequentImage = new Image<Gray, byte>(2, 2)
             {
-                [0, 0] = new Gray(255),
-                [0, 1] = new Gray(0),
-                [1, 0] = new Gray(255),
-                [1, 1] = new Gray(0)
+                [0, 0] = new(255),
+                [0, 1] = new(0),
+                [1, 0] = new(255),
+                [1, 1] = new(0)
             };
 
             var testImage = new Image<Gray, byte>(2, 2)
             {
-                [0, 0] = new Gray(255),
-                [0, 1] = new Gray(0),
-                [1, 0] = new Gray(255),
-                [1, 1] = new Gray(255)
+                [0, 0] = new(255),
+                [0, 1] = new(0),
+                [1, 0] = new(255),
+                [1, 1] = new(255)
             };
 
             strategy.Apply(frequentImage);
@@ -183,10 +183,10 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var image = new Image<Gray, byte>(2, 2)
             {
-                [0, 0] = new Gray(255),
-                [0, 1] = new Gray(0),
-                [1, 0] = new Gray(0),
-                [1, 1] = new Gray(0)
+                [0, 0] = new(255),
+                [0, 1] = new(0),
+                [1, 0] = new(0),
+                [1, 1] = new(0)
             };
 
             strategy.Apply(image);

@@ -1,5 +1,4 @@
 # NV's [Computer Vision] Room Occupancy Sensor
-[![Docker Image CI](https://github.com/nvsnkv/NVs.OccupancySensor/actions/workflows/docker-image.yml/badge.svg)](https://github.com/nvsnkv/NVs.OccupancySensor/actions/workflows/docker-image.yml)
 ## What's That?
 Containerized open-source ASP.Net Core application and MQTT client that uses computer vision to identify someone's presence in the room.
 Uses background subtraction algorithms to identify if camera sees something which is not a part of furnishings.
@@ -22,14 +21,10 @@ This application does not provide anything that can control external devices or 
 Prepare your favorite API Explorer. [Swagger-UI](https://swagger.io/docs/open-source-tools/swagger-ui/usage/installation/) or [Postman](https://www.postman.com/) will work.
 Application produces OpenAPI definition that can be downloaded from path `/swagger/v1/swagger.json`. This format can be consumed by varios API testing tools.
 
-Depending on the hosting option you prefer, you'll need either [.Net Core 3.1 SDK](https://dotnet.microsoft.com/download/dotnet/thank-you/sdk-3.1.407-windows-x64-installer) or [Docker](https://docs.docker.com/get-docker/) installed on the host to build and run application.
-If you're planning to build a docker image for raspberry-pi you'll need to also have `debootstrap` installed on build machine - there is no good base image for raspberry so we'll our own during the build.
-
-#### Patience (optional)
-In case you chose to use Docker, please ensure that you can spend couple of hours building the image. Compilation of EmguCV is the part of building procedure for Linux distros and it may take several hours if you're doing it on weak device.
+You'll need [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) installed on the host to build and run application.
 
 ### Building the Application
-TBD
+Nothing special there - just run `dotnet build` and MSBuild will do the rest for you!
 
 ### Quick Setup
 1. Build application;
@@ -37,7 +32,7 @@ TBD
     1. Ensure `CV:Capture:Source` is set to the proper source;
     2. Ensure MQTT settings are correct;
     3. Set `StreamingAllowed` to _True_ to enable video translations on debug page;
-2. Deploy the application;
+2. Deploy the application (either run [dotnet publish](https://docs.microsoft.com/ru-ru/dotnet/core/tools/dotnet-publish) or just move `NVs.OccupancySensor.API` folder to the preferred location);
 3. Open `/debug.html` URL in your favorite browser. If application was successfully deployed you should see the debug page;
 4. Start the sensor by making a POST HTTP request to `/api/v1/Sensor/Start`. You can download API definition from `/swagger/v1/swagger.json` and use API explorer like Swagger-UI or Postman to simplify requests submission;
 5. Refresh the debug page;
@@ -117,36 +112,6 @@ Application uses MQTT.Net to build MQTT client. The following settings used to c
 #### Logging
 This app uses Serilog to capture logs, with `File` and `Console` sinks available. Please refer to the documentation for [Serilog.Settings.Configuration](https://github.com/serilog/serilog-settings-configuration).
 Startup process gets logged to `startup.ndjson` file in the application working directory. Rolling interval is set to 1 day for this log. Application will keep last 10 startup.ndjson log files. This behaviour is hardcoded.
-#### Version
-* `Version` field in appsettings.json is not actually a setting :) . MQTT adapter sends it to Home Assistant as a part of configuration topic.
-## Building notes
-TBD
-
-Create a volume:
-```sh
-#!/bin/bash
-docker volume create occupancy_sensor_data
-```
-Run:
-```sh
-#!/bin/bash
-docker run -e "CV:Capture:FrameInterval"="00:00:01" \
-    -e "MQTT:ClientId"="sensor_dev" \
-    -e "MQTT:Server"="127.0.0.1" \
-    -e "MQTT:USER"="user" \
-    -e "MQTT:Password"="i have no clue" \
-    -e "StartSensor"="True" \
-    -e "StartMQTT"="True" \
-    --device /dev/video0 \ #video device needs to be added to the container if CV:Capture:Source is not a file or URL
-    -p 40080:80 \ #container exposes port 80 by default
-    -v occupancy_sensor_data:/app/data
-    --rm \
-    occ-sensor
-```
-
 
 #### Swagger
 When built in debug, application exposes Swagger UI on URL `/swagger/index.html`. This UI allows to explore and interact with HTTP API exposed by this app.
-#### Known issues as of January 2021
-* Cross-compilation using `qemu-user-static` on x86_64 machine may fail during dotnet build - dotnet currently does not support QEMU. See [this comment](https://github.com/dotnet/dotnet-docker/issues/1512#issuecomment-562180086) for more details
-* Docker image creation fails on `apt-get update` when building on "Raspbian 10 GNU/Linux buster" - `libseccomp2` package needs to be updated on host machine to fix the original issue. Please refer to details [here](https://askubuntu.com/questions/1263284/apt-update-throws-signature-error-in-ubuntu-20-04-container-on-arm) and [here](https://github.com/moby/moby/issues/40734) 

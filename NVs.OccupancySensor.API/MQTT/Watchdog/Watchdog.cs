@@ -16,7 +16,7 @@ namespace NVs.OccupancySensor.API.MQTT.Watchdog
         private readonly ILogger<Watchdog> logger;
         private int alreadyHandling = 0;
         private int attemptsMade = 0;
-        private readonly CancellationTokenSource cts = new CancellationTokenSource();
+        private readonly CancellationTokenSource cts = new();
 
         public Watchdog([NotNull] IMqttClient client, [NotNull] ILogger<Watchdog> logger, [NotNull] WatchdogSettings settings)
         {
@@ -53,17 +53,24 @@ namespace NVs.OccupancySensor.API.MQTT.Watchdog
                         var delay = (attemptsMade + 1) * settings.Interval;
                         await Task.Delay(delay, cts.Token);
 
-                        var result = await client.ReconnectAsync(cts.Token);
-                        if (result.ResultCode == MqttClientConnectResultCode.Success)
+                        try
                         {
-                            attemptsMade = 0;
-                            logger.LogInformation("Client successfully reconnected.");
-                            return;
+                            var result = await client.ReconnectAsync(cts.Token);
+                            if (result.ResultCode == MqttClientConnectResultCode.Success)
+                            {
+                                attemptsMade = 0;
+                                logger.LogInformation("Client successfully reconnected.");
+                                return;
+                            }
+                            else
+                            {
+                                logger.LogInformation("Failed to reconnect: received {resultCode}, {resultReason}", result.ResultCode, result.ReasonString);
+                                attemptsMade++;
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            logger.LogInformation("Failed to reconnect: received {resultCode}, {resultReason}",
-                                result.ResultCode, result.ReasonString);
+                            logger.LogError(ex, "Exception raised during reconnect!");
                             attemptsMade++;
                         }
                     }
