@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -32,7 +33,7 @@ namespace NVs.OccupancySensor.API.MQTT
             MqttClientSubscribeResultCode.GrantedQoS2
         };
 
-        private readonly object thisLock = new object();
+        private readonly object thisLock = new();
 
         private readonly IOccupancySensor sensor;
         private readonly ILogger<HomeAssistantMqttAdapter> logger;
@@ -53,7 +54,7 @@ namespace NVs.OccupancySensor.API.MQTT
             this.sensor = sensor ?? throw new ArgumentNullException(nameof(sensor));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            messages = new Messages(settings.ClientId, settings.Version);
+            messages = new Messages(settings.ClientId, Assembly.GetExecutingAssembly().GetName().Version?.ToString()  ?? string.Empty);
 
             try
             {

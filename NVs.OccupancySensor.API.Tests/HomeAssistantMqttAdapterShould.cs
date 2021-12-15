@@ -17,30 +17,30 @@ using System.Linq;
 using NVs.OccupancySensor.API.Tests.Utils;
 using MQTTnet.Client.Subscribing;
 using System.ComponentModel;
+using System.Reflection;
 
 namespace NVs.OccupancySensor.API.Tests
 {
     public class HomeAssistantMqttAdapterShould
     {
-        private readonly Mock<IOccupancySensor> sensor = new Mock<IOccupancySensor>();
-        private readonly Mock<ILogger<HomeAssistantMqttAdapter>> logger = new Mock<ILogger<HomeAssistantMqttAdapter>>();
-        private readonly Mock<IMqttClient> client = new Mock<IMqttClient>();
-        private readonly Mock<IDisposable> watchdog = new Mock<IDisposable>();
-        private readonly Mock<IConfiguration> config = new Mock<IConfiguration>();
+        private readonly Mock<IOccupancySensor> sensor = new();
+        private readonly Mock<ILogger<HomeAssistantMqttAdapter>> logger = new();
+        private readonly Mock<IMqttClient> client = new();
+        private readonly Mock<IDisposable> watchdog = new();
+        private readonly Mock<IConfiguration> config = new();
         private readonly string expectedClientId = "AClientId";
         private readonly string expectedServer = "mqtt";
         private readonly int expectedPort = 5883;
         private readonly string expectedUser = "John";
         private readonly string expectedPassword = "John's password";
-        private readonly string expectedVersion = "0.0.TEST";
-
-        private readonly SimpleMessageComparer comparer = new SimpleMessageComparer();
+        
+        private readonly SimpleMessageComparer comparer = new();
 
         private readonly Messages expectedMessages;
 
         public HomeAssistantMqttAdapterShould() 
         {
-            expectedMessages = new Messages(expectedClientId, expectedVersion);
+            expectedMessages = new Messages(expectedClientId, typeof(HomeAssistantMqttAdapter).Assembly.GetName().Version.ToString());
 
             var section = new Mock<IConfigurationSection>();
             section.SetupGet(s => s[It.Is<string>(v => "ClientId".Equals(v))]).Returns(expectedClientId);
@@ -50,8 +50,7 @@ namespace NVs.OccupancySensor.API.Tests
             section.SetupGet(s => s[It.Is<string>(v => "Password".Equals(v))]).Returns(expectedPassword);
    
             config.Setup(c => c.GetSection(It.Is<string>(v => "MQTT".Equals(v)))).Returns(section.Object);
-            config.SetupGet(c => c[It.Is<string>(v => "Version".Equals(v))]).Returns(expectedVersion);
-
+            
             client.Setup(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(new MqttClientConnectResult()));
             client.Setup(c => c.PublishAsync(It.IsAny<MqttApplicationMessage>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(new MqttClientPublishResult()));
             client.Setup(c => c.SubscribeAsync(It.IsAny<MqttClientSubscribeOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(new MqttClientSubscribeResult()));

@@ -10,7 +10,7 @@ namespace NVs.OccupancySensor.API.Formatters
 {
     internal sealed class ImageOutputFormatter : OutputFormatter
     {
-        private static readonly Image<Rgb, byte> EmptyImage = new Image<Rgb, byte>(100, 100);
+        private static readonly Image<Rgb, byte> EmptyImage = new(100, 100);
 
         public ImageOutputFormatter()
         {

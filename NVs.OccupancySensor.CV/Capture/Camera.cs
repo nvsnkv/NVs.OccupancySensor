@@ -192,7 +192,7 @@ namespace NVs.OccupancySensor.CV.Capture
         public static VideoCapture CreateVideoCapture(CaptureSettings settings)
         {
             return int.TryParse(settings.Source, out var camIndex)
-                ? new VideoCapture(camIndex, VideoCapture.API.Gstreamer)
+                ? new VideoCapture(camIndex)
                 : new VideoCapture(settings.Source);
         }
     }

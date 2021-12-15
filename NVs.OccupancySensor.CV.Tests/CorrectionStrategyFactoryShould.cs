@@ -8,7 +8,7 @@ namespace NVs.OccupancySensor.CV.Tests
 {
     public class CorrectionStrategyFactoryShould
     {
-        private readonly CorrectionStrategyFactory factory = new CorrectionStrategyFactory(StaticMaskSettings.Default);
+        private readonly CorrectionStrategyFactory factory = new(StaticMaskSettings.Default);
 
         [Fact]
         public void CreateBypassCorrectorByDefault()

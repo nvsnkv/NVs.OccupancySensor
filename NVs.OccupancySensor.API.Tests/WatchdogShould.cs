@@ -18,12 +18,12 @@ namespace NVs.OccupancySensor.API.Tests
 {
     public sealed class WatchdogShould
     {
-        private readonly Mock<IMqttClient> client = new Mock<IMqttClient>();
+        private readonly Mock<IMqttClient> client = new();
         private IMqttClientDisconnectedHandler handler;
 
-        private readonly Mock<ILogger<Watchdog>> logger = new Mock<ILogger<Watchdog>>();
-        private readonly Mock<IConfiguration> config = new Mock<IConfiguration>();
-        private readonly Mock<IConfigurationSection> retriesSection = new Mock<IConfigurationSection>();
+        private readonly Mock<ILogger<Watchdog>> logger = new();
+        private readonly Mock<IConfiguration> config = new();
+        private readonly Mock<IConfigurationSection> retriesSection = new();
         
 
         public WatchdogShould()

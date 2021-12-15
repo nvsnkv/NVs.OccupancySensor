@@ -6,8 +6,8 @@ namespace NVs.OccupancySensor.CV.Tests
 {
     public sealed class StrategyManagerShould
     {
-        private Mock<IStatefulCorrectionStrategy> strategy = new Mock<IStatefulCorrectionStrategy>();
-        private CorrectionStrategyManager manager = new CorrectionStrategyManager();
+        private Mock<IStatefulCorrectionStrategy> strategy = new();
+        private CorrectionStrategyManager manager = new();
 
         [Fact]
         public void NotBeAbleToManageStatelessStrategies()

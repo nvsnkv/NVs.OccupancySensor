@@ -16,7 +16,6 @@ namespace NVs.OccupancySensor.API.MQTT
             Port = int.TryParse(section["Port"], out var port) ? port : (int?)null;
             User = section["User"] ?? throw new InvalidOperationException("MQTT:User field is not defined in configuration!");
             Password = section["Password"] ?? throw new InvalidOperationException("MQTT:Password field is not defined in configuration!");
-            Version = configuration["Version"] ?? throw new InvalidOperationException("Version field is not defined in configuration!");
         }
 
         public string ClientId { get; }
@@ -28,7 +27,5 @@ namespace NVs.OccupancySensor.API.MQTT
         public string User { get; }
         
         public string Password { get; }
-
-        public string Version { get; }
     }
 }

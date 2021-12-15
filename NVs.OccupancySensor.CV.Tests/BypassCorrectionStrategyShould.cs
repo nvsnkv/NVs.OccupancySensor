@@ -7,7 +7,7 @@ namespace NVs.OccupancySensor.CV.Tests
 {
     public class BypassCorrectionStrategyShould
     {
-        private readonly BypassCorrectionStrategy strategy = new BypassCorrectionStrategy();
+        private readonly BypassCorrectionStrategy strategy = new();
         [Fact]
         public void NotChangeInputImage()
         {

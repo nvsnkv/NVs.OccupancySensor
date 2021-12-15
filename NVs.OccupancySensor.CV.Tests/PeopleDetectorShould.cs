@@ -15,7 +15,7 @@ namespace NVs.OccupancySensor.CV.Tests
     
     public sealed class PeopleDetectorShould
     {
-        private readonly Mock<ILogger<PeopleDetector>> logger = new Mock<ILogger<PeopleDetector>>(); 
+        private readonly Mock<ILogger<PeopleDetector>> logger = new(); 
 
         [Fact]
         public void DetectPresenceIfMaskIsWhite()

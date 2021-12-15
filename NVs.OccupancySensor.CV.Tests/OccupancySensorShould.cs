@@ -18,12 +18,12 @@ namespace NVs.OccupancySensor.CV.Tests
 {
     public sealed class OccupancySensorShould
     {
-        private readonly Mock<ICamera> camera = new Mock<ICamera>();
-        private readonly Mock<IDenoiser> denoiser = new Mock<IDenoiser>();
-        private readonly Mock<IBackgroundSubtractor> subtractor = new Mock<IBackgroundSubtractor>();
-        private readonly Mock<ICorrector> corrector = new Mock<ICorrector>();
-        private readonly Mock<IPeopleDetector> detector = new Mock<IPeopleDetector>();
-        private readonly Mock<ILogger<Sense.OccupancySensor>> logger = new Mock<ILogger<Sense.OccupancySensor>>();
+        private readonly Mock<ICamera> camera = new();
+        private readonly Mock<IDenoiser> denoiser = new();
+        private readonly Mock<IBackgroundSubtractor> subtractor = new();
+        private readonly Mock<ICorrector> corrector = new();
+        private readonly Mock<IPeopleDetector> detector = new();
+        private readonly Mock<ILogger<Sense.OccupancySensor>> logger = new();
 
         public OccupancySensorShould()
         {
