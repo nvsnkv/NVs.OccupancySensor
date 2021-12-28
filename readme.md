@@ -1,4 +1,5 @@
 # NV's [Computer Vision] Room Occupancy Sensor
+![Build(master)](https://github.com/nvsnkv/NVs.OccupancySensor/actions/workflows/dotnet.yml/badge.svg?branch=master)
 ## What's That?
 Open-source ASP.Net Core application and MQTT client that uses computer vision to identify someone's presence in the room.
 App uses background subtraction algorithms to identify if camera sees something which is not a part of furnishings.
