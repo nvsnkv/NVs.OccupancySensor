@@ -1,11 +1,11 @@
 # NV's [Computer Vision] Room Occupancy Sensor
 ## What's That?
-Containerized open-source ASP.Net Core application and MQTT client that uses computer vision to identify someone's presence in the room.
-Uses background subtraction algorithms to identify if camera sees something which is not a part of furnishings.
+Open-source ASP.Net Core application and MQTT client that uses computer vision to identify someone's presence in the room.
+App uses background subtraction algorithms to identify if camera sees something which is not a part of furnishings.
 MQTT client supports configuration convention used by Home Assistant [MQTT integration](https://www.home-assistant.io/docs/mqtt/)
 ## How to Use It?
 Setup the app to connect it with your camera, MQTT server and have fun!
-You can run it as a regular ASP.Net Core application on Windows host (x86_64) or build a docker image to run it on Linux (x86_64 or arm32). Application can use local cameras attached to host, IP cameras (at least the ones which send MJPEG streams) or even a video file.
+You can run it as a regular ASP.Net Core application on Windows host (x86_64) or Linux host (x86_64 or arm32). Application can use local cameras attached to host, IP cameras (at least the ones which send MJPEG streams) or even a video file.
 
 ## Getting Started
 ### Prerequisites
@@ -33,15 +33,17 @@ Nothing special there - just run `dotnet build` and MSBuild will do the rest for
     2. Ensure MQTT settings are correct;
     3. Set `StreamingAllowed` to _True_ to enable video translations on debug page;
 2. Deploy the application (either run [dotnet publish](https://docs.microsoft.com/ru-ru/dotnet/core/tools/dotnet-publish) or just move `NVs.OccupancySensor.API` folder to the preferred location);
-3. Open `/debug.html` URL in your favorite browser. If application was successfully deployed you should see the debug page;
-4. Start the sensor by making a POST HTTP request to `/api/v1/Sensor/Start`. You can download API definition from `/swagger/v1/swagger.json` and use API explorer like Swagger-UI or Postman to simplify requests submission;
-5. Refresh the debug page;
-6. Adjust the position of your camera using the translations on the debug page;
-7. Start MQTT adapter by making a POST HTTP request to `/api/v1/MQTTAdapter/Start`;
-8. Ensure that sensor started to publish MQTT topics to the server;
-9. If everything is fine, set `StreamingAllowed` to _False_ to improve your privacy;
-10. Additionaly, update `StartSensor` and `StartMQTT` settings to _True_ to enable automated start after reboots;
-11. Read the docs below.
+3. Start the app by running `dotnet occ-sensor.dll` in the target folder. By default app will start listening on port 5000;
+4. Open `/debug.html` URL in your favorite browser. If application was successfully deployed you should see the debug page;
+5. Start the sensor by making a POST HTTP request to `/api/v1/Sensor/Start`. You can download API definition from `/swagger/v1/swagger.json` and use API explorer like Swagger-UI or Postman to simplify requests submission;
+6. Refresh the debug page;
+7. Adjust the position of your camera using the translations on the debug page;
+8. Start MQTT adapter by making a POST HTTP request to `/api/v1/MQTTAdapter/Start`;
+9. Ensure that sensor started to publish MQTT topics to the server;
+10. If everything is fine, set `StreamingAllowed` setting to _False_ to improve your privacy;
+11. Additionaly, update `StartSensor` and `StartMQTT` settings to _True_ to enable automated start after reboots;
+12. Restart application;
+13. Read the docs below.
 # Docs
 ## Configuration
 On a high level, application is doing the following actions to find out if someone is present in the room:
@@ -56,7 +58,7 @@ On a high level, application is doing the following actions to find out if someo
 Application has fair amount of configurable items: 
 * Most of the processing steps mentioned above have some settings to tweak, and most of these settings have defaults;
 * Serilog is used to produce the logs;
-* And since it's ASP.Net Core application you can configure it's settings, like "AllowedHosts" etc.
+* And since it's ASP.Net Core application you can configure it's settings, like "Urls", "AllowedHosts" etc.
 
 App uses .Net Core configuration, so you can change the settings by:
 * updating appsettings.json with the values you need;
@@ -104,7 +106,6 @@ Application uses MQTT.Net to build MQTT client. The following settings used to c
 * `MQTT:Password` - string, password used to authenticate client on the server. Required. Does not have a default value
 * `MQTT:Reconnect:AttemptsCount` - integer, count of attemps to automatically reconnect to the server if connection was lost. Default is _0_
 * `MQTT:Reconnect:IntervalBetweenAttempts` - time span, base delay detween two attemps. Application uses progressive delays, multiplying this value to the current attempt number. Default is _00:00:00_
-
 #### Startup
 * `StartSensor` - boolean toggle to start sensor on startup. Default _False_
 * `StartMQTT` - boolean toggle to start MQTT client on startup. Default _False_
@@ -112,6 +113,5 @@ Application uses MQTT.Net to build MQTT client. The following settings used to c
 #### Logging
 This app uses Serilog to capture logs, with `File` and `Console` sinks available. Please refer to the documentation for [Serilog.Settings.Configuration](https://github.com/serilog/serilog-settings-configuration).
 Startup process gets logged to `startup.ndjson` file in the application working directory. Rolling interval is set to 1 day for this log. Application will keep last 10 startup.ndjson log files. This behaviour is hardcoded.
-
 #### Swagger
 When built in debug, application exposes Swagger UI on URL `/swagger/index.html`. This UI allows to explore and interact with HTTP API exposed by this app.
