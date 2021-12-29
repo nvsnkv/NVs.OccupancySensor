@@ -26,6 +26,8 @@ namespace NVs.OccupancySensor.CV.Sense
         private IDisposable correctorSubscription;
         private IDisposable detectorSubscription;
         private bool isDisposed;
+        private bool? presenceDetected;
+        private bool isRunning;
 
         public OccupancySensor([NotNull] ICamera camera, [NotNull] IDenoiser denoiser, [NotNull] IBackgroundSubtractor subtractor,
             [NotNull] ICorrector corrector, [NotNull] IPeopleDetector detector, [NotNull] ILogger<OccupancySensor> logger)
@@ -42,9 +44,27 @@ namespace NVs.OccupancySensor.CV.Sense
             this.corrector = corrector ?? throw new ArgumentNullException(nameof(corrector));
         }
 
-        public bool? PresenceDetected => detector.PeopleDetected;
+        public bool? PresenceDetected
+        {
+            get => presenceDetected;
+            private set
+            {
+                if (value == presenceDetected) return;
+                presenceDetected = value;
+                OnPropertyChanged();
+            }
+        }
 
-        public bool IsRunning => camera.IsRunning;
+        public bool IsRunning
+        {
+            get => isRunning;
+            private set
+            {
+                if (value == isRunning) return;
+                isRunning = value;
+                OnPropertyChanged();
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -56,7 +76,13 @@ namespace NVs.OccupancySensor.CV.Sense
             }
 
             logger.LogInformation("Start requested");
-            camera.Start();
+
+            if (!camera.IsRunning)
+            {
+                camera.Start();
+            }
+
+            IsRunning = true;
         }
 
         public void Stop()
@@ -67,7 +93,8 @@ namespace NVs.OccupancySensor.CV.Sense
             }
 
             logger.LogInformation("Stop requested");
-            camera.Stop();
+            IsRunning = false;
+            PresenceDetected = null;
         }
 
         public void Dispose()
@@ -100,6 +127,9 @@ namespace NVs.OccupancySensor.CV.Sense
                         corrector.Reset();
                         subtractor.Reset();
                         denoiser.Reset();
+
+                        IsRunning = false;
+                        PresenceDetected = null;
                     }
                     break;
             }
@@ -107,12 +137,16 @@ namespace NVs.OccupancySensor.CV.Sense
 
         private void OnDetectorPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            switch (e.PropertyName)
+            if (IsRunning)
             {
-                case nameof(IPeopleDetector.PeopleDetected):
-                    logger.LogInformation($"Detector.PeopleDetected changed to {detector.PeopleDetected?.ToString() ?? "null"}");
-                    OnPropertyChanged(nameof(PresenceDetected));
-                    break;
+                switch (e.PropertyName)
+                {
+                    case nameof(IPeopleDetector.PeopleDetected):
+                        logger.LogInformation(
+                            $"Detector.PeopleDetected changed to {detector.PeopleDetected?.ToString() ?? "null"}");
+                        PresenceDetected = detector.PeopleDetected;
+                        break;
+                }
             }
         }
 
