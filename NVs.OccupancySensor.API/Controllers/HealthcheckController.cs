@@ -72,10 +72,11 @@ namespace NVs.OccupancySensor.API.Controllers
         {
             logger.Log(LogLevel.Trace, "VersionAdv called");
 
-            var version = configuration["Version"];
+            var hostVersion = typeof(HealthcheckController).Assembly.GetName().Version;
+            var cvlibVersion  = typeof(IOccupancySensor).Assembly.GetName().Version;
             var emguVersion = typeof(CvInvoke).Assembly.GetName().Version;
 
-            return $"App version: {version}{Environment.NewLine}EmguCV version: {emguVersion}";
+            return $"App version: {cvlibVersion}{Environment.NewLine}Host version: {hostVersion}{Environment.NewLine}EmguCV version: {emguVersion}";
         }
 
         [HttpGet("emgucvbuildinfo")]
