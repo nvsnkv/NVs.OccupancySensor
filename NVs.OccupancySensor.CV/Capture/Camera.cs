@@ -159,7 +159,7 @@ namespace NVs.OccupancySensor.CV.Capture
             }
         }
 
-        private class ErrorObserver : IObserver<Image<Rgb, byte>>
+        private class ErrorObserver : IObserver<Image<Gray, byte>>
         {
             private readonly Camera camera;
 
@@ -178,7 +178,7 @@ namespace NVs.OccupancySensor.CV.Capture
                 camera.Stop();
             }
 
-            public void OnNext(Image<Rgb, byte> value)
+            public void OnNext(Image<Gray, byte> value)
             {
             }
         }

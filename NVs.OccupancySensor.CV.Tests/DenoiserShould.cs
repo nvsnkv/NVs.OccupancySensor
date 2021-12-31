@@ -13,7 +13,7 @@ using Xunit;
 
 namespace NVs.OccupancySensor.CV.Tests
 {
-    public sealed class DenoiserShould : StageShould<Rgb,Rgb>
+    public sealed class DenoiserShould : StageShould<Gray,Gray>
     {
         private readonly Mock<IDenoisingStrategy> strategy;
         private readonly Denoiser denoiser;
@@ -33,17 +33,17 @@ namespace NVs.OccupancySensor.CV.Tests
         private static Denoiser CreateDenoiser(Mock<ILogger<Denoiser>> logger, Mock<IDenoiserFactory> factory,
             Mock<IDenoisingStrategy> strategy)
         {
-            strategy.Setup(s => s.Denoise(It.IsAny<Image<Rgb, byte>>())).Returns(new Image<Rgb, byte>(1, 1));
+            strategy.Setup(s => s.Denoise(It.IsAny<Image<Gray, byte>>())).Returns(new Image<Gray, byte>(1, 1));
             factory.Setup(f => f.Create(SupportedAlgorithms.None.ToString())).Returns(strategy.Object);
             return new Denoiser(factory.Object, new DenoisingSettings(SupportedAlgorithms.None.ToString()), logger.Object);
         }
 
         protected override void SetupLongRunningPayload(TimeSpan delay)
         {
-            strategy.Setup(s => s.Denoise(It.IsAny<Image<Rgb, byte>>())).Returns(() =>
+            strategy.Setup(s => s.Denoise(It.IsAny<Image<Gray, byte>>())).Returns(() =>
             {
                 Task.Delay(delay).Wait();
-                return new Image<Rgb, byte>(1, 1);
+                return new Image<Gray, byte>(1, 1);
             });
         }
     }

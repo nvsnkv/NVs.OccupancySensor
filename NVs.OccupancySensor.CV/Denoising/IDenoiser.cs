@@ -6,9 +6,9 @@ using NVs.OccupancySensor.CV.Utils;
 
 namespace NVs.OccupancySensor.CV.Denoising
 {
-    public interface IDenoiser : IObserver<Image<Rgb,byte>>, INotifyPropertyChanged
+    public interface IDenoiser : IObserver<Image<Gray,byte>>, INotifyPropertyChanged
     {
-        IObservable<Image<Rgb, byte>> Output { get; }
+        IObservable<Image<Gray, byte>> Output { get; }
 
         IDenoisingSettings Settings { get; set; }
 

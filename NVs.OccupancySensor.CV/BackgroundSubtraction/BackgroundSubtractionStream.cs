@@ -10,7 +10,7 @@ using NVs.OccupancySensor.CV.Utils.Flow;
 
 namespace NVs.OccupancySensor.CV.BackgroundSubtraction
 {
-    internal sealed class BackgroundSubtractionStream : ProcessingStream<Image<Rgb, byte>, Image<Gray, byte>>
+    internal sealed class BackgroundSubtractionStream : ProcessingStream<Image<Gray, byte>, Image<Gray, byte>>
     {
         private readonly ISubtractionStrategy strategy;
 
@@ -19,7 +19,7 @@ namespace NVs.OccupancySensor.CV.BackgroundSubtraction
             this.strategy = strategy ?? throw new ArgumentNullException(nameof(strategy));
         }
 
-        protected override Image<Gray, byte> DoProcess(Image<Rgb, byte> image)
+        protected override Image<Gray, byte> DoProcess(Image<Gray, byte> image)
         {
             return strategy.GetForegroundMask(image);
         }

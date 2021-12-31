@@ -23,19 +23,19 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public async Task ProvideDataForObservers()
         {
-            var inputImage = new Image<Rgb, byte>(1, 1);
-            var expectedImages = new List<Image<Rgb, byte>>();
+            var inputImage = new Image<Gray, byte>(1, 1);
+            var expectedImages = new List<Image<Gray, byte>>();
             var i = 0;
 
             strategy.Setup(s => s.Denoise(inputImage)).Returns(() =>
             {
-                var value = new Image<Rgb, byte>(++i, 1);
+                var value = new Image<Gray, byte>(++i, 1);
                 expectedImages.Add(value);
                 return value;
             });
 
             var denoiser = new DenoisingStream(strategy.Object, new Counter(), CancellationToken.None, logger.Object);
-            var observer = new TestImageObserver<Rgb>();
+            var observer = new TestImageObserver<Gray>();
 
             using (denoiser.Subscribe(observer))
             {
@@ -53,12 +53,12 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public async Task NotProvideDataForObserversAfterCompletion()
         {
-            var inputImage = new Image<Rgb, byte>(1, 1);
-            var expectedImage = new Image<Rgb, byte>(10, 10);
+            var inputImage = new Image<Gray, byte>(1, 1);
+            var expectedImage = new Image<Gray, byte>(10, 10);
             strategy.Setup(s => s.Denoise(inputImage)).Returns(expectedImage);
 
             var denoiser = new DenoisingStream(strategy.Object, new Counter(), CancellationToken.None, logger.Object);
-            var observer = new TestImageObserver<Rgb>();
+            var observer = new TestImageObserver<Gray>();
 
             using (denoiser.Subscribe(observer))
             {
@@ -73,15 +73,15 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public async Task DropNewFramesIfPreviousOneIsStillInProgress()
         {
-            var inputImage = new Image<Rgb, byte>(1, 1);
-            var expectedImage = new Image<Rgb, byte>(10, 10);
+            var inputImage = new Image<Gray, byte>(1, 1);
+            var expectedImage = new Image<Gray, byte>(10, 10);
             strategy.Setup(s => s.Denoise(inputImage)).Returns(() => {
                 Task.Delay(TimeSpan.FromMilliseconds(900)).Wait();
                 return expectedImage;
             });
 
             var denoiser = new DenoisingStream(strategy.Object, new Counter(), CancellationToken.None, logger.Object);
-            var observer = new TestImageObserver<Rgb>();
+            var observer = new TestImageObserver<Gray>();
 
             using (denoiser.Subscribe(observer))
             {
@@ -100,7 +100,7 @@ namespace NVs.OccupancySensor.CV.Tests
         public async Task CompleteStreamWhenRequested()
         {
             var denoiser = new DenoisingStream(strategy.Object, new Counter(), CancellationToken.None, logger.Object);
-            var observer = new TestImageObserver<Rgb>();
+            var observer = new TestImageObserver<Gray>();
 
             using(denoiser.Subscribe(observer))
             {
@@ -114,10 +114,10 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public async Task CompleteStreamIfErrorOccurred()
         {
-            var inputImage = new Image<Rgb, byte>(1, 1);
+            var inputImage = new Image<Gray, byte>(1, 1);
             strategy.Setup(s => s.Denoise(inputImage)).Throws<TestException>();
             var denoiser = new DenoisingStream(strategy.Object, new Counter(), CancellationToken.None, logger.Object);
-            var observer = new TestImageObserver<Rgb>();
+            var observer = new TestImageObserver<Gray>();
 
             using(denoiser.Subscribe(observer))
             {

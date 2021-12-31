@@ -8,7 +8,7 @@ using NVs.OccupancySensor.CV.Utils.Flow;
 
 namespace NVs.OccupancySensor.CV.Capture
 {
-    internal sealed class CameraStream : Stream<Image<Rgb, byte>>, ICameraStream
+    internal sealed class CameraStream : Stream<Image<Gray, byte>>, ICameraStream
     {
         private readonly VideoCapture videoCapture;
         private readonly TimeSpan frameInterval;
@@ -46,10 +46,10 @@ namespace NVs.OccupancySensor.CV.Capture
 
                 if (frame != null)
                 {
-                    Image<Rgb, byte> image;
+                    Image<Gray, byte> image;
                     try
                     {
-                        image = frame.ToImage<Rgb, byte>();
+                        image = frame.ToImage<Gray, byte>();
                         Logger.LogInformation("Frame successfully converted to image!");
                     }
                     catch (Exception e)

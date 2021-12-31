@@ -6,6 +6,6 @@ namespace NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors
 {
     public interface ISubtractionStrategy : IDisposable
     {
-        Image<Gray, byte> GetForegroundMask(Image<Rgb, byte> source);
+        Image<Gray, byte> GetForegroundMask(Image<Gray, byte> source);
     }
 }

@@ -14,10 +14,10 @@ namespace NVs.OccupancySensor.CV.Denoising.Denoisers
             this.settings = settings;
         }
 
-        public Image<Rgb, byte> Denoise([NotNull] Image<Rgb, byte> source)
+        public Image<Gray, byte> Denoise([NotNull] Image<Gray, byte> source)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
-            var result = new Image<Rgb, byte>(source.Width, source.Height);
+            var result = new Image<Gray, byte>(source.Width, source.Height);
 
             CvInvoke.MedianBlur(source, result, settings.K);
 

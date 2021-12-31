@@ -42,15 +42,14 @@ namespace NVs.OccupancySensor.API
                 .AddPresenceDetection()
                 .AddControllers(o => o.OutputFormatters.Add(new ImageOutputFormatter()));
 
-            services.AddSingleton<Streams>(s => new Streams(
+            services.AddSingleton(s => new Streams(
                 s.GetService<ICamera>() ?? throw new InvalidOperationException("Camera was not resolved!"), 
                 s.GetService<IDenoiser>() ?? throw new InvalidOperationException("Denoiser was not resolved!"),
                 s.GetService<IBackgroundSubtractor>() ?? throw new InvalidOperationException("BackgroundSubtractor was not resolved!"), 
                 s.GetService<ICorrector>() ?? throw new InvalidOperationException("Corrector was not resolved!"), 
                 s.GetService<IPeopleDetector>() ?? throw new InvalidOperationException("PeopleDetector was not resolved!")));
 
-            services.AddScoped<Observers>(s => new Observers(
-                s.GetService<IImageObserver<Rgb>>() ?? throw new InvalidOperationException("Rgb observer was not resolved!"), 
+            services.AddScoped(s => new Observers(
                 s.GetService<IImageObserver<Gray>>() ?? throw new InvalidOperationException("Gray observer was not resolved!")));
 
             services.AddSingleton<IMqttAdapter>(s => new HomeAssistantMqttAdapter(

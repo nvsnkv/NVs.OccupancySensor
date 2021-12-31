@@ -4,7 +4,7 @@ using Emgu.CV.Structure;
 
 namespace NVs.OccupancySensor.CV.Capture
 {
-    public interface ICameraStream : IObservable<Image<Rgb, byte>>
+    public interface ICameraStream : IObservable<Image<Gray, byte>>
     {
     }
 }

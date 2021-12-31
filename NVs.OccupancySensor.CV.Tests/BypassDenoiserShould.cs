@@ -10,7 +10,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void BypassImageAsIs()
         {
-            var expectedImage = new Image<Rgb, byte>(1, 1);
+            var expectedImage = new Image<Gray, byte>(1, 1);
             var actual = new BypassDenoiser().Denoise(expectedImage);
 
             Assert.Equal(expectedImage, actual);

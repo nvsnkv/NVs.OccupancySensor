@@ -9,7 +9,7 @@ using NVs.OccupancySensor.CV.Utils.Flow;
 
 namespace NVs.OccupancySensor.CV.BackgroundSubtraction
 {
-    internal sealed class BackgroundSubtractor : Stage<Image<Rgb, byte>, Image<Gray, byte>>, IBackgroundSubtractor
+    internal sealed class BackgroundSubtractor : Stage<Image<Gray, byte>, Image<Gray, byte>>, IBackgroundSubtractor
     {
         private readonly IBackgroundSubtractorFactory factory;
 
@@ -20,7 +20,7 @@ namespace NVs.OccupancySensor.CV.BackgroundSubtraction
             OutputStream = new BackgroundSubtractionStream(factory.Create(Settings.Algorithm), Counter, CancellationToken.None, Logger);
         }
 
-        protected override ProcessingStream<Image<Rgb, byte>, Image<Gray, byte>> CreateStream()
+        protected override ProcessingStream<Image<Gray, byte>, Image<Gray, byte>> CreateStream()
         {
             var strategy = factory.Create(Settings.Algorithm);
             return new BackgroundSubtractionStream(strategy, Counter, CancellationToken.None, Logger);

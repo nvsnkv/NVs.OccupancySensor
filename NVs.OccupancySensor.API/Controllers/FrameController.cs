@@ -32,7 +32,7 @@ namespace NVs.OccupancySensor.API.Controllers
         [IfStreamingAllowed]
         [Produces("image/jpeg")]
         [Route("frame-denoised.jpg")]
-        public async Task<Image<Rgb,byte>> GetDenoisedFrame()
+        public async Task<Image<Gray, byte>> GetDenoisedFrame()
         {
             logger.LogDebug("GetDenoisedFrame called");
 
@@ -41,9 +41,9 @@ namespace NVs.OccupancySensor.API.Controllers
                 return null;
             }
             
-            using (streams.Denoiser.Output.Subscribe(observers.Rgb))
+            using (streams.Denoiser.Output.Subscribe(observers.Gray))
             {
-                return await observers.Rgb.GetImage();
+                return await observers.Gray.GetImage();
             }
         }
 
@@ -90,7 +90,7 @@ namespace NVs.OccupancySensor.API.Controllers
         [IfStreamingAllowed]
         [Produces("image/jpeg")]
         [Route("frame-raw.jpg")]
-        public async Task<Image<Rgb,byte>> GetRawFrame()
+        public async Task<Image<Gray, byte>> GetRawFrame()
         {
             logger.LogDebug("GetRawFrame called");
 
@@ -99,9 +99,9 @@ namespace NVs.OccupancySensor.API.Controllers
                 return null;
             }
             
-            using (streams.Camera.Stream.Subscribe(observers.Rgb))
+            using (streams.Camera.Stream.Subscribe(observers.Gray))
             {
-                return await observers.Rgb.GetImage();
+                return await observers.Gray.GetImage();
             }
         }
 

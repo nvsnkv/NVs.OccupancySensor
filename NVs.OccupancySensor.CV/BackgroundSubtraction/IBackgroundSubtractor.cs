@@ -6,7 +6,7 @@ using NVs.OccupancySensor.CV.Utils;
 
 namespace NVs.OccupancySensor.CV.BackgroundSubtraction
 {
-    public interface IBackgroundSubtractor: IObserver<Image<Rgb,byte>>, INotifyPropertyChanged
+    public interface IBackgroundSubtractor: IObserver<Image<Gray, byte>>, INotifyPropertyChanged
     {
             IObservable<Image<Gray, byte>> Output { get; }
 

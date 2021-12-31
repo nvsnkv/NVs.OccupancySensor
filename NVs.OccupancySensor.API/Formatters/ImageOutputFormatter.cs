@@ -10,7 +10,7 @@ namespace NVs.OccupancySensor.API.Formatters
 {
     internal sealed class ImageOutputFormatter : OutputFormatter
     {
-        private static readonly Image<Rgb, byte> EmptyImage = new(100, 100);
+        private static readonly Image<Gray, byte> EmptyImage = new(100, 100);
 
         public ImageOutputFormatter()
         {
@@ -19,7 +19,7 @@ namespace NVs.OccupancySensor.API.Formatters
 
         protected override bool CanWriteType(Type type)
         {
-            return type == typeof(Image<Rgb, byte>) || type == typeof(Image<Gray, byte>);
+            return type == typeof(Image<Gray, byte>) || type == typeof(Image<Gray, byte>);
         }
 
         public override async Task WriteResponseBodyAsync(OutputFormatterWriteContext context)
@@ -34,7 +34,6 @@ namespace NVs.OccupancySensor.API.Formatters
 
             var bytes = context.Object switch
             {
-                Image<Rgb, byte> rgb => rgb.ToJpegData(),
                 Image<Gray, byte> gray => gray.ToJpegData(),
                 _ => EmptyImage.ToJpegData()
             };

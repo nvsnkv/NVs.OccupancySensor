@@ -26,10 +26,10 @@ namespace NVs.OccupancySensor.CV.Tests
             var settings = new CaptureSettings("Some source", TimeSpan.FromMilliseconds(50));
 
             var captureMock = new Mock<VideoCapture>(MockBehavior.Default, 0, VideoCapture.API.Any);
-            captureMock.Setup(c => c.QueryFrame()).Returns(() => new Image<Rgb, byte>(100,100).Mat);
+            captureMock.Setup(c => c.QueryFrame()).Returns(() => new Image<Gray, byte>(100,100).Mat);
 
             var camera = new Camera(cameraLogger.Object, streamLogger.Object, CaptureSettings.Default, _ => captureMock.Object);
-            var observer = new TestImageObserver<Rgb>();
+            var observer = new TestImageObserver<Gray>();
 
             camera.Settings = settings;
 
@@ -51,7 +51,7 @@ namespace NVs.OccupancySensor.CV.Tests
             captureMock.Setup(c => c.QueryFrame()).Throws<TestException>();
 
             var camera = new Camera(cameraLogger.Object, streamLogger.Object, CaptureSettings.Default, _ => captureMock.Object);
-            var observer = new TestImageObserver<Rgb>();
+            var observer = new TestImageObserver<Gray>();
             
             camera.Start();
             using (camera.Stream.Subscribe(observer))
@@ -119,7 +119,7 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var camera = new Camera(cameraLogger.Object, streamLogger.Object, CaptureSettings.Default, Camera.CreateVideoCapture);
             var logger = new PropertyChangedLogger();
-            var observer = new TestImageObserver<Rgb>();
+            var observer = new TestImageObserver<Gray>();
 
             camera.PropertyChanged += logger.OnPropertyChanged;
 

@@ -111,17 +111,17 @@ namespace NVs.OccupancySensor.CV.Sense
                     OnPropertyChanged(nameof(IsRunning));
                     if (camera.IsRunning)
                     {
-                        denoiserSubscription = camera.Stream.Subscribe(denoiser);
-                        subtractorSubscription= denoiser.Output.Subscribe(subtractor);
-                        correctorSubscription = subtractor.Output.Subscribe(corrector);
+                        subtractorSubscription = camera.Stream.Subscribe(subtractor);
+                        denoiserSubscription = subtractor.Output.Subscribe(denoiser);
+                        correctorSubscription = denoiser.Output.Subscribe(corrector);
                         detectorSubscription = corrector.Output.Subscribe(detector);
                     }
                     else
                     {
                         detectorSubscription?.Dispose();
                         correctorSubscription?.Dispose();
-                        subtractorSubscription?.Dispose();
                         denoiserSubscription?.Dispose();
+                        subtractorSubscription?.Dispose();
 
                         detector.Reset();
                         corrector.Reset();
@@ -164,8 +164,8 @@ namespace NVs.OccupancySensor.CV.Sense
                 {
                     detectorSubscription?.Dispose();
                     correctorSubscription?.Dispose();
-                    subtractorSubscription?.Dispose();
                     denoiserSubscription?.Dispose();
+                    subtractorSubscription?.Dispose();
 
                     camera.PropertyChanged -= OnCameraPropertyChanged;
                     detector.PropertyChanged -= OnDetectorPropertyChanged;

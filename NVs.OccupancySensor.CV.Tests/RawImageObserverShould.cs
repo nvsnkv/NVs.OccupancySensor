@@ -17,21 +17,21 @@ namespace NVs.OccupancySensor.CV.Tests
 {
     public sealed class RawImageObserverShould
     {
-        private readonly Mock<ILogger<RawImageObserver<Rgb>>> logger;
+        private readonly Mock<ILogger<RawImageObserver<Gray>>> logger;
 
         public RawImageObserverShould()
         {
-            logger = new Mock<ILogger<RawImageObserver<Rgb>>>();
+            logger = new Mock<ILogger<RawImageObserver<Gray>>>();
         }
 
         [Fact]
         public async Task ReturnImageOnceItWasObserved()
         {
             var expectedFrame = new Mat(new Size(100, 100), DepthType.Cv32F, 3);
-            Image<Rgb,byte> expectedImage = expectedFrame.ToImage<Rgb,byte>();
+            Image<Gray, byte> expectedImage = expectedFrame.ToImage<Gray, byte>();
             var expectedJpeg = expectedImage.ToJpegData();
             
-            var observer = new RawImageObserver<Rgb>(logger.Object);
+            var observer = new RawImageObserver<Gray>(logger.Object);
             
             var _ = Task.Run(async () =>
             {
@@ -47,7 +47,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public async Task ThrowIOExceptionOnError()
         {
-            var observer = new RawImageObserver<Rgb>(logger.Object);
+            var observer = new RawImageObserver<Gray>(logger.Object);
 
             var _ = Task.Run(async () =>
             {
@@ -64,7 +64,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public async Task ThrowInvalidOperationExceptionIfNullMatReceivedFromObservable()
         {
-            var observer = new RawImageObserver<Rgb>(logger.Object);
+            var observer = new RawImageObserver<Gray>(logger.Object);
 
             var _ = Task.Run(async () =>
             {
@@ -90,7 +90,7 @@ namespace NVs.OccupancySensor.CV.Tests
                         It.Is<Exception>((e, _) => e == null),
                         It.IsAny<Func<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>, Exception, string>>()))
                 .Verifiable("Logger was not called!");
-            var observer = new RawImageObserver<Rgb>(logger.Object);
+            var observer = new RawImageObserver<Gray>(logger.Object);
 
             var _ = Task.Run(async () =>
             {
@@ -122,7 +122,7 @@ namespace NVs.OccupancySensor.CV.Tests
                         It.IsAny<TestException>(),
                         It.IsAny<Func<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>, Exception, string>>()))
                 .Verifiable("Logger was not called!");
-            var observer = new RawImageObserver<Rgb>(logger.Object);
+            var observer = new RawImageObserver<Gray>(logger.Object);
 
             var _ = Task.Run(async () =>
             {
@@ -145,7 +145,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public async Task ReturnNullIfOnCompletedReceived()
         {
-            var observer = new RawImageObserver<Rgb>(logger.Object);
+            var observer = new RawImageObserver<Gray>(logger.Object);
 
             var _ = Task.Run(async () =>
             {

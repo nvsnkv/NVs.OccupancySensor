@@ -27,7 +27,7 @@ namespace NVs.OccupancySensor.CV.Tests
 
         public OccupancySensorShould()
         {
-            denoiser.SetupGet(d => d.Output).Returns(new Mock<IObservable<Image<Rgb, byte>>>().Object);
+            denoiser.SetupGet(d => d.Output).Returns(new Mock<IObservable<Image<Gray, byte>>>().Object);
             subtractor.SetupGet(d => d.Output).Returns(new Mock<IObservable<Image<Gray, byte>>>().Object);
             corrector.SetupGet(d => d.Output).Returns(new Mock<IObservable<Image<Gray, byte>>>().Object);
         }
@@ -89,13 +89,13 @@ namespace NVs.OccupancySensor.CV.Tests
         public async Task ConnectStreamToDenoiserWhenCameraStarts()
         {
             var capture = new Mock<VideoCapture>(MockBehavior.Loose, 0, VideoCapture.API.Any);
-            capture.Setup(c => c.QueryFrame()).Returns(() => new Image<Rgb, byte>(100, 100).Mat);
+            capture.Setup(c => c.QueryFrame()).Returns(() => new Image<Gray, byte>(100, 100).Mat);
 
             camera.SetupGet(c => c.IsRunning).Returns(true);
             camera.SetupGet(c => c.Stream).Returns(new CameraStream(capture.Object, CancellationToken.None, new Mock<ILogger<CameraStream>>().Object, TimeSpan.FromMilliseconds(100)));
-            denoiser.SetupGet(d => d.Output).Returns(new CameraStream(capture.Object, CancellationToken.None, new Mock<ILogger<CameraStream>>().Object, TimeSpan.FromMilliseconds(100)));
+            subtractor.SetupGet(d => d.Output).Returns(new CameraStream(capture.Object, CancellationToken.None, new Mock<ILogger<CameraStream>>().Object, TimeSpan.FromMilliseconds(100)));
             
-            denoiser.Setup(d => d.OnNext(It.IsAny<Image<Rgb,byte>>())).Verifiable("Detect was not called!");
+            denoiser.Setup(d => d.OnNext(It.IsAny<Image<Gray, byte>>())).Verifiable("Detect was not called!");
             var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
             
             camera.Raise(c => c.PropertyChanged += null, new PropertyChangedEventArgs(nameof(ICamera.IsRunning)));
@@ -108,13 +108,13 @@ namespace NVs.OccupancySensor.CV.Tests
         public async Task ConnectStreamToDetectorWhenCameraStarts()
         {
             var capture = new Mock<VideoCapture>(MockBehavior.Loose, 0, VideoCapture.API.Any);
-            capture.Setup(c => c.QueryFrame()).Returns(() => new Image<Rgb, byte>(100, 100).Mat);
+            capture.Setup(c => c.QueryFrame()).Returns(() => new Image<Gray, byte>(100, 100).Mat);
 
             camera.SetupGet(c => c.IsRunning).Returns(true);
             camera.SetupGet(c => c.Stream).Returns(new CameraStream(capture.Object, CancellationToken.None, new Mock<ILogger<CameraStream>>().Object, TimeSpan.FromMilliseconds(100)));
             denoiser.SetupGet(d => d.Output).Returns(new CameraStream(capture.Object, CancellationToken.None, new Mock<ILogger<CameraStream>>().Object, TimeSpan.FromMilliseconds(100)));
             
-            denoiser.Setup(d => d.OnNext(It.IsAny<Image<Rgb,byte>>())).Verifiable("Detect was not called!");
+            denoiser.Setup(d => d.OnNext(It.IsAny<Image<Gray, byte>>())).Verifiable("Detect was not called!");
             var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
             
             camera.Raise(c => c.PropertyChanged += null, new PropertyChangedEventArgs(nameof(ICamera.IsRunning)));

@@ -5,7 +5,7 @@ using Emgu.CV.Structure;
 
 namespace NVs.OccupancySensor.CV.Tests.Utils
 {
-    internal class HeavyTestMatObserver: TestImageObserver<Rgb>
+    internal class HeavyTestMatObserver: TestImageObserver<Gray>
     {
         private readonly TimeSpan fromMilliseconds;
 
@@ -14,7 +14,7 @@ namespace NVs.OccupancySensor.CV.Tests.Utils
             this.fromMilliseconds = fromMilliseconds;
         }
 
-        public override void OnNext(Image<Rgb, byte> value)
+        public override void OnNext(Image<Gray, byte> value)
         {
             base.OnNext(value);
             Task.Delay(fromMilliseconds).Wait();

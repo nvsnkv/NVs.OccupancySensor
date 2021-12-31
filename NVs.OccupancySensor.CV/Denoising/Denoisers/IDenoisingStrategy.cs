@@ -5,6 +5,6 @@ namespace NVs.OccupancySensor.CV.Denoising.Denoisers
 {
     public interface IDenoisingStrategy
     {
-        Image<Rgb, byte> Denoise(Image<Rgb, byte> source);
+        Image<Gray, byte> Denoise(Image<Gray, byte> source);
     }
 }

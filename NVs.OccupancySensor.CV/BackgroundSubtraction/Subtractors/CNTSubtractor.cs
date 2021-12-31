@@ -16,7 +16,7 @@ namespace NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors
             subtractor = new BackgroundSubtractorCNT(settings.MinPixelStability, settings.UseHistory, settings.MaxPixelStability, settings.IsParallel);
         }
 
-        public Image<Gray, byte> GetForegroundMask([NotNull] Image<Rgb, byte> source)
+        public Image<Gray, byte> GetForegroundMask([NotNull] Image<Gray, byte> source)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             var mask = new Image<Gray, byte>(source.Width, source.Height);

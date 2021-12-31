@@ -12,7 +12,7 @@ using Xunit;
 
 namespace NVs.OccupancySensor.CV.Tests
 {
-    public class BackgroundSubtractorShould : StageShould<Rgb, Gray>
+    public class BackgroundSubtractorShould : StageShould<Gray, Gray>
     {
         private readonly Mock<ISubtractionStrategy> strategy;
         private readonly BackgroundSubtractor subtractor;
@@ -34,7 +34,7 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void ApplyStrategyToInputImage()
         {
-            var image = new Image<Rgb, byte>(1, 1);
+            var image = new Image<Gray, byte>(1, 1);
             strategy.Setup(s => s.GetForegroundMask(image)).Returns(new Image<Gray, byte>(1, 1)).Verifiable("GetForegroundMask was not invoked!");
             subtractor.OnNext(image);
 
@@ -43,14 +43,14 @@ namespace NVs.OccupancySensor.CV.Tests
 
         private static BackgroundSubtractor CreateSubtractor(Mock<IBackgroundSubtractorFactory> factory, Mock<ISubtractionStrategy> strategy, Mock<IBackgroundSubtractorSettings> settings, Mock<ILogger<BackgroundSubtractor>> logger)
         {
-            strategy.Setup(s => s.GetForegroundMask(It.IsAny<Image<Rgb, byte>>())).Returns(new Image<Gray, byte>(1, 1));
+            strategy.Setup(s => s.GetForegroundMask(It.IsAny<Image<Gray, byte>>())).Returns(new Image<Gray, byte>(1, 1));
             factory.Setup(f => f.Create(It.IsAny<string>())).Returns(strategy.Object);
             return new BackgroundSubtractor(factory.Object, settings.Object, logger.Object);
         }
 
         protected override void SetupLongRunningPayload(TimeSpan delay)
         {
-            strategy.Setup(s => s.GetForegroundMask(It.IsAny<Image<Rgb, byte>>())).Returns(() =>
+            strategy.Setup(s => s.GetForegroundMask(It.IsAny<Image<Gray, byte>>())).Returns(() =>
             {
                 Task.Delay(delay).Wait();
                 return new Image<Gray, byte>(1, 1);
