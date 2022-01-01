@@ -33,7 +33,7 @@ Nothing special there - just run `dotnet build` and MSBuild will do the rest for
     1. Ensure `CV:Capture:Source` is set to the proper source;
     2. Ensure MQTT settings are correct;
     3. Set `StreamingAllowed` to _True_ to enable video translations on debug page;
-2. Deploy the application (either run [dotnet publish](https://docs.microsoft.com/ru-ru/dotnet/core/tools/dotnet-publish) or just move `NVs.OccupancySensor.API` folder to the preferred location);
+2. Deploy the application (either run [dotnet publish](https://docs.microsoft.com/ru-ru/dotnet/core/tools/dotnet-publish) or just move `NVs.OccupancySensor.API` folder to the preferred location); VS Code users can use "publish" task commited to the repository;
 3. Start the app by running `dotnet occ-sensor.dll` in the target folder. By default app will start listening on port 5000;
 4. Open `/debug.html` URL in your favorite browser. If application was successfully deployed you should see the debug page;
 5. Start the sensor by making a POST HTTP request to `/api/v1/Sensor/Start`. You can download API definition from `/swagger/v1/swagger.json` and use API explorer like Swagger-UI or Postman to simplify requests submission;
