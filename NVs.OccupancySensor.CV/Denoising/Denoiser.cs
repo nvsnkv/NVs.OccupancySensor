@@ -11,7 +11,7 @@ using NVs.OccupancySensor.CV.Utils.Flow;
 
 namespace NVs.OccupancySensor.CV.Denoising
 {
-    internal sealed class Denoiser : Stage<Image<Gray, byte>, Image<Gray, byte>>, IDenoiser
+    internal sealed class Denoiser : Stage, IDenoiser
     {
         private readonly IDenoiserFactory factory;
 
@@ -36,7 +36,7 @@ namespace NVs.OccupancySensor.CV.Denoising
             }
         }
 
-        protected override ProcessingStream<Image<Gray, byte>, Image<Gray, byte>> CreateStream()
+        protected override ProcessingStream CreateStream()
         {
             return new DenoisingStream(factory.Create(Settings.Algorithm), Counter, CancellationToken.None, Logger);
         }

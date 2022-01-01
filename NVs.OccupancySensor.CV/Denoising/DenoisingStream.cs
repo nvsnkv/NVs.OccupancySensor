@@ -10,7 +10,7 @@ using NVs.OccupancySensor.CV.Utils.Flow;
 
 namespace NVs.OccupancySensor.CV.Denoising
 {
-    internal sealed class DenoisingStream : ProcessingStream<Image<Gray, byte>, Image<Gray, byte>>
+    internal sealed class DenoisingStream : ProcessingStream
     {
         private readonly IDenoisingStrategy strategy;
 

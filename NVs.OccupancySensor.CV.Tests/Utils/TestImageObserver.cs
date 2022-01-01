@@ -5,9 +5,9 @@ using Emgu.CV.Structure;
 
 namespace NVs.OccupancySensor.CV.Tests.Utils
 {
-    internal class TestImageObserver<T> : IObserver<Image<T, byte>> where T : struct, IColor
+    internal class TestImageObserver : IObserver<Image<Gray, byte>>
     {
-        public Dictionary<Image<T, byte>, DateTime> ReceivedItems { get; } = new();
+        public Dictionary<Image<Gray, byte>, DateTime> ReceivedItems { get; } = new();
 
         public bool StreamCompleted { get; private set; }
 
@@ -25,7 +25,7 @@ namespace NVs.OccupancySensor.CV.Tests.Utils
             Error = error;
         }
 
-        public virtual void OnNext(Image<T, byte> value)
+        public virtual void OnNext(Image<Gray, byte> value)
         {
             ReceivedItems.Add(value, DateTime.Now);
         }

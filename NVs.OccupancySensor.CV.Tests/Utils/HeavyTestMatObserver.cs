@@ -5,7 +5,7 @@ using Emgu.CV.Structure;
 
 namespace NVs.OccupancySensor.CV.Tests.Utils
 {
-    internal class HeavyTestMatObserver: TestImageObserver<Gray>
+    internal class HeavyTestMatObserver: TestImageObserver
     {
         private readonly TimeSpan fromMilliseconds;
 

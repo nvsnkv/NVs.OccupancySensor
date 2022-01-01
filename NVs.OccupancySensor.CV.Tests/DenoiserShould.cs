@@ -13,7 +13,7 @@ using Xunit;
 
 namespace NVs.OccupancySensor.CV.Tests
 {
-    public sealed class DenoiserShould : StageShould<Gray,Gray>
+    public sealed class DenoiserShould : StageShould
     {
         private readonly Mock<IDenoisingStrategy> strategy;
         private readonly Denoiser denoiser;

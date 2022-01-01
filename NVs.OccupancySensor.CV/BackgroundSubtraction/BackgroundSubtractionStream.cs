@@ -10,7 +10,7 @@ using NVs.OccupancySensor.CV.Utils.Flow;
 
 namespace NVs.OccupancySensor.CV.BackgroundSubtraction
 {
-    internal sealed class BackgroundSubtractionStream : ProcessingStream<Image<Gray, byte>, Image<Gray, byte>>
+    internal sealed class BackgroundSubtractionStream : ProcessingStream
     {
         private readonly ISubtractionStrategy strategy;
 

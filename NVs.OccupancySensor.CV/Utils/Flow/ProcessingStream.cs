@@ -1,11 +1,13 @@
 using System;
 using System.Threading;
+using Emgu.CV;
+using Emgu.CV.Structure;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Utils.Flow
 {
-    internal abstract class ProcessingStream<TIn, TOut> : Stream<TOut> where TIn: class
+    internal abstract class ProcessingStream : Stream
     {
         private readonly Counter counter;
         private readonly ProcessingLock processingLock = new ProcessingLock();
@@ -18,7 +20,7 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
 
         public bool Completed { get; private set; }
 
-        public void Process(TIn image)
+        public void Process(Image<Gray, byte> image)
         {
             if (image is null)
             {
@@ -45,7 +47,7 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
                 return;
             }
 
-            TOut processed;
+            Image<Gray, byte> processed;
             try
             {
                 processed = DoProcess(image);
@@ -80,6 +82,6 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
             Notify(o => o.OnError(error));
         }
 
-        protected abstract TOut DoProcess(TIn image);
+        protected abstract Image<Gray, byte> DoProcess(Image<Gray, byte> image);
     }
 }

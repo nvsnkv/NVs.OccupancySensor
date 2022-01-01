@@ -8,7 +8,7 @@ using NVs.OccupancySensor.CV.Utils.Flow;
 
 namespace NVs.OccupancySensor.CV.Capture
 {
-    internal sealed class CameraStream : Stream<Image<Gray, byte>>, ICameraStream
+    internal sealed class CameraStream : Stream, ICameraStream
     {
         private readonly VideoCapture videoCapture;
         private readonly TimeSpan frameInterval;

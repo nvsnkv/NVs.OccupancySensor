@@ -8,7 +8,7 @@ using NVs.OccupancySensor.CV.Utils.Flow;
 
 namespace NVs.OccupancySensor.CV.Correction
 {
-    sealed class Corrector : Stage<Image<Gray, byte>, Image<Gray, byte>>, ICorrector
+    sealed class Corrector : Stage, ICorrector
     {
         private readonly ICorrectionStrategyFactory factory;
         [NotNull] private ICorrectionSettings settings;
@@ -21,7 +21,7 @@ namespace NVs.OccupancySensor.CV.Correction
             OutputStream = CreateStream();
         }
 
-        protected override ProcessingStream<Image<Gray, byte>, Image<Gray, byte>> CreateStream()
+        protected override ProcessingStream CreateStream()
         {
             var strategy = factory.Create(Settings.Algorithm);
             StrategyManager.SetStrategy(strategy);

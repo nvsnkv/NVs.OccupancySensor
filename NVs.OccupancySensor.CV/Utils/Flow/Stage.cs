@@ -1,22 +1,24 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Emgu.CV;
+using Emgu.CV.Structure;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Utils.Flow
 {
-    internal abstract class Stage<TIn, TOut> : IObserver<TIn> where TIn: class
+    internal abstract class Stage : IObserver<Image<Gray, byte>>
     {
         private readonly ProcessingLock processingLock = new ProcessingLock();
         private readonly object streamLock = new object();
         protected readonly Counter Counter = new Counter();
         protected readonly ILogger Logger;
 
-        protected volatile ProcessingStream<TIn, TOut> OutputStream;
+        protected volatile ProcessingStream OutputStream;
         
 
-        public IObservable<TOut> Output => OutputStream;
+        public IObservable<Image<Gray, byte>> Output => OutputStream;
 
         protected Stage([NotNull] ILogger logger)
         {
@@ -36,7 +38,7 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
             OutputStream.Complete();
         }
 
-        public void OnNext([NotNull] TIn value)
+        public void OnNext([NotNull] Image<Gray, byte> value)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             Logger.LogInformation("New frame received...");
@@ -79,7 +81,7 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
 
         public virtual event PropertyChangedEventHandler PropertyChanged;
 
-        protected void ReplaceStream(ProcessingStream<TIn, TOut> expectedStream, ProcessingStream<TIn, TOut> newStream)
+        private void ReplaceStream(ProcessingStream expectedStream, ProcessingStream newStream)
         {
             if (OutputStream != expectedStream) return;
 
@@ -99,6 +101,6 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        protected abstract ProcessingStream<TIn, TOut> CreateStream();
+        protected abstract ProcessingStream CreateStream();
     }
 }

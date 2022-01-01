@@ -9,7 +9,7 @@ using Xunit;
 
 namespace NVs.OccupancySensor.CV.Tests
 {
-    public sealed class CorrectorShould : StageShould<Gray, Gray>
+    public sealed class CorrectorShould : StageShould
     {
         private readonly Corrector corrector;
         private readonly Mock<IStatefulCorrectionStrategy> strategy;

@@ -12,7 +12,7 @@ using Xunit;
 
 namespace NVs.OccupancySensor.CV.Tests
 {
-    public class BackgroundSubtractorShould : StageShould<Gray, Gray>
+    public class BackgroundSubtractorShould : StageShould
     {
         private readonly Mock<ISubtractionStrategy> strategy;
         private readonly BackgroundSubtractor subtractor;
