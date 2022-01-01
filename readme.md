@@ -49,8 +49,8 @@ Nothing special there - just run `dotnet build` and MSBuild will do the rest for
 ## Configuration
 On a high level, application is doing the following actions to find out if someone is present in the room:
 1. Camera captures an image;
+1. Application builds the foreground mask from the image image;
 1. Captured image is getting processed by denoising block;
-1. Application builds the foreground mask from the denoised image;
 1. Foreground mask is getting adjusted using the correction mask to exclude false-positives (TV screen, edges of objects...); 
 1. Finally, detector computes foreground/background pixel ratio;
 1. Computed value is getting compared with the threshold: if value is greater than threshold, application decides that someone is present in the room;
@@ -67,6 +67,14 @@ App uses .Net Core configuration, so you can change the settings by:
 #### Camera
 * `CV:Capture:Source` - the source for OpenCV capture. Can be either integer value that identifies your local camera, file path or link to the stream. Default is _"0"_. This value is used to create [EmguCV VideoCapture](http://www.emgu.com/wiki/files/4.4.0/document/html/961857d0-b7ba-53d8-253a-5059bb3bc1df.htm)
 * `CV:Capture:FrameInterval` - the timespan that defines how often application will request new frames from the camera. Default is _100 milliseconds_.
+#### Background Subtraction
+* `CV:Subtraction:Algorithm` - background subtraction algorithm to use. Default is _CNT_.
+    * `CNT` - [CouNT](https://sagi-z.github.io/BackgroundSubtractorCNT/) subtraction algorithm created by [sagi-z](https://github.com/sagi-z). 
+This algorithm has a few settings to tweak ([documentation](https://sagi-z.github.io/BackgroundSubtractorCNT/doxygen/html/index.html)):
+        * `CV:Subtraction:CNT:MinPixelStability` - integer, optional. Default is _15_
+        * `CV:Subtraction:CNT:UseHistory` - boolean, optional. Default is _True_
+        * `CV:Subtraction:CNT:MaxPixelStability` - integer, optional. Default is _900_
+        * `CV:Subtraction:CNT:IsParallel` - boolean, optional. Default is _True_
 #### Denoising
 * `CV:Denoising:Algorithm` - denoising algorithm to use. Default is _None_
     * `None` - no denoising performed. The image captured from the camera goes directly to detection logic
@@ -83,14 +91,6 @@ There are several algorithm options that may be adjusted:
         * `CV:Denoising:FastNlMeans:SearchWindowSize` - odd integer, optional. Default is _21_
     * `MedianBlur` - [MedianBlur](https://emgu.com/wiki/files/4.5.1/document/html/32b54325-0d91-bedb-60b4-910e4c65a8db.htm) function used. The only adjustable parameter is:
         * `CV:Denoising:MedianBlur:K` - odd integer greater then 1, optional. Default is _3_
-#### Background Subtraction
-* `CV:Subtraction:Algorithm` - background subtraction algorithm to use. Default is _CNT_.
-    * `CNT` - [CouNT](https://sagi-z.github.io/BackgroundSubtractorCNT/) subtraction algorithm created by [sagi-z](https://github.com/sagi-z). 
-This algorithm has a few settings to tweak ([documentation](https://sagi-z.github.io/BackgroundSubtractorCNT/doxygen/html/index.html)):
-        * `CV:Subtraction:CNT:MinPixelStability` - integer, optional. Default is _15_
-        * `CV:Subtraction:CNT:UseHistory` - boolean, optional. Default is _True_
-        * `CV:Subtraction:CNT:MaxPixelStability` - integer, optional. Default is _900_
-        * `CV:Subtraction:CNT:IsParallel` - boolean, optional. Default is _True_
 #### Correction
 * `CV:Correction:Algorithm` - a post-processing correction options, optional. Default is _None_. Valid values are:
     * `None` - no correction will be performed

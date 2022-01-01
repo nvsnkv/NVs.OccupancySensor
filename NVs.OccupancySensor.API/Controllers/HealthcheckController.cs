@@ -51,8 +51,8 @@ namespace NVs.OccupancySensor.API.Controllers
             var builder = new StringBuilder();
             builder.AppendFormat("Camera: {0}", streams.Camera.IsRunning ? "Running" : "Stopped");
             builder.AppendLine();
-            AppendStage(builder, nameof(streams.Denoiser), streams.Denoiser.Statistics);
             AppendStage(builder, nameof(streams.Subtractor), streams.Subtractor.Statistics);
+            AppendStage(builder, nameof(streams.Denoiser), streams.Denoiser.Statistics);
             AppendStage(builder, nameof(streams.Corrector), streams.Corrector.Statistics);
             builder.AppendFormat("Sensor: {0}", sensor.IsRunning ? "Running" : "Stopped");
             builder.AppendLine();
