@@ -43,13 +43,13 @@ namespace NVs.OccupancySensor.CV.Tests
         }
 
         [Fact]
-        public void DoNotStopCameraOnStop()
+        public void StopCameraOnStop()
         {
-            camera.Setup(c => c.Stop()).Verifiable("Stop was requested");
+            camera.Setup(c => c.Stop()).Verifiable("Stop was not requested");
             var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
 
             sensor.Stop();
-            camera.Verify(c => c.Stop(), Times.Never);
+            camera.Verify();
         }
 
         [Fact]
@@ -129,9 +129,7 @@ namespace NVs.OccupancySensor.CV.Tests
             var propertyName = string.Empty;
             var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
             sensor.PropertyChanged += (_, e) => propertyName = e.PropertyName;
-            sensor.Start();
 
-            detector.SetupGet(d => d.PeopleDetected).Returns(true);
             detector.Raise(d => d.PropertyChanged += null, new PropertyChangedEventArgs(nameof(IPeopleDetector.PeopleDetected)));
             Assert.Equal(nameof(Sense.OccupancySensor.PresenceDetected), propertyName);           
         }
@@ -144,10 +142,19 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             detector.SetupGet(d => d.PeopleDetected).Returns(expected);
             var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
-            sensor.Start();
-            detector.Raise(d => d.PropertyChanged += null, new PropertyChangedEventArgs(nameof(IPeopleDetector.PeopleDetected)));
 
             Assert.Equal(expected, sensor.PresenceDetected);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ReturnSameValueAsCameraFromIsRunning(bool expected)
+        {
+            camera.SetupGet(c => c.IsRunning).Returns(expected);
+            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
+
+            Assert.Equal(expected, sensor.IsRunning);
         }
 
         [Fact]
