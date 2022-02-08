@@ -20,12 +20,14 @@ namespace NVs.OccupancySensor.CV.Utils
 
         public static IServiceCollection AddPresenceDetection(this IServiceCollection services)
         {
+            services.AddSingleton(s => new VideoCaptureProvider(s.GetService<IConfiguration>()?.GetCaptureSettings() ?? throw new InvalidOperationException("CaptureSettings were not resolved")));
+
             services.AddSingleton<ICamera>(
                 s => new Camera(
                     s.GetService<ILogger<Camera>>() ?? throw new InvalidOperationException("Camera logger dependency was not resolved"),
                     s.GetService<ILogger<CameraStream>>() ?? throw new InvalidOperationException("CameraStream logger dependency was not resolved"),
                     s.GetService<IConfiguration>()?.GetCaptureSettings() ?? throw new InvalidOperationException("CaptureSettings were not resolved"),
-                    Camera.CreateVideoCapture));
+                    (s.GetService<VideoCaptureProvider>() ?? throw new InvalidOperationException("VideoCaptureProvider dependency was not resolved")).Get));
 
             services.AddSingleton<IDenoiserFactory>(s => new DenoiserFactory(
                 s.GetService<IConfiguration>()?.GetFastNlMeansColoredDenoisingSettings() ?? throw new InvalidOperationException("FastNlMeansColoredDenoising settings dependency was not resolved"),

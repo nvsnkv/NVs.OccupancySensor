@@ -16,7 +16,7 @@ namespace NVs.OccupancySensor.CV.Capture
 
         private readonly ILogger<Camera> logger;
         private readonly ILogger<CameraStream> streamLogger;
-        private readonly Func<CaptureSettings, VideoCapture> createVideoCaptureFunc;
+        private readonly Func<VideoCapture> createVideoCaptureFunc;
         private readonly ErrorObserver errorObserver;
 
         private VideoCapture capture;
@@ -24,13 +24,12 @@ namespace NVs.OccupancySensor.CV.Capture
 
         private ICameraStream stream;
         private volatile bool isRunning;
-        private CaptureSettings settings;
 
-        public Camera([NotNull] ILogger<Camera> logger, [NotNull] ILogger<CameraStream> streamLogger, [NotNull] CaptureSettings settings, [NotNull] Func<CaptureSettings, VideoCapture> createVideoCaptureFunc)
+        public Camera([NotNull] ILogger<Camera> logger, [NotNull] ILogger<CameraStream> streamLogger, [NotNull] CaptureSettings settings, [NotNull] Func<VideoCapture> createVideoCaptureFunc)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.streamLogger = streamLogger ?? throw new ArgumentNullException(nameof(streamLogger));
-            this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            this.Settings = settings ?? throw new ArgumentNullException(nameof(settings));
             this.createVideoCaptureFunc = createVideoCaptureFunc ?? throw new ArgumentNullException(nameof(createVideoCaptureFunc));
             this.errorObserver = new ErrorObserver(this);
         }
@@ -41,16 +40,7 @@ namespace NVs.OccupancySensor.CV.Capture
 
         public bool IsRunning => isRunning;
 
-        public CaptureSettings Settings
-        {
-            get => settings;
-            set
-            {
-                if (Equals(value, settings)) return;
-                settings = value;
-                OnPropertyChanged();
-            }
-        }
+        public CaptureSettings Settings { get; }
 
         public void Start()
         {
@@ -134,7 +124,7 @@ namespace NVs.OccupancySensor.CV.Capture
             logger.LogInformation("Setting up new stream...");
             cts = new CancellationTokenSource();
 
-            capture = createVideoCaptureFunc(Settings);
+            capture = createVideoCaptureFunc();
             
             stream = new CameraStream(capture, cts.Token, streamLogger, Settings.FrameInterval);
             stream.Subscribe(errorObserver);
@@ -187,13 +177,6 @@ namespace NVs.OccupancySensor.CV.Capture
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        public static VideoCapture CreateVideoCapture(CaptureSettings settings)
-        {
-            return int.TryParse(settings.Source, out var camIndex)
-                ? new VideoCapture(camIndex)
-                : new VideoCapture(settings.Source);
         }
     }
 }

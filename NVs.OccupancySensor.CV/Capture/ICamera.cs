@@ -13,6 +13,6 @@ namespace NVs.OccupancySensor.CV.Capture
 
         void Stop();
 
-        CaptureSettings Settings { get; set; }
+        CaptureSettings Settings { get; }
     }
 }
