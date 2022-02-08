@@ -39,8 +39,9 @@ namespace NVs.OccupancySensor.API.Controllers
         public string Get()
         {
             logger.Log(LogLevel.Trace, "Healthcheck called");
-            var ok = streams.Camera.Stream != null && streams.Denoiser.Output != null &&
-                     streams.Subtractor.Output != null && streams.Corrector.Output != null;
+            var ok = adapter.IsRunning && (!sensor.IsRunning || streams.Camera.Stream != null &&
+                streams.Denoiser.Output != null &&
+                streams.Subtractor.Output != null && streams.Corrector.Output != null);
 
             return ok ? "OK" : "FAIL";
         }
@@ -49,6 +50,8 @@ namespace NVs.OccupancySensor.API.Controllers
         public string Stats()
         {
             var builder = new StringBuilder();
+            builder.AppendFormat("MQTT Adapter: {0}", adapter.IsRunning ? "Running" : "Stopped");
+            builder.AppendLine();
             builder.AppendFormat("Camera: {0}", streams.Camera.IsRunning ? "Running" : "Stopped");
             builder.AppendLine();
             AppendStage(builder, nameof(streams.Subtractor), streams.Subtractor.Statistics);
@@ -56,8 +59,7 @@ namespace NVs.OccupancySensor.API.Controllers
             AppendStage(builder, nameof(streams.Corrector), streams.Corrector.Statistics);
             builder.AppendFormat("Sensor: {0}", sensor.IsRunning ? "Running" : "Stopped");
             builder.AppendLine();
-            builder.AppendFormat("MQTT Adapter: {0}", adapter.IsRunning ? "Running" : "Stopped");
-            
+
             return builder.ToString();
         }
 
