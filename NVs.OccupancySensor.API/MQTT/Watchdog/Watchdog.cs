@@ -51,6 +51,7 @@ namespace NVs.OccupancySensor.API.MQTT.Watchdog
                     while (ShouldRetry(args))
                     {
                         var delay = (attemptsMade + 1) * settings.Interval;
+                        logger.LogInformation("Will reconnect in {delay}", delay);
                         await Task.Delay(delay, cts.Token);
 
                         try
