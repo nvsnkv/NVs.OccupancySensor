@@ -32,6 +32,8 @@ namespace NVs.OccupancySensor.CV.Capture
             this.Settings = settings ?? throw new ArgumentNullException(nameof(settings));
             this.createVideoCaptureFunc = createVideoCaptureFunc ?? throw new ArgumentNullException(nameof(createVideoCaptureFunc));
             this.errorObserver = new ErrorObserver(this);
+
+            SetupStream();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -49,12 +51,11 @@ namespace NVs.OccupancySensor.CV.Capture
 
             try
             {
-                SetupStream();
+                stream.Resume();
             }
             catch (Exception e)
             {
                 logger.LogError(e, "An error occurred while setting up new stream!");
-                CompleteStream();
                 isRunning = false;
 
                 throw;
@@ -72,7 +73,7 @@ namespace NVs.OccupancySensor.CV.Capture
             logger.LogInformation("Attempting to stop camera...");
             UnsetIsRunning();
 
-            CompleteStream();
+            stream.Pause();
 
             logger.LogInformation("Camera is now stopped");
 
@@ -98,27 +99,7 @@ namespace NVs.OccupancySensor.CV.Capture
                 isRunning = false;
             }
         }
-
-        private void CompleteStream()
-        {
-            logger.LogInformation("Finalizing current stream and releasing resources...");
-            try
-            {
-                cts?.Cancel();
-                capture?.Dispose();
-
-                stream = null;
-                capture = null;
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Failed to finalize current stream!");
-                throw;
-            }
-
-            logger.LogInformation("Stream finalization is completed.");
-        }
-
+        
         private void SetupStream()
         {
             logger.LogInformation("Setting up new stream...");

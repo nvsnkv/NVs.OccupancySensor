@@ -91,7 +91,7 @@ namespace NVs.OccupancySensor.CV.Tests
         }
 
         [Fact]
-        public void CompleteStreamWhenStopped()
+        public void NotCompleteStreamWhenStopped()
         {
             var camera = new Camera(cameraLogger.Object, streamLogger.Object, CaptureSettings.Default, () => captureMock.Object);
             var logger = new PropertyChangedLogger();
@@ -105,10 +105,10 @@ namespace NVs.OccupancySensor.CV.Tests
                 camera.Stop();
             }
 
-            Assert.Null(camera.Stream);
+            Assert.NotNull(camera.Stream);
             Assert.Equal(2, logger.Notifications[camera].Count(x => x.Value == nameof(Camera.Stream)));
             
-            Assert.True(observer.StreamCompleted);
+            Assert.False(observer.StreamCompleted);
         }
 
         [Fact]
@@ -134,45 +134,6 @@ namespace NVs.OccupancySensor.CV.Tests
             Task.WaitAll(Enumerable.Repeat(Task.Run(() => camera.Stop()), Environment.ProcessorCount).ToArray());
 
             Assert.Equal(2, logger.Notifications[camera].Count(x => x.Value == nameof(Camera.Stream)));
-        }
-
-        [Fact]
-        public void RemainStoppedIfAttemptCreateNewVideoCaptureFailed()
-        {
-            var camera = new Camera(cameraLogger.Object, streamLogger.Object, CaptureSettings.Default, () => throw new TestException());
-            var logger = new PropertyChangedLogger();
-            camera.PropertyChanged += logger.OnPropertyChanged;
-
-            Assert.Throws<TestException>(() => camera.Start());
-            Assert.False(camera.IsRunning);
-            Assert.Empty(logger.Notifications);
-        }
-
-        [Fact]
-        public void RethrowTheExceptionOccurredDuringVideoCaptureCreation()
-        {
-            var camera = new Camera(cameraLogger.Object, streamLogger.Object, CaptureSettings.Default, () => throw new TestException());
-
-            Assert.Throws<TestException>(() => camera.Start());
-        }
-
-        [Fact]
-        public void LogTheExceptionOccurredDuringVideoCaptureCreation()
-        {
-            cameraLogger
-                .Setup(
-                    l => l.Log(
-                        LogLevel.Error,
-                        It.IsAny<EventId>(),
-                        It.IsAny<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>>(),
-                        It.IsAny<TestException>(),
-                        It.IsAny<Func<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>, Exception, string>>()))
-                .Verifiable("Logger was not called!");
-            
-            var camera = new Camera(cameraLogger.Object, streamLogger.Object, CaptureSettings.Default, () => throw new TestException());
-
-            Assert.Throws<TestException>(() => camera.Start());
-            cameraLogger.Verify();
         }
     }
 }

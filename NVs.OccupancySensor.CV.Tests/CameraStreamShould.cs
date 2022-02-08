@@ -32,6 +32,8 @@ namespace NVs.OccupancySensor.CV.Tests
                 TimeSpan.FromMilliseconds(10));
             var observer = new TestImageObserver();
 
+            camera.Resume();
+
             var before = DateTime.Now;
             using (camera.Subscribe(observer))
             {
@@ -49,6 +51,8 @@ namespace NVs.OccupancySensor.CV.Tests
             var camera = new CameraStream(videoMock.Object, CancellationToken.None, loggerMock.Object,
                 TimeSpan.FromMilliseconds(10));
             var observer = new TestImageObserver();
+
+            camera.Resume();
 
             using (camera.Subscribe(observer))
             {
@@ -75,9 +79,10 @@ namespace NVs.OccupancySensor.CV.Tests
                     It.IsAny<Func<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>, Exception, string>>()))
                 .Verifiable("Logger was not called!");
 
-            using (new CameraStream(videoMock.Object, CancellationToken.None, loggerMock.Object,
-                TimeSpan.FromMilliseconds(10)).Subscribe(new TestImageObserver()))
+            var cameraStream = new CameraStream(videoMock.Object, CancellationToken.None, loggerMock.Object, TimeSpan.FromMilliseconds(10));
+            using (cameraStream.Subscribe(new TestImageObserver()))
             {
+                cameraStream.Resume();
                 await Task.Delay(TimeSpan.FromMilliseconds(100));
             }
 
@@ -194,7 +199,8 @@ namespace NVs.OccupancySensor.CV.Tests
                 .ToList();
 
             var camera = new CameraStream(videoMock.Object, cts.Token, loggerMock.Object, TimeSpan.FromMilliseconds(100));
-            
+            camera.Resume();
+
             foreach (var observer in observers)
             {
                 camera.Subscribe(observer);
