@@ -1,7 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
@@ -50,34 +47,11 @@ namespace NVs.OccupancySensor.CV.Tests
         }
 
         [Fact]
-        public void RespectSettingsChange()
-        {
-            var image = new Image<Gray, byte>(10, 10);
-            for(var i=0; i < image.Width; i++)
-            for(var j=0; j < image.Height; j++)
-            {
-                image[i,j] = new Gray(255);
-            }
-
-            var detector = new PeopleDetector(DetectionSettings.Default, logger.Object);
-            detector.OnNext(image);
-
-            Assert.True(detector.PeopleDetected);
-
-            detector.Settings = new DetectionSettings(1.1);
-            detector.Reset();
-
-            detector.OnNext(image);
-
-            Assert.False(detector.PeopleDetected);
-        }
-
-        [Fact]
         public void NotifyWhenPeopleDetected()
         {
             var propertiesChanged = new List<string>();
             var detector = new PeopleDetector(new DetectionSettings(0), logger.Object);
-            detector.PropertyChanged += (_, e) => propertiesChanged.Add(e.PropertyName);
+            detector.PropertyChanged += (_, e) => propertiesChanged.Add(e.PropertyName!);
             
             detector.OnNext(new Image<Gray, byte>(1, 1));
 
@@ -89,7 +63,7 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var propertiesChanged = new List<string>();
             var detector = new PeopleDetector(new DetectionSettings(1), logger.Object);
-            detector.PropertyChanged += (_, e) => propertiesChanged.Add(e.PropertyName);
+            detector.PropertyChanged += (_, e) => propertiesChanged.Add(e.PropertyName!);
             
             detector.OnNext(new Image<Gray, byte>(1, 1));
             Assert.Contains(propertiesChanged, s => nameof(IPeopleDetector.PeopleDetected).Equals(s));
@@ -132,7 +106,7 @@ namespace NVs.OccupancySensor.CV.Tests
             var propertiesChanged = new List<string>();
 
             var detector = new PeopleDetector(new DetectionSettings(1), logger.Object);
-            detector.PropertyChanged += (o, e) => propertiesChanged.Add(e.PropertyName);
+            detector.PropertyChanged += (_, e) => propertiesChanged.Add(e.PropertyName!);
 
             detector.OnNext(new Image<Gray, byte>(1,1));
 

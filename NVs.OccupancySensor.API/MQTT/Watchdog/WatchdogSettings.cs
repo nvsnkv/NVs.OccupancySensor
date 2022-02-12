@@ -1,12 +1,11 @@
 ﻿using System;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 
-namespace NVs.OccupancySensor.API.MQTT
+namespace NVs.OccupancySensor.API.MQTT.Watchdog
 {
     internal sealed class WatchdogSettings
     {
-        public WatchdogSettings([NotNull] IConfiguration configuration)
+        public WatchdogSettings(IConfiguration configuration)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
             var section =  configuration.GetSection("MQTT:Reconnect");

@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Client;
@@ -15,6 +14,7 @@ using MQTTnet.Client.Options;
 using MQTTnet.Client.Publishing;
 using MQTTnet.Client.Receiving;
 using MQTTnet.Client.Subscribing;
+using NVs.OccupancySensor.API.MQTT.Watchdog;
 using NVs.OccupancySensor.CV.Sense;
 
 namespace NVs.OccupancySensor.API.MQTT
@@ -44,7 +44,7 @@ namespace NVs.OccupancySensor.API.MQTT
         
         private volatile bool isRunning;
         
-        public HomeAssistantMqttAdapter([NotNull] IOccupancySensor sensor, [NotNull] ILogger<HomeAssistantMqttAdapter> logger, [NotNull] Func<(IMqttClient, IDisposable)> createClient, [NotNull] AdapterSettings settings)
+        public HomeAssistantMqttAdapter(IOccupancySensor sensor, ILogger<HomeAssistantMqttAdapter> logger, Func<(IMqttClient, IDisposable)> createClient, AdapterSettings settings)
         {
             if (createClient is null)
             {
@@ -90,7 +90,7 @@ namespace NVs.OccupancySensor.API.MQTT
             try
             {
                 var payload = Encoding.UTF8.GetString(args.ApplicationMessage.Payload);
-                logger.LogInformation($"Payload received:{payload}");
+                logger.LogInformation("Payload received:{payload}", payload);
                 newState = payload.ToLowerInvariant().Equals("on");
             }
             catch (Exception e)
@@ -109,7 +109,7 @@ namespace NVs.OccupancySensor.API.MQTT
             }
         }
 
-        private async void SensorOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private async void SensorOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (!IsRunning)
             {
@@ -124,23 +124,23 @@ namespace NVs.OccupancySensor.API.MQTT
             }
             catch (Exception ex)
             {
-                logger.LogError("Failed to publish state change!", ex);
+                logger.LogError("Failed to publish state change! {ex}", ex);
             }
         }
 
-        private IEnumerable<MqttApplicationMessage> PrepareMessages(string propertyName)
+        private IEnumerable<MqttApplicationMessage> PrepareMessages(string? propertyName)
         {
             switch (propertyName)
             {
                 case nameof(sensor.IsRunning):
-                    logger.LogInformation($"Sensor.IsRunning has been changed to {sensor.IsRunning}, preparing the message...");
+                    logger.LogInformation("Sensor.IsRunning has been changed to {isRunning}, preparing the message...", sensor.IsRunning);
                     yield return sensor.IsRunning
                         ? messages.ServiceEnabled
                         : messages.ServiceDisabled;
                     break;
                 
                 case nameof(sensor.PresenceDetected):
-                    logger.LogInformation($"Sensor.DetectPresence has been changed to {sensor.PresenceDetected}, preparing the messages...");
+                    logger.LogInformation("Sensor.DetectPresence has been changed to {detected}, preparing the messages...", sensor.PresenceDetected);
 
                     yield return sensor.PresenceDetected.HasValue
                         ? messages.SensorAvailable
@@ -238,7 +238,7 @@ namespace NVs.OccupancySensor.API.MQTT
             }
         }
 
-        private void EnsureSubscriptionSuccessful([NotNull] MqttClientSubscribeResult result)
+        private static void EnsureSubscriptionSuccessful(MqttClientSubscribeResult result)
         {
             if (result == null) throw new ArgumentNullException(nameof(result));
             if (result.Items.Count == 0) throw new ArgumentException("No items returned!", nameof(result));
@@ -338,12 +338,12 @@ namespace NVs.OccupancySensor.API.MQTT
             sensor.PropertyChanged -= SensorOnPropertyChanged;
             watchdog.Dispose();
 
-            client.UseApplicationMessageReceivedHandler((IMqttApplicationMessageReceivedHandler)null);
+            client.UseApplicationMessageReceivedHandler((IMqttApplicationMessageReceivedHandler)null!);
             client.Dispose();
             
         }
 
-        public static Func<(IMqttClient, IDisposable)> CreateClient([NotNull] WatchdogSettings watchdogSettings, [NotNull] ILogger<Watchdog.Watchdog> watchdogLogger)
+        public static Func<(IMqttClient, IDisposable)> CreateClient(WatchdogSettings watchdogSettings, ILogger<Watchdog.Watchdog> watchdogLogger)
         {
             if (watchdogSettings == null) throw new ArgumentNullException(nameof(watchdogSettings));
             if (watchdogLogger == null) throw new ArgumentNullException(nameof(watchdogLogger));

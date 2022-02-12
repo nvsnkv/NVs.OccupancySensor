@@ -1,7 +1,6 @@
 ﻿using System;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using JetBrains.Annotations;
 
 namespace NVs.OccupancySensor.CV.Denoising.Denoisers
 {
@@ -9,12 +8,12 @@ namespace NVs.OccupancySensor.CV.Denoising.Denoisers
     {
         private readonly IFastNlMeansDenoisingSettings settings;
 
-        public FastNlMeansDenoiser([NotNull] IFastNlMeansDenoisingSettings settings)
+        public FastNlMeansDenoiser(IFastNlMeansDenoisingSettings settings)
         {
             this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
         }
 
-        public Image<Gray, byte> Denoise([NotNull] Image<Gray, byte> source)
+        public Image<Gray, byte> Denoise(Image<Gray, byte> source)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
 

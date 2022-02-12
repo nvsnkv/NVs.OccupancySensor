@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors;
 using NVs.OccupancySensor.CV.Utils.Flow;
@@ -11,7 +10,7 @@ namespace NVs.OccupancySensor.CV.BackgroundSubtraction
     {
         private readonly IBackgroundSubtractorFactory factory;
 
-        public BackgroundSubtractor([NotNull] IBackgroundSubtractorFactory factory,[NotNull] IBackgroundSubtractorSettings settings, [NotNull] ILogger<BackgroundSubtractor> logger): base(logger)
+        public BackgroundSubtractor(IBackgroundSubtractorFactory factory,IBackgroundSubtractorSettings settings, ILogger<BackgroundSubtractor> logger): base(logger)
         {
             this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
             Settings = settings;

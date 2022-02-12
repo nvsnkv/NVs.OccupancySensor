@@ -2,7 +2,6 @@
 using System.Threading;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.Utils;
 using NVs.OccupancySensor.CV.Utils.Flow;
@@ -13,7 +12,7 @@ namespace NVs.OccupancySensor.CV.Correction
     {
         private readonly ICorrectionStrategy strategy;
 
-        public CorrectionStream([NotNull] ICorrectionStrategy strategy, [NotNull] Counter counter, CancellationToken ct, [NotNull] ILogger logger) : base(counter, ct, logger)
+        public CorrectionStream(ICorrectionStrategy strategy, Counter counter, CancellationToken ct, ILogger logger) : base(counter, ct, logger)
         {
             this.strategy = strategy ?? throw new ArgumentNullException(nameof(strategy));
         }

@@ -1,13 +1,12 @@
 using System;
-using JetBrains.Annotations;
 
 namespace NVs.OccupancySensor.CV.Correction
 {
     internal sealed class CorrectionStrategyFactory : ICorrectionStrategyFactory
     {
-        [NotNull] private IStaticMaskSettings staticMaskSettings;
+        private IStaticMaskSettings staticMaskSettings;
 
-        public CorrectionStrategyFactory([NotNull] IStaticMaskSettings settings)
+        public CorrectionStrategyFactory(IStaticMaskSettings settings)
         {
             this.staticMaskSettings = settings ?? throw new ArgumentNullException(nameof(settings));
         }
@@ -32,8 +31,7 @@ namespace NVs.OccupancySensor.CV.Correction
             };
         }
 
-        [NotNull]
-        public IStaticMaskSettings StaticMaskSettings
+                public IStaticMaskSettings StaticMaskSettings
         {
             get => staticMaskSettings;
             set => staticMaskSettings = value ?? throw new ArgumentNullException(nameof(value));

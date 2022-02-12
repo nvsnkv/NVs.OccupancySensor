@@ -15,10 +15,10 @@ namespace NVs.OccupancySensor.API.ActionResults
         private static readonly string ContentType = "multipart/x-mixed-replace;boundary=" + Boundary;
         private static readonly byte[] NewLine = Encoding.UTF8.GetBytes("\r\n");
 
-        private readonly Func<CancellationToken, Task<byte[]>> onNextImage;
+        private readonly Func<CancellationToken, Task<byte[]?>> onNextImage;
         private readonly Action onEnd;
 
-        public MjpegStreamContent(Func<CancellationToken, Task<byte[]>> onNextImage, Action onEnd)
+        public MjpegStreamContent(Func<CancellationToken, Task<byte[]?>> onNextImage, Action onEnd)
         {
             this.onNextImage = onNextImage;
             this.onEnd = onEnd;
@@ -41,9 +41,9 @@ namespace NVs.OccupancySensor.API.ActionResults
                     {
                         var header = $"--{Boundary}\r\nContent-Type: image/jpeg\r\nContent-Length: {imageBytes.Length}\r\n\r\n";
                         var headerData = Encoding.UTF8.GetBytes(header);
-                        await outputStream.WriteAsync(headerData, 0, headerData.Length, cancellationToken);
-                        await outputStream.WriteAsync(imageBytes, 0, imageBytes.Length, cancellationToken);
-                        await outputStream.WriteAsync(NewLine, 0, NewLine.Length, cancellationToken);
+                        await outputStream.WriteAsync(headerData, cancellationToken);
+                        await outputStream.WriteAsync(imageBytes, cancellationToken);
+                        await outputStream.WriteAsync(NewLine, cancellationToken);
                     }
                     else
                     {

@@ -2,7 +2,6 @@
 using System;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.Correction;
@@ -19,7 +18,7 @@ namespace NVs.OccupancySensor.API.Controllers
         private readonly ILogger<CorrectionMaskController> logger;
         private readonly IConfiguration config;
 
-        public CorrectionMaskController([NotNull] ICorrectionStrategyManager manager, [NotNull] ILogger<CorrectionMaskController> logger, [NotNull] IConfiguration config)
+        public CorrectionMaskController(ICorrectionStrategyManager manager, ILogger<CorrectionMaskController> logger, IConfiguration config)
         {
             this.manager = manager ?? throw new ArgumentNullException(nameof(manager));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -58,7 +57,7 @@ namespace NVs.OccupancySensor.API.Controllers
         }
         
         [HttpGet]
-        public Image<Gray, byte> GetMask()
+        public Image<Gray, byte>? GetMask()
         {
             logger.LogDebug("ResetStrategyState called");
             var maskPath = config.GetStaticMaskSettings().MaskPath;

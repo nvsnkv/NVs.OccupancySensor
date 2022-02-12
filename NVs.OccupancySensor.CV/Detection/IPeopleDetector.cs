@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using Emgu.CV;
-using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 
 namespace NVs.OccupancySensor.CV.Detection
@@ -10,10 +9,8 @@ namespace NVs.OccupancySensor.CV.Detection
     {
         bool? PeopleDetected { get; }
 
-        Image<Gray,byte> Mask { get; }
-
-        IDetectionSettings Settings { get; set; }
-
+        Image<Gray,byte>? Mask { get; }
+        
         void Reset();
     }
 }

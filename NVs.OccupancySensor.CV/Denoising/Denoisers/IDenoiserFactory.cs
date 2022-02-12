@@ -1,15 +1,11 @@
-﻿using JetBrains.Annotations;
-
-namespace NVs.OccupancySensor.CV.Denoising.Denoisers
+﻿namespace NVs.OccupancySensor.CV.Denoising.Denoisers
 {
     public interface IDenoiserFactory
     {
-        IDenoisingStrategy Create([NotNull] string algorithm);
+        IDenoisingStrategy Create(string algorithm);
 
-        [NotNull]
-        IFastNlMeansColoredDenoisingSettings FastNlMeansColoredDenoisingSettings { get; set; }
+                IFastNlMeansColoredDenoisingSettings FastNlMeansColoredDenoisingSettings { get; set; }
 
-        [NotNull]
-        IMedianBlurSettings MedianBlurSettings { get; set; }
+                IMedianBlurSettings MedianBlurSettings { get; set; }
     }
 }

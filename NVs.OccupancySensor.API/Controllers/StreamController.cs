@@ -1,7 +1,6 @@
 ﻿using System;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -17,12 +16,12 @@ namespace NVs.OccupancySensor.API.Controllers
     [Route("api/v1/[controller]")]
     public sealed class StreamsController : ControllerBase
     {
-        [NotNull] private readonly Streams streams;
-        [NotNull] private readonly Observers observers;
-        [NotNull] private readonly IConfiguration config;
-        [NotNull] private readonly ILogger<StreamsController> logger;
+        private readonly Streams streams;
+        private readonly Observers observers;
+        private readonly IConfiguration config;
+        private readonly ILogger<StreamsController> logger;
 
-        public StreamsController([NotNull] Streams streams, [NotNull] Observers observers, [NotNull] ILogger<StreamsController> logger, [NotNull] IConfiguration config)
+        public StreamsController(Streams streams, Observers observers, ILogger<StreamsController> logger, IConfiguration config)
         {
             this.streams = streams ?? throw new ArgumentNullException(nameof(streams));
             this.observers = observers ?? throw new ArgumentNullException(nameof(observers));
@@ -110,7 +109,7 @@ namespace NVs.OccupancySensor.API.Controllers
             return GetMjpegGrayStreamContent(stream);
         }
 
-        private IActionResult GetMjpegRgbStreamContent(IObservable<Image<Gray, byte>> stream)
+        private IActionResult GetMjpegRgbStreamContent(IObservable<Image<Gray, byte>?>? stream)
         {
             var unsubscriber = stream?.Subscribe(observers.Gray);
 
@@ -120,11 +119,11 @@ namespace NVs.OccupancySensor.API.Controllers
             }
 
             return new MjpegStreamContent(
-                async cts => (await observers.Gray.GetImage())?.ToJpegData(),
+                async ct => (await observers.Gray.GetImage(ct))?.ToJpegData(),
                 () => unsubscriber.Dispose());
         }
 
-        private IActionResult GetMjpegGrayStreamContent(IObservable<Image<Gray, byte>> stream)
+        private IActionResult GetMjpegGrayStreamContent(IObservable<Image<Gray, byte>?>? stream)
         {
             var unsubscriber = stream?.Subscribe(observers.Gray);
 
@@ -134,7 +133,7 @@ namespace NVs.OccupancySensor.API.Controllers
             }
 
             return new MjpegStreamContent(
-                async cts => (await observers.Gray.GetImage())?.ToJpegData(),
+                async ct => (await observers.Gray.GetImage(ct))?.ToJpegData(),
                 () => unsubscriber.Dispose());
         }
 

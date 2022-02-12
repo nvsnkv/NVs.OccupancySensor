@@ -46,20 +46,6 @@ namespace NVs.OccupancySensor.CV.Tests
         }
 
         [Fact]
-        public async Task CompleteStreamOnReset()
-        {
-            var observer = new TestImageObserver();
-
-            using (stage.Output.Subscribe(observer))
-            {
-                await Task.Run(() => stage.Reset());
-                await Task.Delay(TimeSpan.FromMilliseconds(100));
-            }
-
-            Assert.True(observer.StreamCompleted);
-        }
-
-        [Fact]
         public async Task DropNewFramesIfSubtractorIsPreviousIsStillInProgress()
         {
             SetupLongRunningPayload(TimeSpan.FromMilliseconds(200));
@@ -69,9 +55,9 @@ namespace NVs.OccupancySensor.CV.Tests
             using (stage.Output.Subscribe(observer))
             {
                 var _ = Task.Run(() => stage.OnNext(new Image<Gray, byte>(1, 1)));
-                _ = Task.Run(() => stage.OnNext(new Image<Gray, byte>(1, 1)));
-                _ = Task.Run(() => stage.OnNext(new Image<Gray, byte>(1, 1)));
-                await Task.Delay(TimeSpan.FromMilliseconds(300));
+                var __ = Task.Run(() => stage.OnNext(new Image<Gray, byte>(1, 1)));
+                var ___ = Task.Run(() => stage.OnNext(new Image<Gray, byte>(1, 1)));
+                await Task.Delay(TimeSpan.FromMilliseconds(900));
             }
 
             Assert.Single(observer.ReceivedItems);

@@ -4,13 +4,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
 using Moq;
 using MQTTnet.Client;
 using MQTTnet.Client.Connecting;
 using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
-using NVs.OccupancySensor.API.MQTT;
 using NVs.OccupancySensor.API.MQTT.Watchdog;
 using Xunit;
 
@@ -19,7 +17,8 @@ namespace NVs.OccupancySensor.API.Tests
     public sealed class WatchdogShould
     {
         private readonly Mock<IMqttClient> client = new();
-        private IMqttClientDisconnectedHandler handler;
+        // ReSharper disable once MemberInitializerValueIgnored
+        private IMqttClientDisconnectedHandler handler = null!;
 
         private readonly Mock<ILogger<Watchdog>> logger = new();
         private readonly Mock<IConfiguration> config = new();
@@ -33,7 +32,7 @@ namespace NVs.OccupancySensor.API.Tests
             config.Setup(s => s.GetSection("MQTT:Reconnect")).Returns(retriesSection.Object);
         }
 
-        private MqttClientConnectResult GetExpectedResult(MqttClientConnectResultCode code)
+        private static MqttClientConnectResult GetExpectedResult(MqttClientConnectResultCode code)
         {
             var result = new MqttClientConnectResult();
             typeof(MqttClientConnectResult).GetProperty("ResultCode")!.SetValue(result, code);

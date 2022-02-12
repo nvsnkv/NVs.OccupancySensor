@@ -5,7 +5,7 @@ namespace NVs.OccupancySensor.CV.Capture
 {
     internal class VideoCaptureProvider
     {
-        private volatile VideoCapture capture;
+        private volatile VideoCapture? capture;
         private readonly object thisLock = new object();
         private readonly CaptureSettings settings;
 
@@ -23,12 +23,10 @@ namespace NVs.OccupancySensor.CV.Capture
 
             lock (thisLock)
             {
-                if (capture == null)
-                {
-                    capture = int.TryParse(settings.Source, out var camIndex)
-                        ? new VideoCapture(camIndex)
-                        : new VideoCapture(settings.Source);
-                }
+                // ReSharper disable once NonAtomicCompoundOperator - used inside lock
+                capture ??= int.TryParse(settings.Source, out var camIndex)
+                    ? new VideoCapture(camIndex)
+                    : new VideoCapture(settings.Source);
             }
 
             return capture;

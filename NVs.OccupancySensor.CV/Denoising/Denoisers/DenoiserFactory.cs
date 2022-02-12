@@ -1,20 +1,19 @@
 ﻿using System;
-using JetBrains.Annotations;
 
 namespace NVs.OccupancySensor.CV.Denoising.Denoisers
 {
     internal sealed class DenoiserFactory : IDenoiserFactory
     {
-        [NotNull] private IFastNlMeansColoredDenoisingSettings fastNlMeansColoredDenoisingSettings;
-        [NotNull] private IMedianBlurSettings medianBlurSettings;
+        private IFastNlMeansColoredDenoisingSettings fastNlMeansColoredDenoisingSettings;
+        private IMedianBlurSettings medianBlurSettings;
 
-        public DenoiserFactory(IFastNlMeansColoredDenoisingSettings fastNlMeansColoredDenoisingSettings, [NotNull] IMedianBlurSettings medianBlurSettings)
+        public DenoiserFactory(IFastNlMeansColoredDenoisingSettings fastNlMeansColoredDenoisingSettings, IMedianBlurSettings medianBlurSettings)
         {
             this.fastNlMeansColoredDenoisingSettings = fastNlMeansColoredDenoisingSettings ?? throw new ArgumentNullException(nameof(fastNlMeansColoredDenoisingSettings));
             this.medianBlurSettings = medianBlurSettings ?? throw new ArgumentNullException(nameof(medianBlurSettings));
         }
 
-        public IDenoisingStrategy Create([NotNull] string algorithm)
+        public IDenoisingStrategy Create(string algorithm)
         {
             if (algorithm == null) throw new ArgumentNullException(nameof(algorithm));
             if (Enum.TryParse(algorithm, out SupportedAlgorithms supportedAlgorithm))
@@ -38,15 +37,13 @@ namespace NVs.OccupancySensor.CV.Denoising.Denoisers
             throw new ArgumentException($"Unable to create denoiser! Unknown algorithm '{algorithm}' given!");
         }
 
-        [NotNull]
-        public IFastNlMeansColoredDenoisingSettings FastNlMeansColoredDenoisingSettings
+                public IFastNlMeansColoredDenoisingSettings FastNlMeansColoredDenoisingSettings
         {
             get => fastNlMeansColoredDenoisingSettings;
             set => fastNlMeansColoredDenoisingSettings = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        [NotNull]
-        public IMedianBlurSettings MedianBlurSettings
+                public IMedianBlurSettings MedianBlurSettings
         {
             get => medianBlurSettings;
             set => medianBlurSettings = value ?? throw new ArgumentNullException(nameof(value));

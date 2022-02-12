@@ -1,13 +1,12 @@
 ﻿using System;
-using JetBrains.Annotations;
 
 namespace NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors
 {
     internal sealed class BackgroundSubtractorFactory : IBackgroundSubtractorFactory
     {
-        [NotNull] private ICNTSubtractorSettings cntSubtractorSettings;
+        private ICNTSubtractorSettings cntSubtractorSettings;
 
-        public BackgroundSubtractorFactory([NotNull] ICNTSubtractorSettings cntSubtractorSettings)
+        public BackgroundSubtractorFactory(ICNTSubtractorSettings cntSubtractorSettings)
         {
             this.cntSubtractorSettings = cntSubtractorSettings ?? throw new ArgumentNullException(nameof(cntSubtractorSettings));
         }
@@ -26,8 +25,7 @@ namespace NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors
             throw new ArgumentException($"Unable to create subtractor. Unknown algorithm '{algorithm}' given", nameof(algorithm));
         }
 
-        [NotNull]
-        public ICNTSubtractorSettings CNTSubtractorSettings
+                public ICNTSubtractorSettings CNTSubtractorSettings
         {
             get => cntSubtractorSettings;
             set => cntSubtractorSettings = value ?? throw new ArgumentNullException(nameof(value));

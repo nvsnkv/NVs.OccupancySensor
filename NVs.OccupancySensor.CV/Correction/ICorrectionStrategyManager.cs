@@ -1,6 +1,4 @@
-﻿using System.Net.Http.Headers;
-
-namespace NVs.OccupancySensor.CV.Correction
+﻿namespace NVs.OccupancySensor.CV.Correction
 {
     public interface ICorrectionStrategyManager
     {

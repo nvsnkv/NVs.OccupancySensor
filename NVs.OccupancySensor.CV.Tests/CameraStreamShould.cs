@@ -32,6 +32,8 @@ namespace NVs.OccupancySensor.CV.Tests
                 TimeSpan.FromMilliseconds(10));
             var observer = new TestImageObserver();
 
+            camera.Resume();
+
             var before = DateTime.Now;
             using (camera.Subscribe(observer))
             {
@@ -49,6 +51,8 @@ namespace NVs.OccupancySensor.CV.Tests
             var camera = new CameraStream(videoMock.Object, CancellationToken.None, loggerMock.Object,
                 TimeSpan.FromMilliseconds(10));
             var observer = new TestImageObserver();
+
+            camera.Resume();
 
             using (camera.Subscribe(observer))
             {
@@ -72,12 +76,13 @@ namespace NVs.OccupancySensor.CV.Tests
                     It.IsAny<EventId>(),
                     It.IsAny<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>>(),
                     It.IsAny<TestException>(),
-                    It.IsAny<Func<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>, Exception, string>>()))
+                    It.IsAny<Func<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>, Exception?, string>>()))
                 .Verifiable("Logger was not called!");
 
-            using (new CameraStream(videoMock.Object, CancellationToken.None, loggerMock.Object,
-                TimeSpan.FromMilliseconds(10)).Subscribe(new TestImageObserver()))
+            var cameraStream = new CameraStream(videoMock.Object, CancellationToken.None, loggerMock.Object, TimeSpan.FromMilliseconds(10));
+            using (cameraStream.Subscribe(new TestImageObserver()))
             {
+                cameraStream.Resume();
                 await Task.Delay(TimeSpan.FromMilliseconds(100));
             }
 
@@ -90,9 +95,10 @@ namespace NVs.OccupancySensor.CV.Tests
             videoMock.Setup(v => v.QueryFrame()).Throws<TestException>();
             var observer = new TestImageObserver();
 
-            using (new CameraStream(videoMock.Object, CancellationToken.None, loggerMock.Object,
-                TimeSpan.FromMilliseconds(10)).Subscribe(observer))
+            var cameraStream = new CameraStream(videoMock.Object, CancellationToken.None, loggerMock.Object, TimeSpan.FromMilliseconds(10));
+            using (cameraStream.Subscribe(observer))
             {
+                cameraStream.Resume();
                 await Task.Delay(TimeSpan.FromMilliseconds(100));
             }
 
@@ -106,9 +112,10 @@ namespace NVs.OccupancySensor.CV.Tests
             videoMock.Setup(v => v.QueryFrame()).Throws<TestException>();
             var observer = new TestImageObserver();
 
-            using (new CameraStream(videoMock.Object, CancellationToken.None, loggerMock.Object,
-                TimeSpan.FromMilliseconds(10)).Subscribe(observer))
+            var cameraStream = new CameraStream(videoMock.Object, CancellationToken.None, loggerMock.Object, TimeSpan.FromMilliseconds(10));
+            using (cameraStream.Subscribe(observer))
             {
+                cameraStream.Resume();
                 await Task.Delay(TimeSpan.FromMilliseconds(100));
             }
 
@@ -121,10 +128,10 @@ namespace NVs.OccupancySensor.CV.Tests
             videoMock.Setup(v => v.QueryFrame()).Returns(() => new Image<Gray, byte>(100, 100).Mat);
 
             var cts = new CancellationTokenSource();
-            var camera = new CameraStream(videoMock.Object, cts.Token, loggerMock.Object,
-                TimeSpan.FromMilliseconds(10));
+            var camera = new CameraStream(videoMock.Object, cts.Token, loggerMock.Object, TimeSpan.FromMilliseconds(10));
             var observer = new TestImageObserver();
 
+            camera.Resume();
             camera.Subscribe(observer);
 
             // ReSharper disable MethodSupportsCancellation
@@ -144,10 +151,10 @@ namespace NVs.OccupancySensor.CV.Tests
             videoMock.Setup(v => v.QueryFrame()).Returns(() => new Image<Gray, byte>(100, 100).Mat);
 
             var cts = new CancellationTokenSource();
-            var camera = new CameraStream(videoMock.Object, cts.Token, loggerMock.Object,
-                TimeSpan.FromMilliseconds(10));
+            var camera = new CameraStream(videoMock.Object, cts.Token, loggerMock.Object, TimeSpan.FromMilliseconds(10));
             var observer = new TestImageObserver();
 
+            camera.Resume();
             camera.Subscribe(observer);
 
             // ReSharper disable MethodSupportsCancellation
@@ -172,7 +179,7 @@ namespace NVs.OccupancySensor.CV.Tests
                 if (invoked)
                 {
                     Task.Delay(TimeSpan.MaxValue, cts.Token).Wait(cts.Token);
-                    return null;
+                    return null!;
                 }
 
                 invoked = true;
@@ -194,7 +201,8 @@ namespace NVs.OccupancySensor.CV.Tests
                 .ToList();
 
             var camera = new CameraStream(videoMock.Object, cts.Token, loggerMock.Object, TimeSpan.FromMilliseconds(100));
-            
+            camera.Resume();
+
             foreach (var observer in observers)
             {
                 camera.Subscribe(observer);

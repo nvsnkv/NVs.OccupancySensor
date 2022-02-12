@@ -86,9 +86,9 @@ namespace NVs.OccupancySensor.CV.Tests
             using (denoiser.Subscribe(observer))
             {
                 var _ =Task.Run(() => denoiser.Process(inputImage));
-                _ = Task.Run(() => denoiser.Process(inputImage));
-                _ = Task.Run(() => denoiser.Process(inputImage));
-                _ = Task.Run(() => denoiser.Process(inputImage));
+                var __ = Task.Run(() => denoiser.Process(inputImage));
+                var ___ = Task.Run(() => denoiser.Process(inputImage));
+                var _____ = Task.Run(() => denoiser.Process(inputImage));
 
                 await Task.Delay(TimeSpan.FromMilliseconds(1300));
             }

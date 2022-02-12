@@ -32,6 +32,8 @@
     </style>
 </head>
 <body>
+<script type="text/javascript" src="htmx.js"></script>
+
 <ul>
     <li><a href="/debug.html">Refresh</a></li>
     <li><a href="/swagger" target="_blank">Swagger</a></li>
@@ -58,5 +60,10 @@
 <div></div>
 <iframe src="api/v1/streams/stream.mjpeg"></iframe>
 <iframe src="api/v1/streams/stream-raw.mjpeg"></iframe>
+<div></div>
+<button hx-post="/api/v1/Sensor/Start">Start Sensor</button>
+<button hx-post="/api/v1/Sensor/Stop">Stop Sensor</button>
+<div><span>Sensor: IsRunning</span> <span hx-get="/api/v1/Sensor/IsRunning" hx-trigger="every 2s"></span></div>
+<div><span>Sensor: PresenceDetected</span> <span hx-get="/api/v1/Sensor/PresenceDetected" hx-trigger="every 2s"></span></div>
 </body>
 </html>

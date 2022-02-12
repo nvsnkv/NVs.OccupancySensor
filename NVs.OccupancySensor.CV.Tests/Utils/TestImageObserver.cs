@@ -11,7 +11,7 @@ namespace NVs.OccupancySensor.CV.Tests.Utils
 
         public bool StreamCompleted { get; private set; }
 
-        public Exception Error { get; private set; }
+        public Exception? Error { get; private set; }
 
 
 

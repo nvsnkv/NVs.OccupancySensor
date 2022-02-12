@@ -17,7 +17,7 @@ namespace NVs.OccupancySensor.API.Formatters
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("image/jpeg"));
         }
 
-        protected override bool CanWriteType(Type type)
+        protected override bool CanWriteType(Type? type)
         {
             return type == typeof(Image<Gray, byte>) || type == typeof(Image<Gray, byte>);
         }
@@ -39,7 +39,7 @@ namespace NVs.OccupancySensor.API.Formatters
             };
 
             context.HttpContext.Response.Headers.ContentLength = bytes.LongLength;
-            await context.HttpContext.Response.Body.WriteAsync(bytes, 0, bytes.Length);
+            await context.HttpContext.Response.Body.WriteAsync(bytes);
         }
     }
 }

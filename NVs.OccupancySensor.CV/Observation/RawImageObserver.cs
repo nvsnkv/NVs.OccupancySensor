@@ -3,7 +3,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Emgu.CV;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Observation
@@ -14,11 +13,11 @@ namespace NVs.OccupancySensor.CV.Observation
         private readonly ILogger<RawImageObserver<TColor>> logger;
         private readonly AutoResetEvent captureReceived = new AutoResetEvent(false);
 
-        private volatile Image<TColor,byte> capture;
-        private volatile Exception exception;
+        private volatile Image<TColor,byte>? capture;
+        private volatile Exception? exception;
         private volatile bool completed;
 
-        public RawImageObserver([NotNull] ILogger<RawImageObserver<TColor>> logger)
+        public RawImageObserver(ILogger<RawImageObserver<TColor>> logger)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -35,17 +34,19 @@ namespace NVs.OccupancySensor.CV.Observation
             SetFlag();
         }
 
-        public void OnNext(Image<TColor,byte> value)
+        public void OnNext(Image<TColor,byte>? value)
         {
             capture = value;
             SetFlag();
         }
 
-        public Task<Image<TColor,byte>> GetImage()
+        public Task<Image<TColor,byte>?> GetImage(CancellationToken ct)
         {
-            var task = new Task<Image<TColor,byte>>(() =>
+            return Task.Factory.StartNew(() =>
             {
                 captureReceived.WaitOne();
+                ct.ThrowIfCancellationRequested();
+
                 if (exception != null)
                 {
                     var e = exception;
@@ -63,15 +64,10 @@ namespace NVs.OccupancySensor.CV.Observation
                 if (capture == null)
                 {
                     logger.LogError("null image received");
-                    throw new InvalidOperationException("Capture was not provided by observable, but neither OnError nor OnComplete were called.");
-                    
                 }
 
                 return capture;
-            });
-
-            task.Start();
-            return task;
+            }, ct);
         }
 
         private void SetFlag()

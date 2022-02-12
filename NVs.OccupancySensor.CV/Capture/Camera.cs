@@ -15,33 +15,31 @@ namespace NVs.OccupancySensor.CV.Capture
         private readonly object thisLock = new object();
 
         private readonly ILogger<Camera> logger;
-        private readonly ILogger<CameraStream> streamLogger;
-        private readonly Func<VideoCapture> createVideoCaptureFunc;
-        private readonly ErrorObserver errorObserver;
-
-        private VideoCapture capture;
-        private CancellationTokenSource cts;
-
-        private ICameraStream stream;
+        private readonly CancellationTokenSource cts;
+        private readonly ICameraStream stream;
         private volatile bool isRunning;
+        private readonly IDisposable errorObserverSubscription;
 
-        public Camera([NotNull] ILogger<Camera> logger, [NotNull] ILogger<CameraStream> streamLogger, [NotNull] CaptureSettings settings, [NotNull] Func<VideoCapture> createVideoCaptureFunc)
+        public Camera(ILogger<Camera> logger, ILogger<CameraStream> streamLogger, CaptureSettings settings, Func<VideoCapture> createVideoCaptureFunc)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.streamLogger = streamLogger ?? throw new ArgumentNullException(nameof(streamLogger));
-            this.Settings = settings ?? throw new ArgumentNullException(nameof(settings));
-            this.createVideoCaptureFunc = createVideoCaptureFunc ?? throw new ArgumentNullException(nameof(createVideoCaptureFunc));
-            this.errorObserver = new ErrorObserver(this);
+            
+            this.logger.LogInformation("Setting up new stream...");
+            cts = new CancellationTokenSource();
+
+            var capture = createVideoCaptureFunc();
+            
+            stream = new CameraStream(capture, cts.Token, streamLogger, settings.FrameInterval);
+            errorObserverSubscription = stream.Subscribe(new ErrorObserver(this));
+            this.logger.LogInformation("Stream has been created");
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        public ICameraStream Stream => stream;
+        public IObservable<Image<Gray, byte>> Stream => stream;
 
         public bool IsRunning => isRunning;
-
-        public CaptureSettings Settings { get; }
-
+        
         public void Start()
         {
             logger.LogInformation("Attempting to start camera...");
@@ -49,12 +47,11 @@ namespace NVs.OccupancySensor.CV.Capture
 
             try
             {
-                SetupStream();
+                stream.Resume();
             }
             catch (Exception e)
             {
                 logger.LogError(e, "An error occurred while setting up new stream!");
-                CompleteStream();
                 isRunning = false;
 
                 throw;
@@ -72,7 +69,7 @@ namespace NVs.OccupancySensor.CV.Capture
             logger.LogInformation("Attempting to stop camera...");
             UnsetIsRunning();
 
-            CompleteStream();
+            stream.Pause();
 
             logger.LogInformation("Camera is now stopped");
 
@@ -99,38 +96,6 @@ namespace NVs.OccupancySensor.CV.Capture
             }
         }
 
-        private void CompleteStream()
-        {
-            logger.LogInformation("Finalizing current stream and releasing resources...");
-            try
-            {
-                cts?.Cancel();
-                capture?.Dispose();
-
-                stream = null;
-                capture = null;
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Failed to finalize current stream!");
-                throw;
-            }
-
-            logger.LogInformation("Stream finalization is completed.");
-        }
-
-        private void SetupStream()
-        {
-            logger.LogInformation("Setting up new stream...");
-            cts = new CancellationTokenSource();
-
-            capture = createVideoCaptureFunc();
-            
-            stream = new CameraStream(capture, cts.Token, streamLogger, Settings.FrameInterval);
-            stream.Subscribe(errorObserver);
-            logger.LogInformation("Stream has been created");
-        }
-
         private void SetIsRunning()
         {
             if (isRunning)
@@ -153,7 +118,7 @@ namespace NVs.OccupancySensor.CV.Capture
         {
             private readonly Camera camera;
 
-            public ErrorObserver([NotNull] Camera camera)
+            public ErrorObserver(Camera camera)
             {
                 this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
             }
@@ -174,9 +139,15 @@ namespace NVs.OccupancySensor.CV.Capture
         }
 
         [NotifyPropertyChangedInvocator]
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public void Dispose()
+        {
+            errorObserverSubscription.Dispose();
+            cts.Dispose();
         }
     }
 }

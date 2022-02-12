@@ -2,18 +2,18 @@
 using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NVs.OccupancySensor.CV.Correction;
-using Xunit;
 
 namespace NVs.OccupancySensor.CV.Tests
 {
     public sealed class CorrectorShould : StageShould
     {
-        private readonly Corrector corrector;
-        private readonly Mock<IStatefulCorrectionStrategy> strategy;
-        private readonly Mock<ICorrectionStrategyManager> manager;
+        private readonly Mock<IStatefulCorrectionStrategy> strategy = null!;
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0052:Remove unread private members", Justification = "GetCorrector implementation uses manage to verify that SetStrategy was called"), UsedImplicitly]
+        private readonly Mock<ICorrectionStrategyManager> manager = null!;
         public CorrectorShould() : this(new Mock<ICorrectionStrategyFactory>(), new Mock<IStatefulCorrectionStrategy>(), new Mock<ICorrectionStrategyManager>(), new Mock<ICorrectionSettings>(), new Mock<ILogger<Corrector>>()) { }
         internal CorrectorShould(Mock<ICorrectionStrategyFactory> factory, Mock<IStatefulCorrectionStrategy> strategy, Mock<ICorrectionStrategyManager> manager, Mock<ICorrectionSettings> settings, Mock<ILogger<Corrector>> logger)
              : this(GetCorrector(factory, strategy, manager, settings, logger))
@@ -22,18 +22,8 @@ namespace NVs.OccupancySensor.CV.Tests
             this.manager = manager;
         }
 
-        internal CorrectorShould(Corrector corrector):base(corrector)
+        private CorrectorShould(Corrector corrector):base(corrector)
         {
-            this.corrector = corrector;
-        }
-
-        [Fact]
-        public void ConnectStrategyWithManager()
-        {
-            manager.Setup(s => s.SetStrategy(strategy.Object)).Verifiable();
-            corrector.Reset();
-
-            manager.Verify();
         }
 
         private static Corrector GetCorrector(Mock<ICorrectionStrategyFactory> factory, Mock<IStatefulCorrectionStrategy> strategy, Mock<ICorrectionStrategyManager> manager, Mock<ICorrectionSettings> settings, Mock<ILogger<Corrector>> logger)

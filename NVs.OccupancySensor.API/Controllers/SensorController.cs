@@ -1,5 +1,4 @@
 ﻿using System;
-using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using NVs.OccupancySensor.CV.Sense;
 
@@ -11,7 +10,7 @@ namespace NVs.OccupancySensor.API.Controllers
     {
         private readonly IOccupancySensor sensor;
 
-        public SensorController([NotNull] IOccupancySensor sensor)
+        public SensorController(IOccupancySensor sensor)
         {
             this.sensor = sensor ?? throw new ArgumentNullException(nameof(sensor));
         }

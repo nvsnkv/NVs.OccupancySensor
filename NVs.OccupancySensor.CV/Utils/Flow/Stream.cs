@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Utils.Flow
@@ -16,7 +15,7 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
         protected readonly CancellationToken Ct;
         protected readonly ILogger Logger;
 
-        protected Stream(CancellationToken ct, [NotNull] ILogger logger)
+        protected Stream(CancellationToken ct, ILogger logger)
         {
             this.Ct = ct;
             this.Logger = logger ?? throw new ArgumentNullException(nameof(logger));

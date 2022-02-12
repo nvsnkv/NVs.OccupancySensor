@@ -17,7 +17,6 @@ using System.Linq;
 using NVs.OccupancySensor.API.Tests.Utils;
 using MQTTnet.Client.Subscribing;
 using System.ComponentModel;
-using System.Reflection;
 
 namespace NVs.OccupancySensor.API.Tests
 {
@@ -40,7 +39,7 @@ namespace NVs.OccupancySensor.API.Tests
 
         public HomeAssistantMqttAdapterShould() 
         {
-            expectedMessages = new Messages(expectedClientId, typeof(HomeAssistantMqttAdapter).Assembly.GetName().Version.ToString());
+            expectedMessages = new Messages(expectedClientId, typeof(HomeAssistantMqttAdapter).Assembly.GetName().Version?.ToString());
 
             var section = new Mock<IConfigurationSection>();
             section.SetupGet(s => s[It.Is<string>(v => "ClientId".Equals(v))]).Returns(expectedClientId);
@@ -85,8 +84,8 @@ namespace NVs.OccupancySensor.API.Tests
                     && expectedUser.Equals(o.Credentials.Username)
                     && expectedPassword.Equals(Encoding.UTF8.GetString(o.Credentials.Password))
                     && o.ChannelOptions is MqttClientTcpOptions
-                    && expectedServer.Equals((o.ChannelOptions as MqttClientTcpOptions).Server)
-                    && expectedPort.Equals((o.ChannelOptions as MqttClientTcpOptions).Port)
+                    && expectedServer.Equals((o.ChannelOptions as MqttClientTcpOptions)!.Server)
+                    && expectedPort.Equals((o.ChannelOptions as MqttClientTcpOptions)!.Port)
                     ), It.IsAny<CancellationToken>()
                 ))
                 .Returns(Task.FromResult(new MqttClientConnectResult()))
@@ -158,7 +157,7 @@ namespace NVs.OccupancySensor.API.Tests
             sensor.SetupGet(s => s.PresenceDetected).Returns(true);
             client.Setup(c => c.PublishAsync(It.IsAny<MqttApplicationMessage>(), It.IsAny<CancellationToken>())).Verifiable("Publish was called");
 
-            var adapter = new HomeAssistantMqttAdapter(sensor.Object, logger.Object, CreateClient, new AdapterSettings(config.Object));
+            var _ = new HomeAssistantMqttAdapter(sensor.Object, logger.Object, CreateClient, new AdapterSettings(config.Object));
             
             sensor.Raise(s => s.PropertyChanged += null, new PropertyChangedEventArgs(nameof(IOccupancySensor.IsRunning)));
             sensor.Raise(s => s.PropertyChanged += null, new PropertyChangedEventArgs(nameof(IOccupancySensor.PresenceDetected)));

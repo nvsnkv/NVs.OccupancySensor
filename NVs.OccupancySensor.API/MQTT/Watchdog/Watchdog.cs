@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using MQTTnet.Client;
 using MQTTnet.Client.Connecting;
@@ -14,11 +13,11 @@ namespace NVs.OccupancySensor.API.MQTT.Watchdog
         private readonly IMqttClient client;
         private readonly WatchdogSettings settings;
         private readonly ILogger<Watchdog> logger;
-        private int alreadyHandling = 0;
-        private int attemptsMade = 0;
+        private int alreadyHandling;
+        private int attemptsMade;
         private readonly CancellationTokenSource cts = new();
 
-        public Watchdog([NotNull] IMqttClient client, [NotNull] ILogger<Watchdog> logger, [NotNull] WatchdogSettings settings)
+        public Watchdog(IMqttClient client, ILogger<Watchdog> logger, WatchdogSettings settings)
         {
             this.client = client ?? throw new ArgumentNullException(nameof(client));
             this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
@@ -27,7 +26,7 @@ namespace NVs.OccupancySensor.API.MQTT.Watchdog
             client.UseDisconnectedHandler(Disconnected);
         }
 
-        private async Task Disconnected([NotNull] MqttClientDisconnectedEventArgs args)
+        private async Task Disconnected(MqttClientDisconnectedEventArgs args)
         {
             using (logger.BeginScope("Client disconnected"))
             {
@@ -114,7 +113,7 @@ namespace NVs.OccupancySensor.API.MQTT.Watchdog
     public void Dispose()
     {
         cts.Cancel();
-        client.UseDisconnectedHandler((IMqttClientDisconnectedHandler)null);
+        client.UseDisconnectedHandler((IMqttClientDisconnectedHandler)null!);
     }
 }
 }

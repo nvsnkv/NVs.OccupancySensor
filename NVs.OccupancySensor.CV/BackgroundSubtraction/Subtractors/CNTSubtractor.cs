@@ -2,7 +2,6 @@
 using Emgu.CV;
 using Emgu.CV.BgSegm;
 using Emgu.CV.Structure;
-using JetBrains.Annotations;
 
 namespace NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors
 {
@@ -10,13 +9,13 @@ namespace NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors
     {
         private readonly BackgroundSubtractorCNT subtractor;
 
-        public CNTSubtractor([NotNull] ICNTSubtractorSettings settings)
+        public CNTSubtractor(ICNTSubtractorSettings settings)
         {
             if (settings == null) throw new ArgumentNullException(nameof(settings));
             subtractor = new BackgroundSubtractorCNT(settings.MinPixelStability, settings.UseHistory, settings.MaxPixelStability, settings.IsParallel);
         }
 
-        public Image<Gray, byte> GetForegroundMask([NotNull] Image<Gray, byte> source)
+        public Image<Gray, byte> GetForegroundMask(Image<Gray, byte> source)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             var mask = new Image<Gray, byte>(source.Width, source.Height);

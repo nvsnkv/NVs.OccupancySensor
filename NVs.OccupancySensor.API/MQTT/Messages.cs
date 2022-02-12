@@ -20,13 +20,8 @@ namespace NVs.OccupancySensor.API.MQTT
 
         public readonly string ServiceCommandTopic;
 
-        public Messages(string instanceId, string version)
+        public Messages(string instanceId, string? version)
         {
-            if (string.IsNullOrEmpty(instanceId))
-            {
-                throw new System.ArgumentException($"'{nameof(instanceId)}' cannot be null or empty.", nameof(instanceId));
-            }
-
             if (string.IsNullOrEmpty(version))
             {
                 throw new System.ArgumentException($"'{nameof(version)}' cannot be null or empty.", nameof(version));

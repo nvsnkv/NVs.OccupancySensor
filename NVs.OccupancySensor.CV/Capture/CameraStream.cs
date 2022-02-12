@@ -12,68 +12,81 @@ namespace NVs.OccupancySensor.CV.Capture
     {
         private readonly VideoCapture videoCapture;
         private readonly TimeSpan frameInterval;
+        private volatile bool isRunning;
 
         private int framesCaptured;
-        
-        public CameraStream(VideoCapture videoCapture, CancellationToken ct, ILogger<CameraStream> logger, TimeSpan frameInterval)
-            :base(ct, logger)
+
+        public CameraStream(VideoCapture videoCapture, CancellationToken ct, ILogger<CameraStream> logger, TimeSpan frameInterval) : base(ct, logger)
         {
             this.videoCapture = videoCapture ?? throw new ArgumentNullException(nameof(videoCapture));
             this.frameInterval = frameInterval;
-            
+
             Task.Run(QueryFrames, ct);
         }
-              
+
+        public void Pause()
+        {
+            isRunning = false;
+        }
+
+        public void Resume()
+        {
+            isRunning = true;
+        }
+
         private async Task QueryFrames()
         {
             while (!Ct.IsCancellationRequested)
             {
-                Logger.LogInformation($"Capturing frame {framesCaptured + 1}");
-                Mat frame;
-                try
+                if (isRunning)
                 {
-                    frame = videoCapture.QueryFrame();
-                    Logger.LogInformation("Got new frame");
-                }
-                catch (Exception e)
-                {
-                    Logger.LogError(e, "Unable to query frame!");
-                    Notify(o => o.OnError(e));
-                    Notify(o => o.OnCompleted());
-
-                    return;
-                }
-
-                if (frame != null)
-                {
-                    Image<Gray, byte> image;
+                    Logger.LogInformation($"Capturing frame {framesCaptured + 1}");
+                    Mat frame;
                     try
                     {
-                        image = frame.ToImage<Gray, byte>();
-                        Logger.LogInformation("Frame successfully converted to image!");
+                        frame = videoCapture.QueryFrame();
+                        Logger.LogInformation("Got new frame");
                     }
                     catch (Exception e)
                     {
-                        Logger.LogError(e, "Failed to convert frame to image!");
-                        throw;
+                        Logger.LogError(e, "Unable to query frame!");
+                        Notify(o => o.OnError(e));
+                        Notify(o => o.OnCompleted());
+
+                        return;
                     }
-                    Notify(o => o.OnNext(image));
-                }
-                else
-                {
-                    Logger.LogInformation("null frame received!");
+                    
+                    if (frame != null)
+                    {
+                        Image<Gray, byte> image;
+                        try
+                        {
+                            image = frame.ToImage<Gray, byte>();
+                            Logger.LogInformation("Frame successfully converted to image!");
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.LogError(e, "Failed to convert frame to image!");
+                            throw;
+                        }
+
+                        Notify(o => o.OnNext(image));
+                    }
+                    else
+                    {
+                        Logger.LogInformation("null frame received!");
+                    }
+                    
+                    ++framesCaptured;
+                    Logger.LogInformation($"Frame {framesCaptured} processed");
+
+                    if (framesCaptured == int.MaxValue - 1)
+                    {
+                        Logger.LogInformation("Resetting captured frames counter since it reached int.MaxValue - 1");
+                        framesCaptured = 0;
+                    }
                 }
 
-                
-                ++framesCaptured;
-                Logger.LogInformation($"Frame {framesCaptured} processed");
-                
-                if (framesCaptured == int.MaxValue - 1)
-                {
-                    Logger.LogInformation("Resetting captured frames counter since it reached int.MaxValue - 1");
-                    framesCaptured = 0;
-                }
-                
                 await Task.Delay(frameInterval, Ct);
             }
         }

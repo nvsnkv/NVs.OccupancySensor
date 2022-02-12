@@ -1,9 +1,6 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Utils.Flow
@@ -15,12 +12,25 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
         protected readonly Counter Counter = new Counter();
         protected readonly ILogger Logger;
 
-        protected volatile ProcessingStream OutputStream;
-        
+        protected volatile ProcessingStream? OutputStream;
 
-        public IObservable<Image<Gray, byte>> Output => OutputStream;
 
-        protected Stage([NotNull] ILogger logger)
+        public IObservable<Image<Gray, byte>> Output
+        {
+            get
+            {
+                if (OutputStream != null) return OutputStream;
+                lock (streamLock)
+                {
+                    // ReSharper disable once NonAtomicCompoundOperator - used within lock
+                    OutputStream ??= CreateStream();
+                }
+
+                return OutputStream;
+            }
+        }
+
+        protected Stage(ILogger logger)
         {
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -28,17 +38,26 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
         public void OnCompleted()
         {
             Logger.LogInformation("Stream Completed. Setting Output to null.");
-            OutputStream.Complete();
+            OutputStream?.Complete();
         }
 
         public void OnError(Exception error)
         {
             Logger.LogWarning($"Error received! Setting output to null.{Environment.NewLine}, Exception:{error}");
+            if (OutputStream == null)
+            {
+                lock (streamLock)
+                {
+                    // ReSharper disable once NonAtomicCompoundOperator - used within lock
+                    OutputStream ??= CreateStream();
+                }
+            }
+
             OutputStream.Error(error);
             OutputStream.Complete();
         }
 
-        public void OnNext([NotNull] Image<Gray, byte> value)
+        public void OnNext(Image<Gray, byte> value)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             Logger.LogInformation("New frame received...");
@@ -52,9 +71,13 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
 
             try
             {
-                if (OutputStream?.Completed ?? true)
+                if (OutputStream == null)
                 {
-                    ReplaceStream(OutputStream, CreateStream());
+                    lock (streamLock)
+                    {
+                        // ReSharper disable once NonAtomicCompoundOperator - used within lock
+                        OutputStream ??= CreateStream();
+                    }
                 }
 
                 OutputStream.Process(value);
@@ -70,36 +93,8 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
                 processingLock.Release();
             }
         }
-
-        public void Reset()
-        {
-            var stream = CreateStream();
-            ReplaceStream(OutputStream, stream);
-        }
-
+        
         public IStatistics Statistics => Counter;
-
-        public virtual event PropertyChangedEventHandler PropertyChanged;
-
-        private void ReplaceStream(ProcessingStream expectedStream, ProcessingStream newStream)
-        {
-            if (OutputStream != expectedStream) return;
-
-            lock (streamLock)
-            {
-                if (OutputStream != expectedStream) return;
-                OutputStream = newStream;
-            }
-
-            expectedStream.Complete();
-            OnPropertyChanged(nameof(Output));
-        }
-
-        [NotifyPropertyChangedInvocator]
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
 
         protected abstract ProcessingStream CreateStream();
     }
