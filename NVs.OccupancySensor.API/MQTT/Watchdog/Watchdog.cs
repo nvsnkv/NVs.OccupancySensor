@@ -18,7 +18,7 @@ namespace NVs.OccupancySensor.API.MQTT.Watchdog
         private int attemptsMade = 0;
         private readonly CancellationTokenSource cts = new();
 
-        public Watchdog([NotNull] IMqttClient client, [NotNull] ILogger<Watchdog> logger, [NotNull] WatchdogSettings settings)
+        public Watchdog(IMqttClient client, ILogger<Watchdog> logger, WatchdogSettings settings)
         {
             this.client = client ?? throw new ArgumentNullException(nameof(client));
             this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
@@ -27,7 +27,7 @@ namespace NVs.OccupancySensor.API.MQTT.Watchdog
             client.UseDisconnectedHandler(Disconnected);
         }
 
-        private async Task Disconnected([NotNull] MqttClientDisconnectedEventArgs args)
+        private async Task Disconnected(MqttClientDisconnectedEventArgs args)
         {
             using (logger.BeginScope("Client disconnected"))
             {

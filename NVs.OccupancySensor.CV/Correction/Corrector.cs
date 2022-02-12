@@ -11,9 +11,9 @@ namespace NVs.OccupancySensor.CV.Correction
     sealed class Corrector : Stage, ICorrector
     {
         private readonly ICorrectionStrategyFactory factory;
-        [NotNull] private ICorrectionSettings settings;
+        private ICorrectionSettings settings;
 
-        public Corrector([NotNull] ICorrectionStrategyFactory factory, [NotNull] ICorrectionStrategyManager manager, [NotNull] ICorrectionSettings settings, [NotNull] ILogger<Corrector> logger) : base(logger)
+        public Corrector(ICorrectionStrategyFactory factory, ICorrectionStrategyManager manager, ICorrectionSettings settings, ILogger<Corrector> logger) : base(logger)
         {
             this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
             this.StrategyManager = manager ?? throw new ArgumentNullException(nameof(manager));
@@ -28,14 +28,12 @@ namespace NVs.OccupancySensor.CV.Correction
             return new CorrectionStream(strategy, Counter, CancellationToken.None, Logger);
         }
         
-        [NotNull]
-        public ICorrectionSettings Settings
+                public ICorrectionSettings Settings
         {
             get => settings;
             set => settings = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        [NotNull]
-        public ICorrectionStrategyManager StrategyManager { get; }
+                public ICorrectionStrategyManager StrategyManager { get; }
     }
 }

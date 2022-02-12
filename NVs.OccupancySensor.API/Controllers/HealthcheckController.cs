@@ -16,13 +16,13 @@ namespace NVs.OccupancySensor.API.Controllers
     [Route("api/v1/[controller]")]
     public sealed class HealthcheckController : ControllerBase
     {
-        [NotNull] private readonly ILogger<HealthcheckController> logger;
-        [NotNull] private readonly IConfiguration configuration;
-        [NotNull] private readonly IOccupancySensor sensor;
-        [NotNull] private readonly IMqttAdapter adapter;
-        [NotNull] private readonly Streams streams;
+        private readonly ILogger<HealthcheckController> logger;
+        private readonly IConfiguration configuration;
+        private readonly IOccupancySensor sensor;
+        private readonly IMqttAdapter adapter;
+        private readonly Streams streams;
 
-        public HealthcheckController([NotNull] ILogger<HealthcheckController> logger, [NotNull] IConfiguration configuration, [NotNull] IOccupancySensor sensor, [NotNull] IMqttAdapter adapter, [NotNull] Streams streams)
+        public HealthcheckController(ILogger<HealthcheckController> logger, IConfiguration configuration, IOccupancySensor sensor, IMqttAdapter adapter, Streams streams)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));

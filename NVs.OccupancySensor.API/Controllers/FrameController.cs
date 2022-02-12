@@ -15,12 +15,12 @@ namespace NVs.OccupancySensor.API.Controllers
     [Route("api/v1/[controller]")]
     public class FrameController : ControllerBase
     {
-        [NotNull] private readonly Streams streams;
-        [NotNull] private readonly Observers observers;
-        [NotNull] private readonly ILogger<StreamsController> logger;
-        [NotNull] private readonly IConfiguration config;
+        private readonly Streams streams;
+        private readonly Observers observers;
+        private readonly ILogger<StreamsController> logger;
+        private readonly IConfiguration config;
 
-        public FrameController([NotNull] Streams streams, [NotNull] Observers observers, [NotNull] ILogger<StreamsController> logger, [NotNull] IConfiguration config)
+        public FrameController(Streams streams, Observers observers, ILogger<StreamsController> logger, IConfiguration config)
         {
             this.streams = streams ?? throw new ArgumentNullException(nameof(streams));
             this.observers = observers ?? throw new ArgumentNullException(nameof(observers));

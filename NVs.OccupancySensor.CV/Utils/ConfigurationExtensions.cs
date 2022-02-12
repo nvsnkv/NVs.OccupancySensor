@@ -10,7 +10,7 @@ namespace NVs.OccupancySensor.CV.Utils
 {
     public static class ConfigurationExtensions
     {
-        public static CaptureSettings GetCaptureSettings([NotNull] this IConfiguration config)
+        public static CaptureSettings GetCaptureSettings(this IConfiguration config)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             var cvSource = config.GetSection("CV:Capture")?["Source"] ?? CaptureSettings.Default.Source;
@@ -25,7 +25,7 @@ namespace NVs.OccupancySensor.CV.Utils
             return cameraSettings;
         }
 
-        public static FastNlMeansColoredDenoisingSettings GetFastNlMeansColoredDenoisingSettings([NotNull] this IConfiguration config)
+        public static FastNlMeansColoredDenoisingSettings GetFastNlMeansColoredDenoisingSettings(this IConfiguration config)
         {
             if (config is null)  throw new ArgumentNullException(nameof(config));
             var section = config.GetSection("CV:Denoising:FastNlMeans");
@@ -38,7 +38,7 @@ namespace NVs.OccupancySensor.CV.Utils
             );
         }
 
-        public static MedianBlurDenoisingSettings GetMedianBlurDenoisingSettings([NotNull] this IConfiguration config)
+        public static MedianBlurDenoisingSettings GetMedianBlurDenoisingSettings(this IConfiguration config)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             var section = config.GetSection("CV:Denoising:MedianBlur");
@@ -46,7 +46,7 @@ namespace NVs.OccupancySensor.CV.Utils
             return new MedianBlurDenoisingSettings(int.TryParse(section?["K"], out var k) ? k : MedianBlurDenoisingSettings.Default.K);
         }
 
-        public static DenoisingSettings GetDenoisingSettings([NotNull] this IConfiguration config)
+        public static DenoisingSettings GetDenoisingSettings(this IConfiguration config)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             var section = config.GetSection("CV:Denoising");
@@ -54,7 +54,7 @@ namespace NVs.OccupancySensor.CV.Utils
             return new DenoisingSettings(section?["Algorithm"] ?? DenoisingSettings.Default.Algorithm);
         }
 
-        public static SubtractionSettings GetSubtractionSettings([NotNull] this IConfiguration config)
+        public static SubtractionSettings GetSubtractionSettings(this IConfiguration config)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             IConfigurationSection section = config.GetSection("CV:Subtraction");
@@ -62,7 +62,7 @@ namespace NVs.OccupancySensor.CV.Utils
             return new SubtractionSettings(section?["Algorithm"] ?? SubtractionSettings.Default.Algorithm);
         }
 
-        public static CNTSubtractorSettings GetCNTSubtractorSettings([NotNull] this IConfiguration config)
+        public static CNTSubtractorSettings GetCNTSubtractorSettings(this IConfiguration config)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             var section = config.GetSection("CV:Subtraction:CNT");
@@ -75,7 +75,7 @@ namespace NVs.OccupancySensor.CV.Utils
             );
         }
 
-        public static CorrectionSettings GetCorrectionSettings([NotNull] this IConfiguration config)
+        public static CorrectionSettings GetCorrectionSettings(this IConfiguration config)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             var section = config.GetSection("CV:Correction");
@@ -83,14 +83,14 @@ namespace NVs.OccupancySensor.CV.Utils
             return new CorrectionSettings(section?["Algorithm"] ?? CorrectionSettings.Default.Algorithm);
         }
 
-        public static StaticMaskSettings GetStaticMaskSettings([NotNull] this IConfiguration config)
+        public static StaticMaskSettings GetStaticMaskSettings(this IConfiguration config)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             var section = config.GetSection("CV:Correction:StaticMask");
             return new StaticMaskSettings(section?["PathToFile"] ?? StaticMaskSettings.Default.MaskPath);
         }
 
-        public static DetectionSettings GetDetectionSettings([NotNull] this IConfiguration config)
+        public static DetectionSettings GetDetectionSettings(this IConfiguration config)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             IConfigurationSection section = config.GetSection("CV:Detection");

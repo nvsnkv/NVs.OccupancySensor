@@ -6,7 +6,7 @@ namespace NVs.OccupancySensor.API.MQTT
 {
     internal sealed class AdapterSettings
     {
-        public AdapterSettings([NotNull] IConfiguration configuration)
+        public AdapterSettings(IConfiguration configuration)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
             

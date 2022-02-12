@@ -18,7 +18,7 @@ namespace NVs.OccupancySensor.CV.Observation
         private volatile Exception exception;
         private volatile bool completed;
 
-        public RawImageObserver([NotNull] ILogger<RawImageObserver<TColor>> logger)
+        public RawImageObserver(ILogger<RawImageObserver<TColor>> logger)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }

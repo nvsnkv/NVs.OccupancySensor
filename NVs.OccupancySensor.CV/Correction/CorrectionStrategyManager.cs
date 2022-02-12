@@ -23,7 +23,7 @@ namespace NVs.OccupancySensor.CV.Correction
             (strategy as IStatefulCorrectionStrategy)?.Reset();
         }
 
-        public void SetStrategy([NotNull] ICorrectionStrategy value)
+        public void SetStrategy(ICorrectionStrategy value)
         {
             this.strategy = value ?? throw new ArgumentNullException(nameof(value));
         }

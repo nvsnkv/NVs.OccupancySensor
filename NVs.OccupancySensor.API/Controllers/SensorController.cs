@@ -11,7 +11,7 @@ namespace NVs.OccupancySensor.API.Controllers
     {
         private readonly IOccupancySensor sensor;
 
-        public SensorController([NotNull] IOccupancySensor sensor)
+        public SensorController(IOccupancySensor sensor)
         {
             this.sensor = sensor ?? throw new ArgumentNullException(nameof(sensor));
         }

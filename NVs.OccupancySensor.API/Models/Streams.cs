@@ -10,7 +10,7 @@ namespace NVs.OccupancySensor.API.Models
 {
     public sealed class Streams
     {
-        public Streams([NotNull] ICamera camera, [NotNull] IDenoiser denoiser, [NotNull] IBackgroundSubtractor subtractor, [NotNull] ICorrector corrector, [NotNull] IPeopleDetector detector)
+        public Streams(ICamera camera, IDenoiser denoiser, IBackgroundSubtractor subtractor, ICorrector corrector, IPeopleDetector detector)
         {
             Camera = camera ?? throw new ArgumentNullException(nameof(camera));
             Denoiser = denoiser ?? throw new ArgumentNullException(nameof(denoiser));

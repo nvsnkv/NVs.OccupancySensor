@@ -19,7 +19,7 @@ namespace NVs.OccupancySensor.API.Controllers
         private readonly ILogger<CorrectionMaskController> logger;
         private readonly IConfiguration config;
 
-        public CorrectionMaskController([NotNull] ICorrectionStrategyManager manager, [NotNull] ILogger<CorrectionMaskController> logger, [NotNull] IConfiguration config)
+        public CorrectionMaskController(ICorrectionStrategyManager manager, ILogger<CorrectionMaskController> logger, IConfiguration config)
         {
             this.manager = manager ?? throw new ArgumentNullException(nameof(manager));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));

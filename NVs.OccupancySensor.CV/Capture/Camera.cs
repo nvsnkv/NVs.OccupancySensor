@@ -25,7 +25,7 @@ namespace NVs.OccupancySensor.CV.Capture
         private ICameraStream stream;
         private volatile bool isRunning;
 
-        public Camera([NotNull] ILogger<Camera> logger, [NotNull] ILogger<CameraStream> streamLogger, [NotNull] CaptureSettings settings, [NotNull] Func<VideoCapture> createVideoCaptureFunc)
+        public Camera(ILogger<Camera> logger, ILogger<CameraStream> streamLogger, CaptureSettings settings, Func<VideoCapture> createVideoCaptureFunc)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.streamLogger = streamLogger ?? throw new ArgumentNullException(nameof(streamLogger));
@@ -134,7 +134,7 @@ namespace NVs.OccupancySensor.CV.Capture
         {
             private readonly Camera camera;
 
-            public ErrorObserver([NotNull] Camera camera)
+            public ErrorObserver(Camera camera)
             {
                 this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
             }

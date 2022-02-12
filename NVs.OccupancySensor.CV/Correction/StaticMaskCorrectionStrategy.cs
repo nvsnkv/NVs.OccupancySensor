@@ -9,17 +9,17 @@ namespace NVs.OccupancySensor.CV.Correction
 {
     sealed class StaticMaskCorrectionStrategy : IStatefulCorrectionStrategy
     {
-        [NotNull] private readonly IStaticMaskSettings settings;
+        private readonly IStaticMaskSettings settings;
         private readonly ReaderWriterLockSlim maskLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
         private volatile Image<Gray, byte> mask;
         private volatile Image<Gray, float> adjusted;
         
-        public StaticMaskCorrectionStrategy([NotNull] IStaticMaskSettings settings)
+        public StaticMaskCorrectionStrategy(IStaticMaskSettings settings)
         {
             this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
         }
 
-        public Image<Gray, byte> Apply([NotNull] Image<Gray, byte> source)
+        public Image<Gray, byte> Apply(Image<Gray, byte> source)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             var maskCopy = Mask;

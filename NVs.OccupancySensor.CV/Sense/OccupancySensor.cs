@@ -24,8 +24,8 @@ namespace NVs.OccupancySensor.CV.Sense
         private readonly IDisposable detectorSubscription;
         private bool isDisposed;
 
-        public OccupancySensor([NotNull] ICamera camera, [NotNull] IDenoiser denoiser, [NotNull] IBackgroundSubtractor subtractor,
-            [NotNull] ICorrector corrector, [NotNull] IPeopleDetector detector, [NotNull] ILogger<OccupancySensor> logger)
+        public OccupancySensor(ICamera camera, IDenoiser denoiser, IBackgroundSubtractor subtractor,
+            ICorrector corrector, IPeopleDetector detector, ILogger<OccupancySensor> logger)
         {
             this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
             this.camera.PropertyChanged += OnCameraPropertyChanged;

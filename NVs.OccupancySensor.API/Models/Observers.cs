@@ -7,7 +7,7 @@ namespace NVs.OccupancySensor.API.Models
 {
     public sealed class Observers
     {
-        public Observers([NotNull] IImageObserver<Gray> gray)
+        public Observers(IImageObserver<Gray> gray)
         {
             Gray = gray ?? throw new ArgumentNullException(nameof(gray));
         }

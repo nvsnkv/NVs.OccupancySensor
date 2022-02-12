@@ -6,6 +6,6 @@ namespace NVs.OccupancySensor.CV.Correction
     {
         ICorrectionStrategy Create(string name);
         
-        [NotNull] IStaticMaskSettings StaticMaskSettings { get; set; }
+        IStaticMaskSettings StaticMaskSettings { get; set; }
     }
 }

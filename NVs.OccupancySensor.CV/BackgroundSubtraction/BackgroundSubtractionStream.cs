@@ -14,7 +14,7 @@ namespace NVs.OccupancySensor.CV.BackgroundSubtraction
     {
         private readonly ISubtractionStrategy strategy;
 
-        public BackgroundSubtractionStream([NotNull] ISubtractionStrategy strategy, [NotNull] Counter counter, CancellationToken ct, [NotNull] ILogger logger) : base(counter, ct, logger)
+        public BackgroundSubtractionStream(ISubtractionStrategy strategy, Counter counter, CancellationToken ct, ILogger logger) : base(counter, ct, logger)
         {
             this.strategy = strategy ?? throw new ArgumentNullException(nameof(strategy));
         }

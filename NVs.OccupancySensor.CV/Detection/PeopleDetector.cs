@@ -14,10 +14,10 @@ namespace NVs.OccupancySensor.CV.Detection
 
         private double threshold;
         private bool? peopleDetected;
-        [NotNull] private IDetectionSettings settings;
+        private IDetectionSettings settings;
         private Image<Gray, byte> mask;
 
-        public PeopleDetector([NotNull] IDetectionSettings settings, [NotNull] ILogger<PeopleDetector> logger)
+        public PeopleDetector(IDetectionSettings settings, ILogger<PeopleDetector> logger)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
@@ -38,7 +38,7 @@ namespace NVs.OccupancySensor.CV.Detection
             Mask = null;
         }
 
-        public void OnNext([NotNull] Image<Gray, byte> value)
+        public void OnNext(Image<Gray, byte> value)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             logger.LogInformation("Received new frame...");
@@ -83,8 +83,7 @@ namespace NVs.OccupancySensor.CV.Detection
             }
         }
 
-        [NotNull]
-        public IDetectionSettings Settings
+                public IDetectionSettings Settings
         {
             get => settings;
             set

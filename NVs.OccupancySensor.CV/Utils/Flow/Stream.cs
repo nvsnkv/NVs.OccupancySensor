@@ -16,7 +16,7 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
         protected readonly CancellationToken Ct;
         protected readonly ILogger Logger;
 
-        protected Stream(CancellationToken ct, [NotNull] ILogger logger)
+        protected Stream(CancellationToken ct, ILogger logger)
         {
             this.Ct = ct;
             this.Logger = logger ?? throw new ArgumentNullException(nameof(logger));

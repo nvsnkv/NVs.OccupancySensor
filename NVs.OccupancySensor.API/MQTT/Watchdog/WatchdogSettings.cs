@@ -6,7 +6,7 @@ namespace NVs.OccupancySensor.API.MQTT
 {
     internal sealed class WatchdogSettings
     {
-        public WatchdogSettings([NotNull] IConfiguration configuration)
+        public WatchdogSettings(IConfiguration configuration)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
             var section =  configuration.GetSection("MQTT:Reconnect");

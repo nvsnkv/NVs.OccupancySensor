@@ -17,12 +17,12 @@ namespace NVs.OccupancySensor.API.Controllers
     [Route("api/v1/[controller]")]
     public sealed class StreamsController : ControllerBase
     {
-        [NotNull] private readonly Streams streams;
-        [NotNull] private readonly Observers observers;
-        [NotNull] private readonly IConfiguration config;
-        [NotNull] private readonly ILogger<StreamsController> logger;
+        private readonly Streams streams;
+        private readonly Observers observers;
+        private readonly IConfiguration config;
+        private readonly ILogger<StreamsController> logger;
 
-        public StreamsController([NotNull] Streams streams, [NotNull] Observers observers, [NotNull] ILogger<StreamsController> logger, [NotNull] IConfiguration config)
+        public StreamsController(Streams streams, Observers observers, ILogger<StreamsController> logger, IConfiguration config)
         {
             this.streams = streams ?? throw new ArgumentNullException(nameof(streams));
             this.observers = observers ?? throw new ArgumentNullException(nameof(observers));

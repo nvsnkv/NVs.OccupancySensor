@@ -33,7 +33,7 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
             }
         }
 
-        protected Stage([NotNull] ILogger logger)
+        protected Stage(ILogger logger)
         {
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -51,7 +51,7 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
             OutputStream.Complete();
         }
 
-        public void OnNext([NotNull] Image<Gray, byte> value)
+        public void OnNext(Image<Gray, byte> value)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             Logger.LogInformation("New frame received...");

@@ -11,7 +11,7 @@ namespace NVs.OccupancySensor.CV.BackgroundSubtraction
     {
         private readonly IBackgroundSubtractorFactory factory;
 
-        public BackgroundSubtractor([NotNull] IBackgroundSubtractorFactory factory,[NotNull] IBackgroundSubtractorSettings settings, [NotNull] ILogger<BackgroundSubtractor> logger): base(logger)
+        public BackgroundSubtractor(IBackgroundSubtractorFactory factory,IBackgroundSubtractorSettings settings, ILogger<BackgroundSubtractor> logger): base(logger)
         {
             this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
             Settings = settings;

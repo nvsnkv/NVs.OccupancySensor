@@ -13,7 +13,7 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
         private readonly ProcessingLock processingLock = new ProcessingLock();
 
 
-        protected ProcessingStream([NotNull] Counter counter, CancellationToken ct, [NotNull] ILogger logger) : base(ct, logger)
+        protected ProcessingStream(Counter counter, CancellationToken ct, ILogger logger) : base(ct, logger)
         {
             this.counter = counter ?? throw new ArgumentNullException(nameof(counter));
         }

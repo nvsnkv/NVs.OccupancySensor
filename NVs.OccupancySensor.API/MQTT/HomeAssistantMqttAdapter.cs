@@ -44,7 +44,7 @@ namespace NVs.OccupancySensor.API.MQTT
         
         private volatile bool isRunning;
         
-        public HomeAssistantMqttAdapter([NotNull] IOccupancySensor sensor, [NotNull] ILogger<HomeAssistantMqttAdapter> logger, [NotNull] Func<(IMqttClient, IDisposable)> createClient, [NotNull] AdapterSettings settings)
+        public HomeAssistantMqttAdapter(IOccupancySensor sensor, ILogger<HomeAssistantMqttAdapter> logger, Func<(IMqttClient, IDisposable)> createClient, AdapterSettings settings)
         {
             if (createClient is null)
             {
@@ -238,7 +238,7 @@ namespace NVs.OccupancySensor.API.MQTT
             }
         }
 
-        private void EnsureSubscriptionSuccessful([NotNull] MqttClientSubscribeResult result)
+        private void EnsureSubscriptionSuccessful(MqttClientSubscribeResult result)
         {
             if (result == null) throw new ArgumentNullException(nameof(result));
             if (result.Items.Count == 0) throw new ArgumentException("No items returned!", nameof(result));
@@ -343,7 +343,7 @@ namespace NVs.OccupancySensor.API.MQTT
             
         }
 
-        public static Func<(IMqttClient, IDisposable)> CreateClient([NotNull] WatchdogSettings watchdogSettings, [NotNull] ILogger<Watchdog.Watchdog> watchdogLogger)
+        public static Func<(IMqttClient, IDisposable)> CreateClient(WatchdogSettings watchdogSettings, ILogger<Watchdog.Watchdog> watchdogLogger)
         {
             if (watchdogSettings == null) throw new ArgumentNullException(nameof(watchdogSettings));
             if (watchdogLogger == null) throw new ArgumentNullException(nameof(watchdogLogger));

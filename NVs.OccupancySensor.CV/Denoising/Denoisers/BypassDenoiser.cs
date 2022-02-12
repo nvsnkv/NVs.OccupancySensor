@@ -7,7 +7,7 @@ namespace NVs.OccupancySensor.CV.Denoising.Denoisers
 {
     internal sealed class BypassDenoiser : IDenoisingStrategy
     {
-        public Image<Gray, byte> Denoise([NotNull] Image<Gray, byte> source)
+        public Image<Gray, byte> Denoise(Image<Gray, byte> source)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             return source;
