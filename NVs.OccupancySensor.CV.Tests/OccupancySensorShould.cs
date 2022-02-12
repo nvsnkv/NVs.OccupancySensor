@@ -10,7 +10,6 @@ using NVs.OccupancySensor.CV.Capture;
 using NVs.OccupancySensor.CV.Correction;
 using NVs.OccupancySensor.CV.Denoising;
 using NVs.OccupancySensor.CV.Detection;
-using NVs.OccupancySensor.CV.Tests.Utils;
 using Xunit;
 using IBackgroundSubtractor = NVs.OccupancySensor.CV.BackgroundSubtraction.IBackgroundSubtractor;
 

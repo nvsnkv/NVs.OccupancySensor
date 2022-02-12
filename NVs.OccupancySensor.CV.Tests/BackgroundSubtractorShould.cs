@@ -6,15 +6,13 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NVs.OccupancySensor.CV.BackgroundSubtraction;
 using NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors;
-using NVs.OccupancySensor.CV.Tests.Utils;
-using NVs.OccupancySensor.CV.Utils.Flow;
 using Xunit;
 
 namespace NVs.OccupancySensor.CV.Tests
 {
     public class BackgroundSubtractorShould : StageShould
     {
-        private readonly Mock<ISubtractionStrategy> strategy;
+        private readonly Mock<ISubtractionStrategy> strategy = null!;
         private readonly BackgroundSubtractor subtractor;
 
 
@@ -26,7 +24,7 @@ namespace NVs.OccupancySensor.CV.Tests
             this.strategy = strategy;
         }
 
-        internal BackgroundSubtractorShould(BackgroundSubtractor subtractor) : base(subtractor)
+        private BackgroundSubtractorShould(BackgroundSubtractor subtractor) : base(subtractor)
         {
             this.subtractor = subtractor;
         }

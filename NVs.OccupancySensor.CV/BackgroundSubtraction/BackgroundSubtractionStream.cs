@@ -2,7 +2,6 @@
 using System.Threading;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors;
 using NVs.OccupancySensor.CV.Utils;

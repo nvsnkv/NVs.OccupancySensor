@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using MQTTnet.Client;
 using MQTTnet.Client.Connecting;
@@ -114,7 +113,7 @@ namespace NVs.OccupancySensor.API.MQTT.Watchdog
     public void Dispose()
     {
         cts.Cancel();
-        client.UseDisconnectedHandler((IMqttClientDisconnectedHandler)null);
+        client.UseDisconnectedHandler((IMqttClientDisconnectedHandler)null!);
     }
 }
 }

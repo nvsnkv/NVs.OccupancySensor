@@ -15,10 +15,10 @@ namespace NVs.OccupancySensor.API.ActionResults
         private static readonly string ContentType = "multipart/x-mixed-replace;boundary=" + Boundary;
         private static readonly byte[] NewLine = Encoding.UTF8.GetBytes("\r\n");
 
-        private readonly Func<CancellationToken, Task<byte[]>> onNextImage;
+        private readonly Func<CancellationToken, Task<byte[]?>> onNextImage;
         private readonly Action onEnd;
 
-        public MjpegStreamContent(Func<CancellationToken, Task<byte[]>> onNextImage, Action onEnd)
+        public MjpegStreamContent(Func<CancellationToken, Task<byte[]?>> onNextImage, Action onEnd)
         {
             this.onNextImage = onNextImage;
             this.onEnd = onEnd;

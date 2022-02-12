@@ -1,7 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
@@ -54,7 +51,7 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var propertiesChanged = new List<string>();
             var detector = new PeopleDetector(new DetectionSettings(0), logger.Object);
-            detector.PropertyChanged += (_, e) => propertiesChanged.Add(e.PropertyName);
+            detector.PropertyChanged += (_, e) => propertiesChanged.Add(e.PropertyName!);
             
             detector.OnNext(new Image<Gray, byte>(1, 1));
 
@@ -66,7 +63,7 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var propertiesChanged = new List<string>();
             var detector = new PeopleDetector(new DetectionSettings(1), logger.Object);
-            detector.PropertyChanged += (_, e) => propertiesChanged.Add(e.PropertyName);
+            detector.PropertyChanged += (_, e) => propertiesChanged.Add(e.PropertyName!);
             
             detector.OnNext(new Image<Gray, byte>(1, 1));
             Assert.Contains(propertiesChanged, s => nameof(IPeopleDetector.PeopleDetected).Equals(s));
@@ -109,7 +106,7 @@ namespace NVs.OccupancySensor.CV.Tests
             var propertiesChanged = new List<string>();
 
             var detector = new PeopleDetector(new DetectionSettings(1), logger.Object);
-            detector.PropertyChanged += (o, e) => propertiesChanged.Add(e.PropertyName);
+            detector.PropertyChanged += (o, e) => propertiesChanged.Add(e.PropertyName!);
 
             detector.OnNext(new Image<Gray, byte>(1,1));
 

@@ -23,7 +23,7 @@ namespace NVs.OccupancySensor.API.Tests
             configuration.Setup(c => c.GetSection(It.Is<string>(v => "MQTT".Equals(v)))).Returns(section.Object);
             section.SetupGet(s => s[It.Is<string>(v => "ClientId".Equals(v))]).Returns(expectedClientId);
             section.SetupGet(s => s[It.Is<string>(v => "Server".Equals(v))]).Returns(expectedServer);
-            section.SetupGet(s => s[It.Is<string>(v => "Port".Equals(v))]).Returns(expectedPort?.ToString());
+            section.SetupGet(s => s[It.Is<string>(v => "Port".Equals(v))]).Returns(expectedPort?.ToString() ?? string.Empty);
             section.SetupGet(s => s[It.Is<string>(v => "User".Equals(v))]).Returns(expectedUser);
             section.SetupGet(s => s[It.Is<string>(v => "Password".Equals(v))]).Returns(expectedPassword);
 

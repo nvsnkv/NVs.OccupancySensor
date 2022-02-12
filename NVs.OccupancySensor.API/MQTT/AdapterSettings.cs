@@ -1,5 +1,4 @@
 ﻿using System;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 
 namespace NVs.OccupancySensor.API.MQTT

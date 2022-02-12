@@ -2,7 +2,6 @@
 using Emgu.CV;
 using Emgu.CV.BgSegm;
 using Emgu.CV.Structure;
-using JetBrains.Annotations;
 
 namespace NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors
 {

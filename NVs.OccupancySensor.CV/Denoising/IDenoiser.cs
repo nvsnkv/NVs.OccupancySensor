@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using NVs.OccupancySensor.CV.Utils;

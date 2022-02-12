@@ -1,5 +1,3 @@
-using JetBrains.Annotations;
-
 namespace NVs.OccupancySensor.CV.Correction 
 {
     public interface ICorrectionStrategyFactory 

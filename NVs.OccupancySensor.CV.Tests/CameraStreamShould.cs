@@ -76,7 +76,7 @@ namespace NVs.OccupancySensor.CV.Tests
                     It.IsAny<EventId>(),
                     It.IsAny<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>>(),
                     It.IsAny<TestException>(),
-                    It.IsAny<Func<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>, Exception, string>>()))
+                    It.IsAny<Func<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>, Exception?, string>>()))
                 .Verifiable("Logger was not called!");
 
             var cameraStream = new CameraStream(videoMock.Object, CancellationToken.None, loggerMock.Object, TimeSpan.FromMilliseconds(10));
@@ -179,7 +179,7 @@ namespace NVs.OccupancySensor.CV.Tests
                 if (invoked)
                 {
                     Task.Delay(TimeSpan.MaxValue, cts.Token).Wait(cts.Token);
-                    return null;
+                    return null!;
                 }
 
                 invoked = true;

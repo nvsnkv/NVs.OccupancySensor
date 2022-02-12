@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
 using Moq;
 using MQTTnet.Client;
 using MQTTnet.Client.Connecting;
@@ -19,7 +18,7 @@ namespace NVs.OccupancySensor.API.Tests
     public sealed class WatchdogShould
     {
         private readonly Mock<IMqttClient> client = new();
-        private IMqttClientDisconnectedHandler handler;
+        private IMqttClientDisconnectedHandler handler = null!;
 
         private readonly Mock<ILogger<Watchdog>> logger = new();
         private readonly Mock<IConfiguration> config = new();

@@ -1,5 +1,4 @@
 ﻿using System;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using NVs.OccupancySensor.CV.Settings;
 using NVs.OccupancySensor.CV.Settings.Correction;

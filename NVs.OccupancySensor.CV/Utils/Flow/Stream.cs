@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Utils.Flow

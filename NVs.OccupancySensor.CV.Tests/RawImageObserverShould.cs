@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
@@ -39,8 +40,9 @@ namespace NVs.OccupancySensor.CV.Tests
                 observer.OnNext(expectedImage);
             });
 
-            var image = await observer.GetImage();
-            var actualJpeg = image.ToJpegData();
+            var image = await observer.GetImage(CancellationToken.None);
+            Assert.NotNull(image);
+            var actualJpeg = image!.ToJpegData();
             Assert.Equal(expectedJpeg, actualJpeg);
         }
 
@@ -57,12 +59,12 @@ namespace NVs.OccupancySensor.CV.Tests
 
             await Assert.ThrowsAsync<IOException>(async () =>
             {
-                await observer.GetImage();
+                await observer.GetImage(CancellationToken.None);
             });
         }
         
         [Fact]
-        public async Task ThrowInvalidOperationExceptionIfNullMatReceivedFromObservable()
+        public async Task DoesNotThrowInvalidOperationExceptionIfNullMatReceivedFromObservable()
         {
             var observer = new RawImageObserver<Gray>(logger.Object);
 
@@ -72,10 +74,9 @@ namespace NVs.OccupancySensor.CV.Tests
                 observer.OnNext(null);
             });
 
-            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            {
-                await observer.GetImage();
-            });
+
+            var image = await observer.GetImage(CancellationToken.None);
+            Assert.Null(image);
         }
 
         [Fact]
@@ -86,9 +87,9 @@ namespace NVs.OccupancySensor.CV.Tests
                     l => l.Log(
                         LogLevel.Error,
                         It.IsAny<EventId>(),
-                        It.Is<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>>((x, _)=> x.ToString().Contains("null image received")),
+                        It.Is<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>>((x, _)=> x.ToString()!.Contains("null image received")),
                         It.Is<Exception>((e, _) => e == null),
-                        It.IsAny<Func<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>, Exception, string>>()))
+                        It.IsAny<Func<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>, Exception?, string>>()))
                 .Verifiable("Logger was not called!");
             var observer = new RawImageObserver<Gray>(logger.Object);
 
@@ -100,7 +101,7 @@ namespace NVs.OccupancySensor.CV.Tests
 
             try
             {
-                await observer.GetImage();
+                await observer.GetImage(CancellationToken.None);
             }
             catch (Exception)
             {
@@ -120,7 +121,7 @@ namespace NVs.OccupancySensor.CV.Tests
                         It.IsAny<EventId>(),
                         It.IsAny<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>>(),
                         It.IsAny<TestException>(),
-                        It.IsAny<Func<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>, Exception, string>>()))
+                        It.IsAny<Func<It.IsSubtype<IReadOnlyList<KeyValuePair<string, object>>>, Exception?, string>>()))
                 .Verifiable("Logger was not called!");
             var observer = new RawImageObserver<Gray>(logger.Object);
 
@@ -132,7 +133,7 @@ namespace NVs.OccupancySensor.CV.Tests
 
             try
             {
-                await observer.GetImage();
+                await observer.GetImage(CancellationToken.None);
             }
             catch (Exception)
             {
@@ -153,7 +154,7 @@ namespace NVs.OccupancySensor.CV.Tests
                 observer.OnCompleted();
             });
 
-            var result = await observer.GetImage();
+            var result = await observer.GetImage(CancellationToken.None);
             Assert.Null(result);
         }
     }

@@ -58,7 +58,7 @@ namespace NVs.OccupancySensor.CV.Utils
                 s.GetService<IConfiguration>()?.GetCorrectionSettings() ?? throw new InvalidOperationException("Correction settings were not resolved!"),
                 s.GetService<ILogger<Corrector>>() ?? throw new InvalidOperationException("Corrector logger dependency was not resolved")));
 
-            services.AddSingleton<IPeopleDetector>(s => new PeopleDetector(s.GetService<IConfiguration>().GetDetectionSettings() ?? throw new InvalidOperationException("Detection settings dependency was not resolved!"),
+            services.AddSingleton<IPeopleDetector>(s => new PeopleDetector(s.GetService<IConfiguration>()?.GetDetectionSettings() ?? throw new InvalidOperationException("Detection settings dependency was not resolved!"),
                 s.GetService<ILogger<PeopleDetector>>() ?? throw new InvalidOperationException("Detector logger dependency was not resolved!")));
 
             services.AddSingleton<IOccupancySensor>(

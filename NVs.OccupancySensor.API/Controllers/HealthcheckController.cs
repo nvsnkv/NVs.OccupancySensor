@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Text;
 using Emgu.CV;
-using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

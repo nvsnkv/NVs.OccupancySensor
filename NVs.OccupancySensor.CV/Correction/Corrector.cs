@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Threading;
-using Emgu.CV;
-using Emgu.CV.Structure;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.Utils.Flow;
 

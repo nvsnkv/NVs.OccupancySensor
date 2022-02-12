@@ -3,7 +3,6 @@ using System.Drawing;
 using System.Threading;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using JetBrains.Annotations;
 
 namespace NVs.OccupancySensor.CV.Correction
 {
@@ -11,8 +10,8 @@ namespace NVs.OccupancySensor.CV.Correction
     {
         private readonly IStaticMaskSettings settings;
         private readonly ReaderWriterLockSlim maskLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
-        private volatile Image<Gray, byte> mask;
-        private volatile Image<Gray, float> adjusted;
+        private volatile Image<Gray, byte>? mask;
+        private volatile Image<Gray, float>? adjusted;
         
         public StaticMaskCorrectionStrategy(IStaticMaskSettings settings)
         {
@@ -30,7 +29,7 @@ namespace NVs.OccupancySensor.CV.Correction
                 maskCopy = Mask;
             }
 
-            if (source.Size != maskCopy.Size)
+            if (source.Size != maskCopy!.Size)
                 throw new ArgumentException("Dimensions of source and mask does not match!", nameof(source))
                 {
                     Data =
@@ -58,19 +57,18 @@ namespace NVs.OccupancySensor.CV.Correction
 
         public void Save()
         {
-            Mask.Save(settings.MaskPath);
+            Mask?.Save(settings.MaskPath);
             adjusted = null;
         }
 
         public void Reset()
         {
-            var copy = Mask;
-            if (copy == null) throw new InvalidOperationException("Unable to reset mask if previous mask was not defined!");
+            var copy = Mask ?? throw new InvalidOperationException("Unable to reset mask if previous mask was not defined!");
             ResetMask(copy.Size);
             AdjustMask(Mask);
         }
 
-        private Image<Gray, byte> Mask
+        private Image<Gray, byte>? Mask
         {
             get
             {

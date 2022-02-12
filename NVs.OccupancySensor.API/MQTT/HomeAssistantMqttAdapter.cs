@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Client;
@@ -109,7 +108,7 @@ namespace NVs.OccupancySensor.API.MQTT
             }
         }
 
-        private async void SensorOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private async void SensorOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (!IsRunning)
             {
@@ -124,11 +123,11 @@ namespace NVs.OccupancySensor.API.MQTT
             }
             catch (Exception ex)
             {
-                logger.LogError("Failed to publish state change!", ex);
+                logger.LogError("Failed to publish state change! {ex}", ex);
             }
         }
 
-        private IEnumerable<MqttApplicationMessage> PrepareMessages(string propertyName)
+        private IEnumerable<MqttApplicationMessage> PrepareMessages(string? propertyName)
         {
             switch (propertyName)
             {
@@ -338,7 +337,7 @@ namespace NVs.OccupancySensor.API.MQTT
             sensor.PropertyChanged -= SensorOnPropertyChanged;
             watchdog.Dispose();
 
-            client.UseApplicationMessageReceivedHandler((IMqttApplicationMessageReceivedHandler)null);
+            client.UseApplicationMessageReceivedHandler((IMqttApplicationMessageReceivedHandler)null!);
             client.Dispose();
             
         }

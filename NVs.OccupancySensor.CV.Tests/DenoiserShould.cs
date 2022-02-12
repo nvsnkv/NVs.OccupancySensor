@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
@@ -8,15 +7,13 @@ using Moq;
 using NVs.OccupancySensor.CV.Denoising;
 using NVs.OccupancySensor.CV.Denoising.Denoisers;
 using NVs.OccupancySensor.CV.Settings;
-using NVs.OccupancySensor.CV.Tests.Utils;
-using Xunit;
 
 namespace NVs.OccupancySensor.CV.Tests
 {
     public sealed class DenoiserShould : StageShould
     {
-        private readonly Mock<IDenoisingStrategy> strategy;
-        private readonly Denoiser denoiser;
+        private readonly Mock<IDenoisingStrategy> strategy = null!;
+        private readonly Denoiser denoiser = null!;
 
         public DenoiserShould(): this(new Mock<ILogger<Denoiser>>(), new Mock<IDenoiserFactory>(), new Mock<IDenoisingStrategy>()) { }
 

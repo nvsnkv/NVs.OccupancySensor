@@ -1,7 +1,6 @@
 ﻿using System;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -120,11 +119,11 @@ namespace NVs.OccupancySensor.API.Controllers
             }
 
             return new MjpegStreamContent(
-                async cts => (await observers.Gray.GetImage())?.ToJpegData(),
+                async ct => (await observers.Gray.GetImage(ct))?.ToJpegData(),
                 () => unsubscriber.Dispose());
         }
 
-        private IActionResult GetMjpegGrayStreamContent(IObservable<Image<Gray, byte>> stream)
+        private IActionResult GetMjpegGrayStreamContent(IObservable<Image<Gray, byte>?> stream)
         {
             var unsubscriber = stream?.Subscribe(observers.Gray);
 
@@ -134,7 +133,7 @@ namespace NVs.OccupancySensor.API.Controllers
             }
 
             return new MjpegStreamContent(
-                async cts => (await observers.Gray.GetImage())?.ToJpegData(),
+                async ct => (await observers.Gray.GetImage(ct))?.ToJpegData(),
                 () => unsubscriber.Dispose());
         }
 

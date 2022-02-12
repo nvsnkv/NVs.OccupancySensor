@@ -1,6 +1,5 @@
 ﻿using System;
 using Emgu.CV.Structure;
-using JetBrains.Annotations;
 using NVs.OccupancySensor.CV.Observation;
 
 namespace NVs.OccupancySensor.API.Models

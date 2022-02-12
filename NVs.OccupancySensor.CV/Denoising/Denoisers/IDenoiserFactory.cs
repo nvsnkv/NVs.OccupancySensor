@@ -1,6 +1,4 @@
-﻿using JetBrains.Annotations;
-
-namespace NVs.OccupancySensor.CV.Denoising.Denoisers
+﻿namespace NVs.OccupancySensor.CV.Denoising.Denoisers
 {
     public interface IDenoiserFactory
     {

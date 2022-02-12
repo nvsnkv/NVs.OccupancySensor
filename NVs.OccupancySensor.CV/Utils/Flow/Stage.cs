@@ -1,9 +1,6 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Utils.Flow
@@ -15,7 +12,7 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
         protected readonly Counter Counter = new Counter();
         protected readonly ILogger Logger;
 
-        protected volatile ProcessingStream OutputStream;
+        protected volatile ProcessingStream? OutputStream;
 
 
         public IObservable<Image<Gray, byte>> Output
@@ -41,12 +38,21 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
         public void OnCompleted()
         {
             Logger.LogInformation("Stream Completed. Setting Output to null.");
-            OutputStream.Complete();
+            OutputStream?.Complete();
         }
 
         public void OnError(Exception error)
         {
             Logger.LogWarning($"Error received! Setting output to null.{Environment.NewLine}, Exception:{error}");
+            if (OutputStream == null)
+            {
+                lock (streamLock)
+                {
+                    // ReSharper disable once NonAtomicCompoundOperator - used within lock
+                    OutputStream ??= CreateStream();
+                }
+            }
+
             OutputStream.Error(error);
             OutputStream.Complete();
         }
@@ -65,6 +71,15 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
 
             try
             {
+                if (OutputStream == null)
+                {
+                    lock (streamLock)
+                    {
+                        // ReSharper disable once NonAtomicCompoundOperator - used within lock
+                        OutputStream ??= CreateStream();
+                    }
+                }
+
                 OutputStream.Process(value);
                 Logger.LogInformation("Noise filter applied.");
             }

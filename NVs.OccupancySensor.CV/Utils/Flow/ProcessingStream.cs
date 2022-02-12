@@ -2,7 +2,6 @@ using System;
 using System.Threading;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Utils.Flow

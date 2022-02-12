@@ -1,11 +1,8 @@
-﻿using System;
-using JetBrains.Annotations;
-
-namespace NVs.OccupancySensor.CV.Correction
+﻿namespace NVs.OccupancySensor.CV.Correction
 {
     internal sealed class CorrectionStrategyManager : ICorrectionStrategyManager
     {
-        private ICorrectionStrategy strategy;
+        private ICorrectionStrategy? strategy;
 
         public bool CanManage => strategy is IStatefulCorrectionStrategy;
         public void LoadState()
@@ -25,7 +22,7 @@ namespace NVs.OccupancySensor.CV.Correction
 
         public void SetStrategy(ICorrectionStrategy value)
         {
-            this.strategy = value ?? throw new ArgumentNullException(nameof(value));
+            strategy = value;
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using Emgu.CV;
-using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 
 namespace NVs.OccupancySensor.CV.Detection

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors;
 using NVs.OccupancySensor.CV.Utils.Flow;

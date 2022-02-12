@@ -1,12 +1,7 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Threading;
-using Emgu.CV;
-using Emgu.CV.Structure;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.CV.Denoising.Denoisers;
-using NVs.OccupancySensor.CV.Utils;
 using NVs.OccupancySensor.CV.Utils.Flow;
 
 namespace NVs.OccupancySensor.CV.Denoising

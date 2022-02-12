@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Emgu.CV;
-using Emgu.CV.Structure;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NVs.OccupancySensor.CV.Capture;
@@ -53,7 +51,7 @@ namespace NVs.OccupancySensor.CV.Tests
             var camera = new Camera(cameraLogger.Object, streamLogger.Object, CaptureSettings.Default, () => captureMock.Object);
             var logger = new PropertyChangedLogger();
 
-            camera.PropertyChanged += logger.OnPropertyChanged;
+            camera.PropertyChanged += logger.OnPropertyChanged!;
 
             camera.Start();
 
@@ -67,7 +65,7 @@ namespace NVs.OccupancySensor.CV.Tests
             var camera = new Camera(cameraLogger.Object, streamLogger.Object, CaptureSettings.Default, () => captureMock.Object);
             var logger = new PropertyChangedLogger();
 
-            camera.PropertyChanged += logger.OnPropertyChanged;
+            camera.PropertyChanged += logger.OnPropertyChanged!;
 
             camera.Start();
 
@@ -81,7 +79,7 @@ namespace NVs.OccupancySensor.CV.Tests
             var camera = new Camera(cameraLogger.Object, streamLogger.Object, CaptureSettings.Default, () => captureMock.Object);
             var logger = new PropertyChangedLogger();
 
-            camera.PropertyChanged += logger.OnPropertyChanged;
+            camera.PropertyChanged += logger.OnPropertyChanged!;
 
             camera.Start();
             camera.Stop();
@@ -97,7 +95,7 @@ namespace NVs.OccupancySensor.CV.Tests
             var logger = new PropertyChangedLogger();
             var observer = new TestImageObserver();
 
-            camera.PropertyChanged += logger.OnPropertyChanged;
+            camera.PropertyChanged += logger.OnPropertyChanged!;
 
             camera.Start();
             using (camera.Stream.Subscribe(observer))
@@ -116,7 +114,7 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var camera = new Camera(cameraLogger.Object, streamLogger.Object, CaptureSettings.Default, () => captureMock.Object);
             var logger = new PropertyChangedLogger();
-            camera.PropertyChanged += logger.OnPropertyChanged;
+            camera.PropertyChanged += logger.OnPropertyChanged!;
             
             Task.WaitAll(Enumerable.Repeat(Task.Run(() => camera.Start()), Environment.ProcessorCount).ToArray());
 
@@ -128,7 +126,7 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var camera = new Camera(cameraLogger.Object, streamLogger.Object, CaptureSettings.Default, () => captureMock.Object);
             var logger = new PropertyChangedLogger();
-            camera.PropertyChanged += logger.OnPropertyChanged;
+            camera.PropertyChanged += logger.OnPropertyChanged!;
 
             camera.Start();
             Task.WaitAll(Enumerable.Repeat(Task.Run(() => camera.Stop()), Environment.ProcessorCount).ToArray());
