@@ -1,11 +1,14 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using Emgu.CV;
+using Emgu.CV.Structure;
 using NVs.OccupancySensor.CV.Settings;
 
 namespace NVs.OccupancySensor.CV.Capture
 {
     public interface ICamera : INotifyPropertyChanged
     {
-        ICameraStream Stream { get; }
+        IObservable<Image<Gray, byte>> Stream { get; }
         
         bool IsRunning { get; }
 

@@ -16,9 +16,22 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
         protected readonly ILogger Logger;
 
         protected volatile ProcessingStream OutputStream;
-        
 
-        public IObservable<Image<Gray, byte>> Output => OutputStream;
+
+        public IObservable<Image<Gray, byte>> Output
+        {
+            get
+            {
+                if (OutputStream != null) return OutputStream;
+                lock (streamLock)
+                {
+                    // ReSharper disable once NonAtomicCompoundOperator - used within lock
+                    OutputStream ??= CreateStream();
+                }
+
+                return OutputStream;
+            }
+        }
 
         protected Stage([NotNull] ILogger logger)
         {
@@ -52,11 +65,6 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
 
             try
             {
-                if (OutputStream?.Completed ?? true)
-                {
-                    ReplaceStream(OutputStream, CreateStream());
-                }
-
                 OutputStream.Process(value);
                 Logger.LogInformation("Noise filter applied.");
             }
@@ -70,36 +78,8 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
                 processingLock.Release();
             }
         }
-
-        public void Reset()
-        {
-            var stream = CreateStream();
-            ReplaceStream(OutputStream, stream);
-        }
-
+        
         public IStatistics Statistics => Counter;
-
-        public virtual event PropertyChangedEventHandler PropertyChanged;
-
-        private void ReplaceStream(ProcessingStream expectedStream, ProcessingStream newStream)
-        {
-            if (OutputStream != expectedStream) return;
-
-            lock (streamLock)
-            {
-                if (OutputStream != expectedStream) return;
-                OutputStream = newStream;
-            }
-
-            expectedStream.Complete();
-            OnPropertyChanged(nameof(Output));
-        }
-
-        [NotifyPropertyChangedInvocator]
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
 
         protected abstract ProcessingStream CreateStream();
     }

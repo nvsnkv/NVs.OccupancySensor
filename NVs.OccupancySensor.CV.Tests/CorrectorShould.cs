@@ -11,7 +11,6 @@ namespace NVs.OccupancySensor.CV.Tests
 {
     public sealed class CorrectorShould : StageShould
     {
-        private readonly Corrector corrector;
         private readonly Mock<IStatefulCorrectionStrategy> strategy;
         private readonly Mock<ICorrectionStrategyManager> manager;
         public CorrectorShould() : this(new Mock<ICorrectionStrategyFactory>(), new Mock<IStatefulCorrectionStrategy>(), new Mock<ICorrectionStrategyManager>(), new Mock<ICorrectionSettings>(), new Mock<ILogger<Corrector>>()) { }
@@ -24,16 +23,6 @@ namespace NVs.OccupancySensor.CV.Tests
 
         internal CorrectorShould(Corrector corrector):base(corrector)
         {
-            this.corrector = corrector;
-        }
-
-        [Fact]
-        public void ConnectStrategyWithManager()
-        {
-            manager.Setup(s => s.SetStrategy(strategy.Object)).Verifiable();
-            corrector.Reset();
-
-            manager.Verify();
         }
 
         private static Corrector GetCorrector(Mock<ICorrectionStrategyFactory> factory, Mock<IStatefulCorrectionStrategy> strategy, Mock<ICorrectionStrategyManager> manager, Mock<ICorrectionSettings> settings, Mock<ILogger<Corrector>> logger)

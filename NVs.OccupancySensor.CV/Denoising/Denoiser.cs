@@ -32,7 +32,6 @@ namespace NVs.OccupancySensor.CV.Denoising
             {
                 if (Equals(value ?? throw new ArgumentNullException(nameof(value)), settings)) return;
                 settings = value;
-                OnPropertyChanged();
             }
         }
 

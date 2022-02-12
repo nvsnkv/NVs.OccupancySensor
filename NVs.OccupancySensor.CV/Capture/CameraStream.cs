@@ -15,13 +15,12 @@ namespace NVs.OccupancySensor.CV.Capture
         private volatile bool isRunning;
 
         private int framesCaptured;
-        
-        public CameraStream(VideoCapture videoCapture, CancellationToken ct, ILogger<CameraStream> logger, TimeSpan frameInterval)
-            :base(ct, logger)
+
+        public CameraStream(VideoCapture videoCapture, CancellationToken ct, ILogger<CameraStream> logger, TimeSpan frameInterval) : base(ct, logger)
         {
             this.videoCapture = videoCapture ?? throw new ArgumentNullException(nameof(videoCapture));
             this.frameInterval = frameInterval;
-            
+
             Task.Run(QueryFrames, ct);
         }
 
@@ -39,25 +38,24 @@ namespace NVs.OccupancySensor.CV.Capture
         {
             while (!Ct.IsCancellationRequested)
             {
-                Logger.LogInformation($"Capturing frame {framesCaptured + 1}");
-                Mat frame;
-                try
-                {
-                    frame = videoCapture.QueryFrame();
-                    Logger.LogInformation("Got new frame");
-                }
-                catch (Exception e)
-                {
-                    Logger.LogError(e, "Unable to query frame!");
-                    Notify(o => o.OnError(e));
-                    Notify(o => o.OnCompleted());
-
-                    return;
-                }
-
                 if (isRunning)
                 {
+                    Logger.LogInformation($"Capturing frame {framesCaptured + 1}");
+                    Mat frame;
+                    try
+                    {
+                        frame = videoCapture.QueryFrame();
+                        Logger.LogInformation("Got new frame");
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogError(e, "Unable to query frame!");
+                        Notify(o => o.OnError(e));
+                        Notify(o => o.OnCompleted());
 
+                        return;
+                    }
+                    
                     if (frame != null)
                     {
                         Image<Gray, byte> image;
@@ -78,8 +76,7 @@ namespace NVs.OccupancySensor.CV.Capture
                     {
                         Logger.LogInformation("null frame received!");
                     }
-
-
+                    
                     ++framesCaptured;
                     Logger.LogInformation($"Frame {framesCaptured} processed");
 

@@ -15,16 +15,13 @@ namespace NVs.OccupancySensor.CV.Sense
     internal sealed class OccupancySensor : IOccupancySensor, IDisposable
     {
         private readonly ICamera camera;
-        private readonly IDenoiser denoiser;
-        [NotNull] private readonly IBackgroundSubtractor subtractor;
-        private readonly ICorrector corrector;
         private readonly IPeopleDetector detector;
         private readonly ILogger<OccupancySensor> logger;
         
-        private IDisposable denoiserSubscription;
-        private IDisposable subtractorSubscription;
-        private IDisposable correctorSubscription;
-        private IDisposable detectorSubscription;
+        private readonly IDisposable denoiserSubscription;
+        private readonly IDisposable subtractorSubscription;
+        private readonly IDisposable correctorSubscription;
+        private readonly IDisposable detectorSubscription;
         private bool isDisposed;
 
         public OccupancySensor([NotNull] ICamera camera, [NotNull] IDenoiser denoiser, [NotNull] IBackgroundSubtractor subtractor,
@@ -37,9 +34,11 @@ namespace NVs.OccupancySensor.CV.Sense
             this.detector.PropertyChanged += OnDetectorPropertyChanged;
 
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.denoiser = denoiser ?? throw new ArgumentNullException(nameof(denoiser));
-            this.subtractor = subtractor ?? throw new ArgumentNullException(nameof(subtractor));
-            this.corrector = corrector ?? throw new ArgumentNullException(nameof(corrector));
+            
+            subtractorSubscription = camera.Stream.Subscribe(subtractor);
+            denoiserSubscription = subtractor.Output.Subscribe(denoiser);
+            correctorSubscription = denoiser.Output.Subscribe(corrector);
+            detectorSubscription = corrector.Output.Subscribe(detector);
         }
 
         public bool? PresenceDetected => detector.PeopleDetected;
@@ -81,26 +80,13 @@ namespace NVs.OccupancySensor.CV.Sense
             {
                 case nameof(ICamera.IsRunning):
                     logger.LogInformation($"Camera.IsRunning changed to {camera.IsRunning}");
-                    OnPropertyChanged(nameof(IsRunning));
-                    if (camera.IsRunning)
-                    {
-                        subtractorSubscription = camera.Stream.Subscribe(subtractor);
-                        denoiserSubscription = subtractor.Output.Subscribe(denoiser);
-                        correctorSubscription = denoiser.Output.Subscribe(corrector);
-                        detectorSubscription = corrector.Output.Subscribe(detector);
-                    }
-                    else
-                    {
-                        detectorSubscription?.Dispose();
-                        correctorSubscription?.Dispose();
-                        denoiserSubscription?.Dispose();
-                        subtractorSubscription?.Dispose();
 
+                    if (!camera.IsRunning)
+                    {
                         detector.Reset();
-                        corrector.Reset();
-                        subtractor.Reset();
-                        denoiser.Reset();
                     }
+
+                    OnPropertyChanged(nameof(IsRunning));
                     break;
             }
         }
@@ -132,9 +118,9 @@ namespace NVs.OccupancySensor.CV.Sense
                     correctorSubscription?.Dispose();
                     denoiserSubscription?.Dispose();
                     subtractorSubscription?.Dispose();
-
-                    camera.PropertyChanged -= OnCameraPropertyChanged;
+                    
                     detector.PropertyChanged -= OnDetectorPropertyChanged;
+                    camera.PropertyChanged -= OnCameraPropertyChanged;
                 }
 
                 isDisposed = true;

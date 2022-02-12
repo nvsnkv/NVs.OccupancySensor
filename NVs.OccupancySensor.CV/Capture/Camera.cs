@@ -38,7 +38,7 @@ namespace NVs.OccupancySensor.CV.Capture
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public ICameraStream Stream => stream;
+        public IObservable<Image<Gray, byte>> Stream => stream;
 
         public bool IsRunning => isRunning;
 

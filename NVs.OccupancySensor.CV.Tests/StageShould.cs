@@ -46,20 +46,6 @@ namespace NVs.OccupancySensor.CV.Tests
         }
 
         [Fact]
-        public async Task CompleteStreamOnReset()
-        {
-            var observer = new TestImageObserver();
-
-            using (stage.Output.Subscribe(observer))
-            {
-                await Task.Run(() => stage.Reset());
-                await Task.Delay(TimeSpan.FromMilliseconds(100));
-            }
-
-            Assert.True(observer.StreamCompleted);
-        }
-
-        [Fact]
         public async Task DropNewFramesIfSubtractorIsPreviousIsStillInProgress()
         {
             SetupLongRunningPayload(TimeSpan.FromMilliseconds(200));
