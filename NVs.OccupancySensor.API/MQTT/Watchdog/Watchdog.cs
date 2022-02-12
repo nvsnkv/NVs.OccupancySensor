@@ -13,8 +13,8 @@ namespace NVs.OccupancySensor.API.MQTT.Watchdog
         private readonly IMqttClient client;
         private readonly WatchdogSettings settings;
         private readonly ILogger<Watchdog> logger;
-        private int alreadyHandling = 0;
-        private int attemptsMade = 0;
+        private int alreadyHandling;
+        private int attemptsMade;
         private readonly CancellationTokenSource cts = new();
 
         public Watchdog(IMqttClient client, ILogger<Watchdog> logger, WatchdogSettings settings)

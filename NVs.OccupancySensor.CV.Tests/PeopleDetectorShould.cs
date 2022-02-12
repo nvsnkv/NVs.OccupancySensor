@@ -106,7 +106,7 @@ namespace NVs.OccupancySensor.CV.Tests
             var propertiesChanged = new List<string>();
 
             var detector = new PeopleDetector(new DetectionSettings(1), logger.Object);
-            detector.PropertyChanged += (o, e) => propertiesChanged.Add(e.PropertyName!);
+            detector.PropertyChanged += (_, e) => propertiesChanged.Add(e.PropertyName!);
 
             detector.OnNext(new Image<Gray, byte>(1,1));
 

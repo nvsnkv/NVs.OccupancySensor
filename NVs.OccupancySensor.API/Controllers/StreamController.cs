@@ -109,7 +109,7 @@ namespace NVs.OccupancySensor.API.Controllers
             return GetMjpegGrayStreamContent(stream);
         }
 
-        private IActionResult GetMjpegRgbStreamContent(IObservable<Image<Gray, byte>> stream)
+        private IActionResult GetMjpegRgbStreamContent(IObservable<Image<Gray, byte>?>? stream)
         {
             var unsubscriber = stream?.Subscribe(observers.Gray);
 
@@ -123,7 +123,7 @@ namespace NVs.OccupancySensor.API.Controllers
                 () => unsubscriber.Dispose());
         }
 
-        private IActionResult GetMjpegGrayStreamContent(IObservable<Image<Gray, byte>?> stream)
+        private IActionResult GetMjpegGrayStreamContent(IObservable<Image<Gray, byte>?>? stream)
         {
             var unsubscriber = stream?.Subscribe(observers.Gray);
 

@@ -2,7 +2,6 @@
 using System.Text;
 using Emgu.CV;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.API.Models;
 using NVs.OccupancySensor.API.MQTT;
@@ -16,19 +15,16 @@ namespace NVs.OccupancySensor.API.Controllers
     public sealed class HealthcheckController : ControllerBase
     {
         private readonly ILogger<HealthcheckController> logger;
-        private readonly IConfiguration configuration;
         private readonly IOccupancySensor sensor;
         private readonly IMqttAdapter adapter;
         private readonly Streams streams;
 
-        public HealthcheckController(ILogger<HealthcheckController> logger, IConfiguration configuration, IOccupancySensor sensor, IMqttAdapter adapter, Streams streams)
+        public HealthcheckController(ILogger<HealthcheckController> logger, IOccupancySensor sensor, IMqttAdapter adapter, Streams streams)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
-            if (configuration == null) throw new ArgumentNullException(nameof(configuration));
             if (sensor == null) throw new ArgumentNullException(nameof(sensor));
             if (adapter == null) throw new ArgumentNullException(nameof(adapter));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             this.sensor = sensor ?? throw new ArgumentNullException(nameof(sensor));
             this.adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
             this.streams = streams ?? throw new ArgumentNullException(nameof(streams));
@@ -38,9 +34,7 @@ namespace NVs.OccupancySensor.API.Controllers
         public string Get()
         {
             logger.Log(LogLevel.Trace, "Healthcheck called");
-            var ok = adapter.IsRunning && (!sensor.IsRunning || streams.Camera.Stream != null &&
-                streams.Denoiser.Output != null &&
-                streams.Subtractor.Output != null && streams.Corrector.Output != null);
+            var ok = adapter.IsRunning;
 
             return ok ? "OK" : "FAIL";
         }

@@ -29,11 +29,11 @@ namespace NVs.OccupancySensor.CV.Tests
         [InlineData("http://some.file/", null)]
         [InlineData("http://some.file/", "05:30")]
         [InlineData("http://some.file/", "BadValue")]
-        public void CreateCameraSettingsFromConfiguration(string source, string frameInterval)
+        public void CreateCameraSettingsFromConfiguration(string? source, string? frameInterval)
         {
             var section = new Mock<IConfigurationSection>();
-            section.SetupGet(s => s["Source"]).Returns(source);
-            section.SetupGet(s => s["FrameInterval"]).Returns(frameInterval);
+            section.SetupGet(s => s["Source"]).Returns(source!);
+            section.SetupGet(s => s["FrameInterval"]).Returns(frameInterval!);
 
             var config = new Mock<IConfiguration>();
             config.Setup(c => c.GetSection("CV:Capture")).Returns(section.Object);

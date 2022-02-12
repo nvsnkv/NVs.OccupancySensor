@@ -14,6 +14,7 @@ using MQTTnet.Client.Options;
 using MQTTnet.Client.Publishing;
 using MQTTnet.Client.Receiving;
 using MQTTnet.Client.Subscribing;
+using NVs.OccupancySensor.API.MQTT.Watchdog;
 using NVs.OccupancySensor.CV.Sense;
 
 namespace NVs.OccupancySensor.API.MQTT
@@ -89,7 +90,7 @@ namespace NVs.OccupancySensor.API.MQTT
             try
             {
                 var payload = Encoding.UTF8.GetString(args.ApplicationMessage.Payload);
-                logger.LogInformation($"Payload received:{payload}");
+                logger.LogInformation("Payload received:{payload}", payload);
                 newState = payload.ToLowerInvariant().Equals("on");
             }
             catch (Exception e)
@@ -132,14 +133,14 @@ namespace NVs.OccupancySensor.API.MQTT
             switch (propertyName)
             {
                 case nameof(sensor.IsRunning):
-                    logger.LogInformation($"Sensor.IsRunning has been changed to {sensor.IsRunning}, preparing the message...");
+                    logger.LogInformation("Sensor.IsRunning has been changed to {isRunning}, preparing the message...", sensor.IsRunning);
                     yield return sensor.IsRunning
                         ? messages.ServiceEnabled
                         : messages.ServiceDisabled;
                     break;
                 
                 case nameof(sensor.PresenceDetected):
-                    logger.LogInformation($"Sensor.DetectPresence has been changed to {sensor.PresenceDetected}, preparing the messages...");
+                    logger.LogInformation("Sensor.DetectPresence has been changed to {detected}, preparing the messages...", sensor.PresenceDetected);
 
                     yield return sensor.PresenceDetected.HasValue
                         ? messages.SensorAvailable
@@ -237,7 +238,7 @@ namespace NVs.OccupancySensor.API.MQTT
             }
         }
 
-        private void EnsureSubscriptionSuccessful(MqttClientSubscribeResult result)
+        private static void EnsureSubscriptionSuccessful(MqttClientSubscribeResult result)
         {
             if (result == null) throw new ArgumentNullException(nameof(result));
             if (result.Items.Count == 0) throw new ArgumentException("No items returned!", nameof(result));

@@ -38,6 +38,7 @@ public class VideoCaptureProviderShould
 
         }.Select(a => Task.Factory.StartNew(a)).ToArray();
 
+        // ReSharper disable once CoVariantArrayConversion - no writes expected
         Task.WaitAll(tasks);
 
         var captures = tasks.Select(t => t.Result).ToList();

@@ -55,8 +55,8 @@ namespace NVs.OccupancySensor.CV.Tests
             using (stage.Output.Subscribe(observer))
             {
                 var _ = Task.Run(() => stage.OnNext(new Image<Gray, byte>(1, 1)));
-                _ = Task.Run(() => stage.OnNext(new Image<Gray, byte>(1, 1)));
-                _ = Task.Run(() => stage.OnNext(new Image<Gray, byte>(1, 1)));
+                var __ = Task.Run(() => stage.OnNext(new Image<Gray, byte>(1, 1)));
+                var ___ = Task.Run(() => stage.OnNext(new Image<Gray, byte>(1, 1)));
                 await Task.Delay(TimeSpan.FromMilliseconds(900));
             }
 

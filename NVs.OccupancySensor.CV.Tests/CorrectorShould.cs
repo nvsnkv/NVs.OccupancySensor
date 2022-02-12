@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NVs.OccupancySensor.CV.Correction;
@@ -11,6 +12,7 @@ namespace NVs.OccupancySensor.CV.Tests
     public sealed class CorrectorShould : StageShould
     {
         private readonly Mock<IStatefulCorrectionStrategy> strategy = null!;
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0052:Remove unread private members", Justification = "GetCorrector implementation uses manage to verify that SetStrategy was called"), UsedImplicitly]
         private readonly Mock<ICorrectionStrategyManager> manager = null!;
         public CorrectorShould() : this(new Mock<ICorrectionStrategyFactory>(), new Mock<IStatefulCorrectionStrategy>(), new Mock<ICorrectionStrategyManager>(), new Mock<ICorrectionSettings>(), new Mock<ILogger<Corrector>>()) { }
         internal CorrectorShould(Mock<ICorrectionStrategyFactory> factory, Mock<IStatefulCorrectionStrategy> strategy, Mock<ICorrectionStrategyManager> manager, Mock<ICorrectionSettings> settings, Mock<ILogger<Corrector>> logger)

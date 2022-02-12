@@ -2,7 +2,7 @@
 {
     internal static class LogUtils
     {
-        public static string GetHashString(this object obj)
+        public static string GetHashString(this object? obj)
         {
             return obj == null ? "null" : obj.GetHashCode().ToString("X");
         }

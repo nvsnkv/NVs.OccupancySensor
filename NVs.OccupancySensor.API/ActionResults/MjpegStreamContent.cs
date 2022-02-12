@@ -41,9 +41,9 @@ namespace NVs.OccupancySensor.API.ActionResults
                     {
                         var header = $"--{Boundary}\r\nContent-Type: image/jpeg\r\nContent-Length: {imageBytes.Length}\r\n\r\n";
                         var headerData = Encoding.UTF8.GetBytes(header);
-                        await outputStream.WriteAsync(headerData, 0, headerData.Length, cancellationToken);
-                        await outputStream.WriteAsync(imageBytes, 0, imageBytes.Length, cancellationToken);
-                        await outputStream.WriteAsync(NewLine, 0, NewLine.Length, cancellationToken);
+                        await outputStream.WriteAsync(headerData, cancellationToken);
+                        await outputStream.WriteAsync(imageBytes, cancellationToken);
+                        await outputStream.WriteAsync(NewLine, cancellationToken);
                     }
                     else
                     {

@@ -32,7 +32,7 @@ namespace NVs.OccupancySensor.CV.Tests
             corrector.SetupGet(d => d.Output).Returns(GetStreamMock());
         }
 
-        private IObservable<Image<Gray, byte>> GetStreamMock()
+        private static IObservable<Image<Gray, byte>> GetStreamMock()
         {
             var mock = new Mock<IObservable<Image<Gray, byte>>>();
             mock.Setup(s => s.Subscribe(It.IsAny<IObserver<Image<Gray, byte>>>())).Returns(new Mock<IDisposable>().Object);
@@ -158,7 +158,7 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             bool propertyChangedRaised = false;
             var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
-            sensor.PropertyChanged += (_,__) => propertyChangedRaised = true;
+            sensor.PropertyChanged += (_,_) => propertyChangedRaised = true;
 
             sensor.Dispose();
             camera.Raise(c => c.PropertyChanged += null, new PropertyChangedEventArgs(nameof(ICamera.IsRunning)));
@@ -171,7 +171,7 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             bool propertyChangedRaised = false;
             var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
-            sensor.PropertyChanged += (_,__) => propertyChangedRaised = true;
+            sensor.PropertyChanged += (_,_) => propertyChangedRaised = true;
 
             sensor.Dispose();
             detector.Raise(d => d.PropertyChanged += null, new PropertyChangedEventArgs(nameof(IPeopleDetector.PeopleDetected)));

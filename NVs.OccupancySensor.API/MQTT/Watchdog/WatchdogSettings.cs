@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
 
-namespace NVs.OccupancySensor.API.MQTT
+namespace NVs.OccupancySensor.API.MQTT.Watchdog
 {
     internal sealed class WatchdogSettings
     {
