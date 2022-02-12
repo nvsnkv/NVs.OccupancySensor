@@ -8,7 +8,7 @@ namespace NVs.OccupancySensor.CV.Utils
     {
         public static IObservable<TOut> ToObservable<TOut>(this INotifyPropertyChanged source, string propertyName, Func<TOut> selector)
         {
-            PropertyChangedEventHandler handler = null;
+            PropertyChangedEventHandler? handler = null;
             return Observable.FromEventPattern<PropertyChangedEventArgs>(
                     h => source.PropertyChanged += handler = (o, e) => h(o, e),
                     h => source.PropertyChanged -= handler

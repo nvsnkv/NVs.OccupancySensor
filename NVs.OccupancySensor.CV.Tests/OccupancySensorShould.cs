@@ -27,10 +27,18 @@ namespace NVs.OccupancySensor.CV.Tests
 
         public OccupancySensorShould()
         {
-            camera.SetupGet(c => c.Stream).Returns(new Mock<ICameraStream>().Object);
-            denoiser.SetupGet(d => d.Output).Returns(new Mock<IObservable<Image<Gray, byte>>>().Object);
-            subtractor.SetupGet(d => d.Output).Returns(new Mock<IObservable<Image<Gray, byte>>>().Object);
-            corrector.SetupGet(d => d.Output).Returns(new Mock<IObservable<Image<Gray, byte>>>().Object);
+            camera.SetupGet(c => c.Stream).Returns(GetStreamMock());
+            denoiser.SetupGet(d => d.Output).Returns(GetStreamMock());
+            subtractor.SetupGet(d => d.Output).Returns(GetStreamMock());
+            corrector.SetupGet(d => d.Output).Returns(GetStreamMock());
+        }
+
+        private IObservable<Image<Gray, byte>> GetStreamMock()
+        {
+            var mock = new Mock<IObservable<Image<Gray, byte>>>();
+            mock.Setup(s => s.Subscribe(It.IsAny<IObserver<Image<Gray, byte>>>())).Returns(new Mock<IDisposable>().Object);
+
+            return mock.Object;
         }
 
         [Fact]

@@ -6,7 +6,7 @@ using NVs.OccupancySensor.CV.Settings;
 
 namespace NVs.OccupancySensor.CV.Capture
 {
-    public interface ICamera : INotifyPropertyChanged
+    public interface ICamera : INotifyPropertyChanged, IDisposable
     {
         IObservable<Image<Gray, byte>> Stream { get; }
         
@@ -15,7 +15,5 @@ namespace NVs.OccupancySensor.CV.Capture
         void Start();
 
         void Stop();
-
-        CaptureSettings Settings { get; }
     }
 }

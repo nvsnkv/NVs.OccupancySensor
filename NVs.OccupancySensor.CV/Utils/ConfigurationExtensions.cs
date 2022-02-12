@@ -59,7 +59,8 @@ namespace NVs.OccupancySensor.CV.Utils
             if (config == null) throw new ArgumentNullException(nameof(config));
             IConfigurationSection section = config.GetSection("CV:Subtraction");
 
-            return new SubtractionSettings(section?["Algorithm"] ?? SubtractionSettings.Default.Algorithm);
+            var algorithm = section?["Algorithm"];
+            return new SubtractionSettings(string.IsNullOrEmpty(algorithm) ? SubtractionSettings.Default.Algorithm : algorithm);
         }
 
         public static CNTSubtractorSettings GetCNTSubtractorSettings(this IConfiguration config)

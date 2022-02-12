@@ -15,7 +15,7 @@ namespace NVs.OccupancySensor.CV.Tests.Utils
                 Notifications[sender] = new Dictionary<DateTime, string>();
             }
             
-            Notifications[sender].Add(DateTime.Now, e.PropertyName);
+            Notifications[sender].Add(DateTime.Now, e.PropertyName!);
         }
     }
 }

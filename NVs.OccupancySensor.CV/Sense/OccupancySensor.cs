@@ -17,7 +17,7 @@ namespace NVs.OccupancySensor.CV.Sense
         private readonly ICamera camera;
         private readonly IPeopleDetector detector;
         private readonly ILogger<OccupancySensor> logger;
-        
+
         private readonly IDisposable denoiserSubscription;
         private readonly IDisposable subtractorSubscription;
         private readonly IDisposable correctorSubscription;
@@ -33,7 +33,7 @@ namespace NVs.OccupancySensor.CV.Sense
             this.detector.PropertyChanged += OnDetectorPropertyChanged;
 
             this.logger = logger;
-            
+
             subtractorSubscription = camera.Stream.Subscribe(subtractor);
             denoiserSubscription = subtractor.Output.Subscribe(denoiser);
             correctorSubscription = denoiser.Output.Subscribe(corrector);
@@ -70,7 +70,19 @@ namespace NVs.OccupancySensor.CV.Sense
 
         public void Dispose()
         {
-            Dispose(disposing: true);
+            if (!isDisposed)
+            {
+
+                detectorSubscription.Dispose();
+                correctorSubscription.Dispose();
+                denoiserSubscription.Dispose();
+                subtractorSubscription.Dispose();
+
+                detector.PropertyChanged -= OnDetectorPropertyChanged;
+                camera.PropertyChanged -= OnCameraPropertyChanged;
+
+                isDisposed = true;
+            }
         }
 
         private void OnCameraPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -105,25 +117,6 @@ namespace NVs.OccupancySensor.CV.Sense
         private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (!isDisposed)
-            {
-                if (disposing)
-                {
-                    detectorSubscription.Dispose();
-                    correctorSubscription.Dispose();
-                    denoiserSubscription.Dispose();
-                    subtractorSubscription.Dispose();
-                    
-                    detector.PropertyChanged -= OnDetectorPropertyChanged;
-                    camera.PropertyChanged -= OnCameraPropertyChanged;
-                }
-
-                isDisposed = true;
-            }
         }
     }
 }

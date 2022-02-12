@@ -109,7 +109,7 @@ namespace NVs.OccupancySensor.CV.Tests
         {
             var section = new Mock<IConfigurationSection>();
             var expectedAlgorithm = "CNT";
-            section.SetupGet(s => s["Algorithm"]).Returns((string)null);
+            section.SetupGet(s => s["Algorithm"]).Returns(string.Empty);
             var config = new Mock<IConfiguration>();
             config.Setup(c => c.GetSection("CV:Subtraction")).Returns(section.Object);
 
