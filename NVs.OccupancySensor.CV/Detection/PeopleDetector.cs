@@ -14,8 +14,8 @@ namespace NVs.OccupancySensor.CV.Detection
 
         private double threshold;
         private bool? peopleDetected;
-        private IDetectionSettings settings;
-        private Image<Gray, byte> mask;
+        private readonly IDetectionSettings settings;
+        private Image<Gray, byte>? mask;
 
         public PeopleDetector(IDetectionSettings settings, ILogger<PeopleDetector> logger)
         {
@@ -43,7 +43,7 @@ namespace NVs.OccupancySensor.CV.Detection
             if (value == null) throw new ArgumentNullException(nameof(value));
             logger.LogInformation("Received new frame...");
 
-            double average = 0;
+            double average;
             try
             {
                 average = value.GetAverage().Intensity / 255;
@@ -59,7 +59,7 @@ namespace NVs.OccupancySensor.CV.Detection
             Mask = value;
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public bool? PeopleDetected
         {
@@ -72,7 +72,7 @@ namespace NVs.OccupancySensor.CV.Detection
             }
         }
 
-        public Image<Gray, byte> Mask
+        public Image<Gray, byte>? Mask
         {
             get => mask;
             private set
@@ -83,20 +83,9 @@ namespace NVs.OccupancySensor.CV.Detection
             }
         }
 
-                public IDetectionSettings Settings
-        {
-            get => settings;
-            set
-            {
-                if (Equals(value, settings)) return;
-                settings = value ?? throw new ArgumentNullException(nameof(value));
-                OnPropertyChanged();
-            }
-        }
-
         public void Reset()
         {
-            threshold = Settings.DetectionThreshold;
+            threshold = settings.DetectionThreshold;
             logger.LogInformation($"Reset called. New threshold is {threshold}");
 
             Mask = null;
@@ -104,7 +93,7 @@ namespace NVs.OccupancySensor.CV.Detection
         }
 
         [NotifyPropertyChangedInvocator]
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

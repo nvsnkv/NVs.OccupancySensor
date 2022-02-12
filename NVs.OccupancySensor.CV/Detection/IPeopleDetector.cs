@@ -10,10 +10,8 @@ namespace NVs.OccupancySensor.CV.Detection
     {
         bool? PeopleDetected { get; }
 
-        Image<Gray,byte> Mask { get; }
-
-        IDetectionSettings Settings { get; set; }
-
+        Image<Gray,byte>? Mask { get; }
+        
         void Reset();
     }
 }

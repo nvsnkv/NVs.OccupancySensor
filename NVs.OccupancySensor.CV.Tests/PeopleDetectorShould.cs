@@ -50,29 +50,6 @@ namespace NVs.OccupancySensor.CV.Tests
         }
 
         [Fact]
-        public void RespectSettingsChange()
-        {
-            var image = new Image<Gray, byte>(10, 10);
-            for(var i=0; i < image.Width; i++)
-            for(var j=0; j < image.Height; j++)
-            {
-                image[i,j] = new Gray(255);
-            }
-
-            var detector = new PeopleDetector(DetectionSettings.Default, logger.Object);
-            detector.OnNext(image);
-
-            Assert.True(detector.PeopleDetected);
-
-            detector.Settings = new DetectionSettings(1.1);
-            detector.Reset();
-
-            detector.OnNext(image);
-
-            Assert.False(detector.PeopleDetected);
-        }
-
-        [Fact]
         public void NotifyWhenPeopleDetected()
         {
             var propertiesChanged = new List<string>();
