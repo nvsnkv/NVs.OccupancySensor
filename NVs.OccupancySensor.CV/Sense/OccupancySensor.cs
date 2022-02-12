@@ -24,16 +24,15 @@ namespace NVs.OccupancySensor.CV.Sense
         private readonly IDisposable detectorSubscription;
         private bool isDisposed;
 
-        public OccupancySensor(ICamera camera, IDenoiser denoiser, IBackgroundSubtractor subtractor,
-            ICorrector corrector, IPeopleDetector detector, ILogger<OccupancySensor> logger)
+        public OccupancySensor(ICamera camera, IDenoiser denoiser, IBackgroundSubtractor subtractor, ICorrector corrector, IPeopleDetector detector, ILogger<OccupancySensor> logger)
         {
-            this.camera = camera ?? throw new ArgumentNullException(nameof(camera));
+            this.camera = camera;
             this.camera.PropertyChanged += OnCameraPropertyChanged;
 
-            this.detector = detector ?? throw new ArgumentNullException(nameof(detector));
+            this.detector = detector;
             this.detector.PropertyChanged += OnDetectorPropertyChanged;
 
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.logger = logger;
             
             subtractorSubscription = camera.Stream.Subscribe(subtractor);
             denoiserSubscription = subtractor.Output.Subscribe(denoiser);
@@ -45,7 +44,7 @@ namespace NVs.OccupancySensor.CV.Sense
 
         public bool IsRunning => camera.IsRunning;
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public void Start()
         {
@@ -103,7 +102,7 @@ namespace NVs.OccupancySensor.CV.Sense
         }
 
         [NotifyPropertyChangedInvocator]
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -114,10 +113,10 @@ namespace NVs.OccupancySensor.CV.Sense
             {
                 if (disposing)
                 {
-                    detectorSubscription?.Dispose();
-                    correctorSubscription?.Dispose();
-                    denoiserSubscription?.Dispose();
-                    subtractorSubscription?.Dispose();
+                    detectorSubscription.Dispose();
+                    correctorSubscription.Dispose();
+                    denoiserSubscription.Dispose();
+                    subtractorSubscription.Dispose();
                     
                     detector.PropertyChanged -= OnDetectorPropertyChanged;
                     camera.PropertyChanged -= OnCameraPropertyChanged;
