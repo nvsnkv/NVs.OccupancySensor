@@ -80,6 +80,7 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
 
         public void Reset()
         {
+            Logger.LogDebug("Reset requested.");
             if (requiresSynchronizationOnReset)
             {
                 lock (processingLock)
@@ -93,8 +94,8 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
             }
         }
 
-        protected abstract Image<Gray, byte> DoProcess(Image<Gray, byte> image);
-
         protected virtual void DoReset() { }
+
+        protected abstract Image<Gray, byte> DoProcess(Image<Gray, byte> image);
     }
 }

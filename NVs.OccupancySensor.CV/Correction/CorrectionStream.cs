@@ -8,7 +8,7 @@ using NVs.OccupancySensor.CV.Utils.Flow;
 
 namespace NVs.OccupancySensor.CV.Correction
 {
-    sealed class CorrectionStream : ProcessingStream
+    internal sealed class CorrectionStream : ProcessingStream
     {
         private readonly ICorrectionStrategy strategy;
 

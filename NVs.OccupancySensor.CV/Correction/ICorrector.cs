@@ -9,10 +9,8 @@ namespace NVs.OccupancySensor.CV.Correction
     {
     IObservable<Image<Gray, byte>> Output { get; }
 
-    ICorrectionSettings Settings { get; set; }
-
     IStatistics Statistics { get; }
 
-    ICorrectionStrategyManager StrategyManager { get; }
+    void Reset();
     }
 }

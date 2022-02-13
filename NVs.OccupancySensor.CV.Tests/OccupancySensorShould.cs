@@ -74,11 +74,10 @@ namespace NVs.OccupancySensor.CV.Tests
         [Fact]
         public void CallDetectorResetWhenCameraStopped() 
         {
-            camera.SetupGet(c => c.IsRunning).Returns(false);
             detector.Setup(d => d.Reset()).Verifiable("Reset was not called!");
-            var _ = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
+            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
 
-            camera.Raise(c => c.PropertyChanged += null, new PropertyChangedEventArgs(nameof(ICamera.IsRunning)));
+            sensor.Stop();
             detector.Verify();
         }
         
@@ -177,6 +176,26 @@ namespace NVs.OccupancySensor.CV.Tests
             detector.Raise(d => d.PropertyChanged += null, new PropertyChangedEventArgs(nameof(IPeopleDetector.PeopleDetected)));
 
             Assert.False(propertyChangedRaised);
+        }
+
+        [Fact]
+        public void ResetSubtractorOnStop()
+        {
+            subtractor.Setup(s => s.Reset()).Verifiable();
+            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
+            
+            sensor.Stop();
+            subtractor.Verify(s => s.Reset());
+        }
+
+        [Fact]
+        public void ResetCorrectorOnStop()
+        {
+            corrector.Setup(s => s.Reset()).Verifiable();
+            var sensor = new Sense.OccupancySensor(camera.Object, denoiser.Object, subtractor.Object, corrector.Object, detector.Object, logger.Object);
+
+            sensor.Stop();
+            corrector.Verify(s => s.Reset());
         }
     }
 }

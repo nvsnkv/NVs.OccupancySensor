@@ -9,8 +9,8 @@ namespace NVs.OccupancySensor.CV.BackgroundSubtraction
     {
             IObservable<Image<Gray, byte>> Output { get; }
 
-            IBackgroundSubtractorSettings Settings { get; set; }
-
             IStatistics Statistics { get; }
+
+            void Reset();
     }
 }

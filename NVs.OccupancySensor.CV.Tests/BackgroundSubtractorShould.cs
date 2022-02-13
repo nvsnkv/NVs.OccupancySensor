@@ -39,6 +39,15 @@ namespace NVs.OccupancySensor.CV.Tests
             strategy.Verify();
         }
 
+        [Fact]
+        public void ResetStrategyOnReset()
+        {
+            strategy.Setup(s => s.Reset()).Verifiable();
+            subtractor.Reset();
+
+            strategy.Verify(s => s.Reset());
+        }
+
         private static BackgroundSubtractor CreateSubtractor(Mock<IBackgroundSubtractorFactory> factory, Mock<ISubtractionStrategy> strategy, Mock<IBackgroundSubtractorSettings> settings, Mock<ILogger<BackgroundSubtractor>> logger)
         {
             strategy.Setup(s => s.GetForegroundMask(It.IsAny<Image<Gray, byte>>())).Returns(new Image<Gray, byte>(1, 1));

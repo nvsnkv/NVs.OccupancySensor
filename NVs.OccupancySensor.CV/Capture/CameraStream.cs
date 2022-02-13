@@ -18,7 +18,7 @@ namespace NVs.OccupancySensor.CV.Capture
 
         public CameraStream(VideoCapture videoCapture, CancellationToken ct, ILogger<CameraStream> logger, TimeSpan frameInterval) : base(ct, logger)
         {
-            this.videoCapture = videoCapture ?? throw new ArgumentNullException(nameof(videoCapture));
+            this.videoCapture = videoCapture;
             this.frameInterval = frameInterval;
 
             Task.Run(QueryFrames, ct);
@@ -40,12 +40,12 @@ namespace NVs.OccupancySensor.CV.Capture
             {
                 if (isRunning)
                 {
-                    Logger.LogInformation($"Capturing frame {framesCaptured + 1}");
+                    Logger.LogDebug($"Capturing frame {framesCaptured + 1}");
                     Mat frame;
                     try
                     {
                         frame = videoCapture.QueryFrame();
-                        Logger.LogInformation("Got new frame");
+                        Logger.LogDebug("Got new frame");
                     }
                     catch (Exception e)
                     {
@@ -62,7 +62,7 @@ namespace NVs.OccupancySensor.CV.Capture
                         try
                         {
                             image = frame.ToImage<Gray, byte>();
-                            Logger.LogInformation("Frame successfully converted to image!");
+                            Logger.LogDebug("Frame successfully converted to image!");
                         }
                         catch (Exception e)
                         {
@@ -74,7 +74,7 @@ namespace NVs.OccupancySensor.CV.Capture
                     }
                     else
                     {
-                        Logger.LogInformation("null frame received!");
+                        Logger.LogDebug("null frame received!");
                     }
                     
                     ++framesCaptured;

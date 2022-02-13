@@ -8,20 +8,18 @@ using Microsoft.Extensions.Logging;
 
 namespace NVs.OccupancySensor.CV.Detection
 {
-    sealed class PeopleDetector : IPeopleDetector
+    internal sealed class PeopleDetector : IPeopleDetector
     {
         private readonly ILogger<PeopleDetector> logger;
 
-        private double threshold;
+        private readonly double threshold;
         private bool? peopleDetected;
-        private readonly IDetectionSettings settings;
         private Image<Gray, byte>? mask;
 
         public PeopleDetector(IDetectionSettings settings, ILogger<PeopleDetector> logger)
         {
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
-            threshold = this.settings.DetectionThreshold;
+            this.logger = logger;
+            threshold = settings.DetectionThreshold;
         }
 
         public void OnCompleted()
@@ -40,8 +38,7 @@ namespace NVs.OccupancySensor.CV.Detection
 
         public void OnNext(Image<Gray, byte> value)
         {
-            if (value == null) throw new ArgumentNullException(nameof(value));
-            logger.LogInformation("Received new frame...");
+            logger.LogDebug("Received new frame...");
 
             double average;
             try
@@ -54,7 +51,7 @@ namespace NVs.OccupancySensor.CV.Detection
                 throw;
             }
 
-            logger.LogInformation($"Computed average: {average}");
+            logger.LogDebug($"Computed average: {average}");
             PeopleDetected = average >= threshold;
             Mask = value;
         }
@@ -85,9 +82,6 @@ namespace NVs.OccupancySensor.CV.Detection
 
         public void Reset()
         {
-            threshold = settings.DetectionThreshold;
-            logger.LogInformation($"Reset called. New threshold is {threshold}");
-
             Mask = null;
             PeopleDetected = null;
         }
