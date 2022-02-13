@@ -17,9 +17,9 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
 
         protected Stream(CancellationToken ct, ILogger logger)
         {
-            this.Ct = ct;
-            this.Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.Ct.Register(() =>
+            Ct = ct;
+            Logger = logger;
+            Ct.Register(() =>
             {
                 logger.LogInformation("Cancellation requested");
                 Notify(o => o.OnCompleted(), true);
@@ -29,8 +29,6 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
 
         public IDisposable Subscribe(IObserver<Image<Gray, byte>> observer)
         {
-            if (observer == null) throw new ArgumentNullException(nameof(observer));
-
             // ReSharper disable InconsistentlySynchronizedField
             if (!observers.Contains(observer))
             {

@@ -10,23 +10,20 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
     {
         private readonly Counter counter;
         private readonly ProcessingLock processingLock = new ProcessingLock();
+        private readonly bool requiresSynchronizationOnReset;
 
 
-        protected ProcessingStream(Counter counter, CancellationToken ct, ILogger logger) : base(ct, logger)
+        protected ProcessingStream(Counter counter, CancellationToken ct, ILogger logger, bool requiresSynchronizationOnReset = false) : base(ct, logger)
         {
-            this.counter = counter ?? throw new ArgumentNullException(nameof(counter));
+            this.counter = counter;
+            this.requiresSynchronizationOnReset = requiresSynchronizationOnReset;
         }
 
         public bool Completed { get; private set; }
 
         public void Process(Image<Gray, byte> image)
         {
-            if (image is null)
-            {
-                throw new ArgumentNullException(nameof(image));
-            }
-
-            Logger.LogInformation("Received new frame...");
+            Logger.LogDebug("Received new frame...");
             if (!processingLock.Acquire())
             {
                 counter.IncreaseDropped();
@@ -51,7 +48,7 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
             {
                 processed = DoProcess(image);
                 counter.IncreaseProcessed();
-                Logger.LogInformation("Operation applied!");
+                Logger.LogDebug("Operation applied!");
             }
             catch (Exception e)
             {
@@ -81,6 +78,23 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
             Notify(o => o.OnError(error));
         }
 
+        public void Reset()
+        {
+            if (requiresSynchronizationOnReset)
+            {
+                lock (processingLock)
+                {
+                    DoReset();
+                }
+            }
+            else
+            {
+                DoReset();
+            }
+        }
+
         protected abstract Image<Gray, byte> DoProcess(Image<Gray, byte> image);
+
+        protected virtual void DoReset() { }
     }
 }

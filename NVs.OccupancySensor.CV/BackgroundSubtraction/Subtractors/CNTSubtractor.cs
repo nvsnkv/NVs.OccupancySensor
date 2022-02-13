@@ -24,6 +24,11 @@ namespace NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors
             return mask;
         }
 
+        public void Reset()
+        {
+            subtractor.Clear();
+        }
+
         public void Dispose()
         {
             subtractor.Dispose();
