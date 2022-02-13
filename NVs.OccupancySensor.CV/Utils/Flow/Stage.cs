@@ -92,8 +92,19 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
                 processingLock.Release();
             }
         }
-        
+
         public IStatistics Statistics => Counter;
+
+        public virtual void Reset()
+        {
+            if (OutputStream != null)
+            {
+                lock (streamLock)
+                {
+                    OutputStream?.Reset();
+                }
+            }
+        }
 
         protected abstract ProcessingStream CreateStream();
     }

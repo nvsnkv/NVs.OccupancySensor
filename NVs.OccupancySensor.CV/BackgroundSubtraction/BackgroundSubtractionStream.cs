@@ -13,7 +13,7 @@ namespace NVs.OccupancySensor.CV.BackgroundSubtraction
     {
         private readonly ISubtractionStrategy strategy;
 
-        public BackgroundSubtractionStream(ISubtractionStrategy strategy, Counter counter, CancellationToken ct, ILogger logger) : base(counter, ct, logger)
+        public BackgroundSubtractionStream(ISubtractionStrategy strategy, Counter counter, CancellationToken ct, ILogger logger) : base(counter, ct, logger, true)
         {
             this.strategy = strategy ?? throw new ArgumentNullException(nameof(strategy));
         }
@@ -21,6 +21,11 @@ namespace NVs.OccupancySensor.CV.BackgroundSubtraction
         protected override Image<Gray, byte> DoProcess(Image<Gray, byte> image)
         {
             return strategy.GetForegroundMask(image);
+        }
+
+        protected override void DoReset()
+        {
+            strategy.Reset();
         }
     }
 }
