@@ -6,7 +6,7 @@ using Emgu.CV.Structure;
 
 namespace NVs.OccupancySensor.CV.Correction
 {
-    sealed class StaticMaskCorrectionStrategy : IStatefulCorrectionStrategy
+    internal sealed class StaticMaskCorrectionStrategy : IStatefulCorrectionStrategy
     {
         private readonly IStaticMaskSettings settings;
         private readonly ReaderWriterLockSlim maskLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);

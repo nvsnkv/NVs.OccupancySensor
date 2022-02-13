@@ -19,9 +19,9 @@ namespace NVs.OccupancySensor.API.MQTT.Watchdog
 
         public Watchdog(IMqttClient client, ILogger<Watchdog> logger, WatchdogSettings settings)
         {
-            this.client = client ?? throw new ArgumentNullException(nameof(client));
-            this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.client = client;
+            this.settings = settings;
+            this.logger = logger;
 
             client.UseDisconnectedHandler(Disconnected);
         }
@@ -30,13 +30,6 @@ namespace NVs.OccupancySensor.API.MQTT.Watchdog
         {
             using (logger.BeginScope("Client disconnected"))
             {
-                if (args == null)
-                {
-                    var e = new ArgumentNullException(nameof(args));
-                    logger.LogError(e, "Null argument received!");
-                    throw e;
-                }
-                
                 try
                 {
                     if (Interlocked.CompareExchange(ref alreadyHandling, 1, 0) != 0)
@@ -47,7 +40,7 @@ namespace NVs.OccupancySensor.API.MQTT.Watchdog
 
                     attemptsMade = 0;
 
-                    while (ShouldRetry(args))
+                    while (ShouldRetry())
                     {
                         var delay = (attemptsMade + 1) * settings.Interval;
                         logger.LogInformation("Will reconnect in {delay}", delay);
@@ -87,17 +80,11 @@ namespace NVs.OccupancySensor.API.MQTT.Watchdog
             }
         }
 
-        private bool ShouldRetry(MqttClientDisconnectedEventArgs args)
+        private bool ShouldRetry()
     {
         if (settings.AttemptsCount == 0)
         {
             logger.LogInformation("Retry is not configured: retry attempts count is zero");
-            return false;
-        }
-
-        if (args.Reason == MqttClientDisconnectReason.NormalDisconnection)
-        {
-            logger.LogInformation("No retry needed: normal disconnection received");
             return false;
         }
 

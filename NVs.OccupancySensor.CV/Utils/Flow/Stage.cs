@@ -32,7 +32,7 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
 
         protected Stage(ILogger logger)
         {
-            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            Logger = logger;
         }
 
         public void OnCompleted()
@@ -59,8 +59,7 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
 
         public void OnNext(Image<Gray, byte> value)
         {
-            if (value == null) throw new ArgumentNullException(nameof(value));
-            Logger.LogInformation("New frame received...");
+            Logger.LogDebug("New frame received...");
 
             if (!processingLock.Acquire())
             {
@@ -81,7 +80,7 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
                 }
 
                 OutputStream.Process(value);
-                Logger.LogInformation("Noise filter applied.");
+                Logger.LogDebug("Frame processed.");
             }
             catch (Exception e)
             {

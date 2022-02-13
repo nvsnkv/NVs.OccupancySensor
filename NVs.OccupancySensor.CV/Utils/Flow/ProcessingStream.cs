@@ -81,6 +81,23 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
             Notify(o => o.OnError(error));
         }
 
+        public void Reset()
+        {
+            if (requiresSynchronizationOnReset)
+            {
+                lock (processingLock)
+                {
+                    DoReset();
+                }
+            }
+            else
+            {
+                DoReset();
+            }
+        }
+
+        protected virtual void DoReset() { }
+
         protected abstract Image<Gray, byte> DoProcess(Image<Gray, byte> image);
     }
 }

@@ -16,6 +16,7 @@ namespace NVs.OccupancySensor.CV.Sense
     {
         private readonly ICamera camera;
         private readonly IPeopleDetector detector;
+        private readonly IBackgroundSubtractor subtractor;
         private readonly ILogger<OccupancySensor> logger;
 
         private readonly IDisposable denoiserSubscription;
@@ -32,6 +33,7 @@ namespace NVs.OccupancySensor.CV.Sense
             this.detector = detector;
             this.detector.PropertyChanged += OnDetectorPropertyChanged;
 
+            this.subtractor = subtractor;
             this.logger = logger;
 
             subtractorSubscription = camera.Stream.Subscribe(subtractor);
@@ -52,7 +54,7 @@ namespace NVs.OccupancySensor.CV.Sense
             {
                 throw new ObjectDisposedException(nameof(OccupancySensor));
             }
-
+            
             logger.LogInformation("Start requested");
             camera.Start();
         }
@@ -63,9 +65,11 @@ namespace NVs.OccupancySensor.CV.Sense
             {
                 throw new ObjectDisposedException(nameof(OccupancySensor));
             }
-
+            
             logger.LogInformation("Stop requested");
             camera.Stop();
+            detector.Reset();
+            subtractor.Reset();
         }
 
         public void Dispose()
@@ -91,12 +95,6 @@ namespace NVs.OccupancySensor.CV.Sense
             {
                 case nameof(ICamera.IsRunning):
                     logger.LogInformation($"Camera.IsRunning changed to {camera.IsRunning}");
-
-                    if (!camera.IsRunning)
-                    {
-                        detector.Reset();
-                    }
-
                     OnPropertyChanged(nameof(IsRunning));
                     break;
             }

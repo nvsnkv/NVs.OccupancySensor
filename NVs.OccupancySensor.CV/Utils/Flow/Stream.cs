@@ -75,7 +75,7 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
                     try
                     {
                         action(observer);
-                        Logger.LogInformation($"[Observer {observer.GetHashString()}] Notification succeeded");
+                        Logger.LogDebug($"[Observer {observer.GetHashString()}] Notification succeeded");
                     }
                     catch (Exception e)
                     {
@@ -83,7 +83,7 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
                     }
                 });
             }
-            Logger.LogInformation("Notifications submitted");
+            Logger.LogDebug("Notifications submitted");
         }
 
         private sealed class Unsubscriber : IDisposable
@@ -94,8 +94,8 @@ namespace NVs.OccupancySensor.CV.Utils.Flow
 
             public Unsubscriber(List<IObserver<Image<Gray, byte>>> observers, object observersLock, IObserver<Image<Gray, byte>> target)
             {
-                this.observers = observers ?? throw new ArgumentNullException(nameof(observers));
-                this.target = target ?? throw new ArgumentNullException(nameof(target));
+                this.observers = observers;
+                this.target = target;
                 this.observersLock = observersLock;
             }
 
