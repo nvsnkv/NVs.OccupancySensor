@@ -41,7 +41,7 @@ namespace NVs.OccupancySensor.API.Tests
         }
 
         [Fact]
-        public async Task NotReconnectAfterNormalDisconnect()
+        public async Task ReconnectEvenAfterNormalDisconnect()
         {
             retriesSection.Setup(s => s["AttemptsCount"]).Returns("1");
             client.Setup(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(),It.IsAny<CancellationToken>()))
@@ -51,7 +51,7 @@ namespace NVs.OccupancySensor.API.Tests
             var _ = new Watchdog(client.Object, logger.Object, new WatchdogSettings(config.Object));
             await handler.HandleDisconnectedAsync(new MqttClientDisconnectedEventArgs(true, new Exception("Test exception"), new MqttClientConnectResult(), MqttClientDisconnectReason.NormalDisconnection));
 
-            client.Verify(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>()), Times.Never);
+            client.Verify(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>()));
         }
 
         [Theory]

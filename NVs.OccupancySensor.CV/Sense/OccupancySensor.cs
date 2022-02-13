@@ -17,6 +17,7 @@ namespace NVs.OccupancySensor.CV.Sense
         private readonly ICamera camera;
         private readonly IPeopleDetector detector;
         private readonly IBackgroundSubtractor subtractor;
+        private readonly ICorrector corrector;
         private readonly ILogger<OccupancySensor> logger;
 
         private readonly IDisposable denoiserSubscription;
@@ -34,6 +35,7 @@ namespace NVs.OccupancySensor.CV.Sense
             this.detector.PropertyChanged += OnDetectorPropertyChanged;
 
             this.subtractor = subtractor;
+            this.corrector = corrector;
             this.logger = logger;
 
             subtractorSubscription = camera.Stream.Subscribe(subtractor);
@@ -69,6 +71,7 @@ namespace NVs.OccupancySensor.CV.Sense
             logger.LogInformation("Stop requested");
             camera.Stop();
             detector.Reset();
+            corrector.Reset();
             subtractor.Reset();
         }
 
