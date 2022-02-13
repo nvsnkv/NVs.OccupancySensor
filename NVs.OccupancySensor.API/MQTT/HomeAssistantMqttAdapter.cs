@@ -84,7 +84,7 @@ namespace NVs.OccupancySensor.API.MQTT
                 return;
             }
 
-            using (logger.BeginScope("MQTT Command received"))
+            using (logger.BeginScope("MQTT Command [{MqttCommand}]", args.GetHashCode().ToString("X")))
             {
                 logger.LogInformation("Command received, updating sensor state...");
 

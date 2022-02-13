@@ -40,7 +40,7 @@ namespace NVs.OccupancySensor.CV.Capture
             {
                 if (isRunning)
                 {
-                    using (Logger.BeginScope("Frame {frame}", framesCaptured + 1))
+                    using (Logger.BeginScope("Frame: {Frame}", framesCaptured + 1))
                     {
                         Logger.LogDebug("Capturing frame");
                         Mat frame;
@@ -80,7 +80,7 @@ namespace NVs.OccupancySensor.CV.Capture
                         }
 
                         ++framesCaptured;
-                        Logger.LogInformation($"Frame {framesCaptured} processed");
+                        Logger.LogDebug($"Frame {framesCaptured} processed");
 
                         if (framesCaptured == int.MaxValue - 1)
                         {
