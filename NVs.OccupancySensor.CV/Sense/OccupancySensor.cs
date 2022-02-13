@@ -19,11 +19,11 @@ namespace NVs.OccupancySensor.CV.Sense
         private readonly IBackgroundSubtractor subtractor;
         private readonly ICorrector corrector;
         private readonly ILogger<OccupancySensor> logger;
-
         private readonly IDisposable denoiserSubscription;
         private readonly IDisposable subtractorSubscription;
         private readonly IDisposable correctorSubscription;
         private readonly IDisposable detectorSubscription;
+
         private bool isDisposed;
 
         public OccupancySensor(ICamera camera, IDenoiser denoiser, IBackgroundSubtractor subtractor, ICorrector corrector, IPeopleDetector detector, ILogger<OccupancySensor> logger)
@@ -97,7 +97,7 @@ namespace NVs.OccupancySensor.CV.Sense
             switch (e.PropertyName)
             {
                 case nameof(ICamera.IsRunning):
-                    logger.LogInformation($"Camera.IsRunning changed to {camera.IsRunning}");
+                    logger.LogInformation("Camera.IsRunning changed to {IsRunning}", camera.IsRunning);
                     OnPropertyChanged(nameof(IsRunning));
                     break;
             }
@@ -105,12 +105,15 @@ namespace NVs.OccupancySensor.CV.Sense
 
         private void OnDetectorPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            switch (e.PropertyName)
+            if (camera.IsRunning || !detector.PeopleDetected.HasValue)
             {
-                case nameof(IPeopleDetector.PeopleDetected):
-                    logger.LogInformation($"Detector.PeopleDetected changed to {detector.PeopleDetected?.ToString() ?? "null"}");
-                    OnPropertyChanged(nameof(PresenceDetected));
-                    break;
+                switch (e.PropertyName)
+                {
+                    case nameof(IPeopleDetector.PeopleDetected):
+                        logger.LogInformation("Detector.PeopleDetected changed to {PeopleDetected}", detector.PeopleDetected);
+                        OnPropertyChanged(nameof(PresenceDetected));
+                        break;
+                }
             }
         }
 
