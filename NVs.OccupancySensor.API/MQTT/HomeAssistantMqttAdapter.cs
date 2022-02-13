@@ -84,28 +84,31 @@ namespace NVs.OccupancySensor.API.MQTT
                 return;
             }
 
-            logger.LogInformation("Command received, updating sensor state...");
+            using (logger.BeginScope("MQTT Command received"))
+            {
+                logger.LogInformation("Command received, updating sensor state...");
 
-            bool newState;
-            try
-            {
-                var payload = Encoding.UTF8.GetString(args.ApplicationMessage.Payload);
-                logger.LogInformation("Payload received:{payload}", payload);
-                newState = payload.ToLowerInvariant().Equals("on");
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Failed to decode new state!");
-                throw;
-            }
+                bool newState;
+                try
+                {
+                    var payload = Encoding.UTF8.GetString(args.ApplicationMessage.Payload);
+                    logger.LogInformation("Payload received:{payload}", payload);
+                    newState = payload.ToLowerInvariant().Equals("on");
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "Failed to decode new state!");
+                    throw;
+                }
 
-            if (newState)
-            {
-                sensor.Start();
-            }
-            else
-            {
-                sensor.Stop();
+                if (newState)
+                {
+                    sensor.Start();
+                }
+                else
+                {
+                    sensor.Stop();
+                }
             }
         }
 

@@ -40,50 +40,54 @@ namespace NVs.OccupancySensor.CV.Capture
             {
                 if (isRunning)
                 {
-                    Logger.LogDebug($"Capturing frame {framesCaptured + 1}");
-                    Mat frame;
-                    try
+                    using (Logger.BeginScope("Frame {frame}", framesCaptured + 1))
                     {
-                        frame = videoCapture.QueryFrame();
-                        Logger.LogDebug("Got new frame");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.LogError(e, "Unable to query frame!");
-                        Notify(o => o.OnError(e));
-                        Notify(o => o.OnCompleted());
-
-                        return;
-                    }
-                    
-                    if (frame != null)
-                    {
-                        Image<Gray, byte> image;
+                        Logger.LogDebug("Capturing frame");
+                        Mat frame;
                         try
                         {
-                            image = frame.ToImage<Gray, byte>();
-                            Logger.LogDebug("Frame successfully converted to image!");
+                            frame = videoCapture.QueryFrame();
+                            Logger.LogDebug("Got new frame");
                         }
                         catch (Exception e)
                         {
-                            Logger.LogError(e, "Failed to convert frame to image!");
-                            throw;
+                            Logger.LogError(e, "Unable to query frame!");
+                            Notify(o => o.OnError(e));
+                            Notify(o => o.OnCompleted());
+
+                            return;
                         }
 
-                        Notify(o => o.OnNext(image));
-                    }
-                    else
-                    {
-                        Logger.LogDebug("null frame received!");
-                    }
-                    
-                    ++framesCaptured;
-                    Logger.LogInformation($"Frame {framesCaptured} processed");
+                        if (frame != null)
+                        {
+                            Image<Gray, byte> image;
+                            try
+                            {
+                                image = frame.ToImage<Gray, byte>();
+                                Logger.LogDebug("Frame successfully converted to image!");
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.LogError(e, "Failed to convert frame to image!");
+                                throw;
+                            }
 
-                    if (framesCaptured == int.MaxValue - 1)
-                    {
-                        Logger.LogInformation("Resetting captured frames counter since it reached int.MaxValue - 1");
-                        framesCaptured = 0;
+                            Notify(o => o.OnNext(image));
+                        }
+                        else
+                        {
+                            Logger.LogDebug("null frame received!");
+                        }
+
+                        ++framesCaptured;
+                        Logger.LogInformation($"Frame {framesCaptured} processed");
+
+                        if (framesCaptured == int.MaxValue - 1)
+                        {
+                            Logger.LogInformation(
+                                "Resetting captured frames counter since it reached int.MaxValue - 1");
+                            framesCaptured = 0;
+                        }
                     }
                 }
 
