@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Version>0.11.0.455</Version>
+    <Version>0.11.1.455</Version>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 

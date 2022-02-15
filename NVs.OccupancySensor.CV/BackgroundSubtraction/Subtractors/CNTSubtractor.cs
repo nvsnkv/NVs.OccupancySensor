@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using Emgu.CV;
 using Emgu.CV.BgSegm;
 using Emgu.CV.Structure;
@@ -7,11 +8,12 @@ namespace NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors
 {
     internal sealed class CNTSubtractor : ISubtractionStrategy
     {
-        private readonly BackgroundSubtractorCNT subtractor;
-
+        private readonly ICNTSubtractorSettings settings;
+        private BackgroundSubtractorCNT subtractor;
+        
         public CNTSubtractor(ICNTSubtractorSettings settings)
         {
-            if (settings == null) throw new ArgumentNullException(nameof(settings));
+            this.settings = settings;
             subtractor = new BackgroundSubtractorCNT(settings.MinPixelStability, settings.UseHistory, settings.MaxPixelStability, settings.IsParallel);
         }
 
@@ -26,7 +28,9 @@ namespace NVs.OccupancySensor.CV.BackgroundSubtraction.Subtractors
 
         public void Reset()
         {
-            subtractor.Clear();
+            var clean = new BackgroundSubtractorCNT(settings.MinPixelStability, settings.UseHistory, settings.MaxPixelStability, settings.IsParallel);
+            var old = Interlocked.Exchange(ref subtractor, clean);
+            old.Dispose();
         }
 
         public void Dispose()
