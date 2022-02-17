@@ -1,34 +1,47 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using NVs.OccupancySensor.API.Models;
 
 namespace NVs.OccupancySensor.API.ActionFilters
 {
-    public class IfStreamingAllowedAttribute : TypeFilterAttribute
+    internal class IfStreamingAllowedAttribute : Attribute, IFilterFactory
     {
-        public IfStreamingAllowedAttribute() : base(typeof(StreamingAllowedActionFilter))
+        private readonly AllowedStreamingType allowed;
+
+        public IfStreamingAllowedAttribute(AllowedStreamingType allowed)
         {
+            this.allowed = allowed;
         }
 
-        private class StreamingAllowedActionFilter : IActionFilter
+        public IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
         {
-            private static readonly string ConfigKey = "StreamingAllowed";
-            private readonly IConfiguration config;
+            return new SteamingAllowedActionFilter(allowed, serviceProvider.GetService<IConfiguration>() ?? throw new InvalidOperationException("Failed to retrieve configuration"));
+        }
 
-            private bool StreamingAllowed => bool.TryParse(config[ConfigKey], out var allowed) && allowed;
+        public bool IsReusable => false;
 
-            public StreamingAllowedActionFilter(IConfiguration config)
+        private class SteamingAllowedActionFilter : IAsyncActionFilter
+        {
+            private readonly AllowedStreamingType allowed;
+            private readonly IConfiguration configuration;
+
+            public SteamingAllowedActionFilter(AllowedStreamingType allowed, IConfiguration configuration)
             {
-                this.config = config;
+                this.allowed = allowed;
+                this.configuration = configuration;
             }
 
-            public void OnActionExecuted(ActionExecutedContext context)
+            public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
             {
-            }
-
-            public void OnActionExecuting(ActionExecutingContext context)
-            {
-                if (!StreamingAllowed)
+                if (Enum.TryParse(configuration["AllowedStreaming"], out AllowedStreamingType configured) && configured <= allowed)
+                {
+                    await next();
+                }
+                else
                 {
                     context.Result = new NoContentResult();
                 }

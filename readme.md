@@ -32,7 +32,7 @@ Nothing special there - just run `dotnet build` and MSBuild will do the rest for
 1. Update a few required settings:
     1. Ensure `CV:Capture:Source` is set to the proper source;
     2. Ensure MQTT settings are correct;
-    3. Set `StreamingAllowed` to _True_ to enable video translations on debug page;
+    3. Set `StreamsAllowed` to _All_ to enable video translations on debug page;
 2. Deploy the application (either run [dotnet publish](https://docs.microsoft.com/ru-ru/dotnet/core/tools/dotnet-publish) or just move `NVs.OccupancySensor.API` folder to the preferred location); VS Code users can use "publish" task commited to the repository;
 3. Start the app by running `dotnet occ-sensor.dll` in the target folder. By default app will start listening on port 5000;
 4. Open `/debug.html` URL in your favorite browser. If application was successfully deployed you should see the debug page;
@@ -41,7 +41,7 @@ Nothing special there - just run `dotnet build` and MSBuild will do the rest for
 7. Adjust the position of your camera using the translations on the debug page;
 8. Start MQTT adapter by making a POST HTTP request to `/api/v1/MQTTAdapter/Start`;
 9. Ensure that sensor started to publish MQTT topics to the server;
-10. If everything is fine, set `StreamingAllowed` setting to _False_ to improve your privacy;
+10. If everything is fine, set `StreamsAllowed` setting to _None_ to improve your privacy;
 11. Additionaly, update `StartSensor` and `StartMQTT` settings to _True_ to enable automated start after reboots;
 12. Restart application;
 13. Read the docs below.
@@ -110,7 +110,10 @@ Application uses MQTT.Net to build MQTT client. The following settings used to c
 #### Startup
 * `StartSensor` - boolean toggle to start sensor on startup. Default _False_
 * `StartMQTT` - boolean toggle to start MQTT client on startup. Default _False_
-* `StreamingAllowed` - boolean toggle to enable or disble streaming of incoming video and processed results. Default _False_
+* `StreamsAllowed` - defines the steams that will be available from debug page (and through streaming API):
+    * `None` - steaming completely disabled;
+    * `Subtracted` - application will produce the streams starting from _Subtraction_ stage, raw camera stream is inacessible;
+    * `All` - applicaton will produce all the streams including the raw stream from the camera
 #### Logging
 This app uses Serilog to capture logs, with `File` and `Console` sinks available. Please refer to the documentation for [Serilog.Settings.Configuration](https://github.com/serilog/serilog-settings-configuration).
 Startup process gets logged to `startup.ndjson` file in the application working directory. Rolling interval is set to 1 day for this log. Application will keep last 10 startup.ndjson log files. This behaviour is hardcoded.

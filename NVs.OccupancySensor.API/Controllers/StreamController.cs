@@ -30,7 +30,7 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
-        [IfStreamingAllowed]
+        [IfStreamingAllowed(AllowedStreamingType.All)]
         [Route("stream-raw.mjpeg")]
         public IActionResult GetRawStream()
         {
@@ -46,7 +46,7 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
-        [IfStreamingAllowed]
+        [IfStreamingAllowed(AllowedStreamingType.Subtracted)]
         [Route("stream-denoised.mjpeg")]
         public IActionResult GetDenoisedStream()
         {
@@ -62,7 +62,7 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
-        [IfStreamingAllowed]
+        [IfStreamingAllowed(AllowedStreamingType.Subtracted)]
         [Route("stream-subtracted.mjpeg")]
         public IActionResult GetSubtractedStream()
         {
@@ -78,7 +78,7 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
-        [IfStreamingAllowed]
+        [IfStreamingAllowed(AllowedStreamingType.Subtracted)]
         [Route("stream-corrected.mjpeg")]
         public IActionResult GetCorrectedStream()
         {
@@ -94,7 +94,7 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
-        [IfStreamingAllowed]
+        [IfStreamingAllowed(AllowedStreamingType.Subtracted)]
         [Route("stream.mjpeg")]
         public IActionResult GetStream()
         {

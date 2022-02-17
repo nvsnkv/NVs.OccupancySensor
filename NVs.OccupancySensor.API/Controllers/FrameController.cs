@@ -29,7 +29,7 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
-        [IfStreamingAllowed]
+        [IfStreamingAllowed(AllowedStreamingType.Subtracted)]
         [Produces("image/jpeg")]
         [Route("frame-denoised.jpg")]
         public async Task<Image<Gray, byte>?> GetDenoisedFrame(CancellationToken ct)
@@ -48,7 +48,7 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
-        [IfStreamingAllowed]
+        [IfStreamingAllowed(AllowedStreamingType.Subtracted)]
         [Produces("image/jpeg")]
         [Route("frame-subtracted.jpg")]
         public async Task<Image<Gray,byte>?> GetSubtractedFrame(CancellationToken ct)
@@ -67,7 +67,7 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
-        [IfStreamingAllowed]
+        [IfStreamingAllowed(AllowedStreamingType.Subtracted)]
         [Produces("image/jpeg")]
         [Route("frame-corrected.jpg")]
         public async Task<Image<Gray, byte>?> GetCorrectedFrame(CancellationToken ct)
@@ -87,7 +87,7 @@ namespace NVs.OccupancySensor.API.Controllers
 
         
         [HttpGet]
-        [IfStreamingAllowed]
+        [IfStreamingAllowed(AllowedStreamingType.All)]
         [Produces("image/jpeg")]
         [Route("frame-raw.jpg")]
         public async Task<Image<Gray, byte>?> GetRawFrame(CancellationToken ct)
