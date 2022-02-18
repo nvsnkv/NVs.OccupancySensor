@@ -30,13 +30,13 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
-        [IfStreamingAllowed(AllowedStreamingType.All)]
+        [IfStreamingAllowed(Streaming.Enabled)]
         [Route("stream-raw.mjpeg")]
         public IActionResult GetRawStream()
         {
             logger.LogDebug("GetRawStream called");
 
-            if (!streams.Camera.IsRunning || !IsStreamingAllowed)
+            if (!streams.Camera.IsRunning)
             {
                 return NoContent();
             }
@@ -46,13 +46,13 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
-        [IfStreamingAllowed(AllowedStreamingType.Subtracted)]
+        [IfStreamingAllowed(Streaming.Enabled)]
         [Route("stream-denoised.mjpeg")]
         public IActionResult GetDenoisedStream()
         {
             logger.LogDebug("GetDenoisedStream called");
 
-            if (!streams.Camera.IsRunning || !IsStreamingAllowed)
+            if (!streams.Camera.IsRunning)
             {
                 return NoContent();
             }
@@ -62,13 +62,13 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
-        [IfStreamingAllowed(AllowedStreamingType.Subtracted)]
+        [IfStreamingAllowed(Streaming.Enabled)]
         [Route("stream-subtracted.mjpeg")]
         public IActionResult GetSubtractedStream()
         {
             logger.LogDebug("GetSubtractedStream called");
 
-            if (!streams.Camera.IsRunning || !IsStreamingAllowed)
+            if (!streams.Camera.IsRunning)
             {
                 return NoContent();
             }
@@ -78,13 +78,13 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
-        [IfStreamingAllowed(AllowedStreamingType.Subtracted)]
+        [IfStreamingAllowed(Streaming.OnlyFinal)]
         [Route("stream-corrected.mjpeg")]
         public IActionResult GetCorrectedStream()
         {
             logger.LogDebug("GetCorrectedStream called");
 
-            if (!streams.Camera.IsRunning || !IsStreamingAllowed)
+            if (!streams.Camera.IsRunning)
             {
                 return NoContent();
             }
@@ -94,13 +94,13 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
-        [IfStreamingAllowed(AllowedStreamingType.Subtracted)]
+        [IfStreamingAllowed(Streaming.OnlyFinal)]
         [Route("stream.mjpeg")]
         public IActionResult GetStream()
         {
             logger.LogDebug($"GetStream called");
 
-            if (!streams.Camera.IsRunning || !IsStreamingAllowed)
+            if (!streams.Camera.IsRunning)
             {
                 return NoContent();
             }
@@ -136,7 +136,5 @@ namespace NVs.OccupancySensor.API.Controllers
                 async ct => (await observers.Gray.GetImage(ct))?.ToJpegData(),
                 () => unsubscriber.Dispose());
         }
-
-        private bool IsStreamingAllowed => bool.TryParse(config["StreamingAllowed"], out var b) && b;
     }
 }

@@ -16,6 +16,8 @@ Place your camera in the area you'd like to monitor.
 Find an appropriate host machine that will run the app. Depending on configuration, application may consume significant amount of CPU and RAM, so it would be hard to provide a _minimal_ and _recommended_ configurations.
 It works on Raspberry Pi 4 with 4 Gb RAM, so you can try something similar or more powerful.
 
+This application exposes HTTP API witout any authorization so you'll need to ensure it's hosted in a secure environment (inaccessible from Internet and so on).
+
 This application does not provide anything that can control external devices or send notifications to end users out of the box. A home automation server with MQTT support would be required to setup various integrations which depends on someone's precense in the room. In most of the cases having a separate host for home automation server would be recommended option.
 
 #### Software
@@ -32,7 +34,7 @@ Nothing special there - just run `dotnet build` and MSBuild will do the rest for
 1. Update a few required settings:
     1. Ensure `CV:Capture:Source` is set to the proper source;
     2. Ensure MQTT settings are correct;
-    3. Set `StreamsAllowed` to _All_ to enable video translations on debug page;
+    3. Set `Streaming` to _Enabled_ to enable video translations on debug page;
 2. Deploy the application (either run [dotnet publish](https://docs.microsoft.com/ru-ru/dotnet/core/tools/dotnet-publish) or just move `NVs.OccupancySensor.API` folder to the preferred location); VS Code users can use "publish" task commited to the repository;
 3. Start the app by running `dotnet occ-sensor.dll` in the target folder. By default app will start listening on port 5000;
 4. Open `/debug.html` URL in your favorite browser. If application was successfully deployed you should see the debug page;
@@ -41,7 +43,7 @@ Nothing special there - just run `dotnet build` and MSBuild will do the rest for
 7. Adjust the position of your camera using the translations on the debug page;
 8. Start MQTT adapter by making a POST HTTP request to `/api/v1/MQTTAdapter/Start`;
 9. Ensure that sensor started to publish MQTT topics to the server;
-10. If everything is fine, set `StreamsAllowed` setting to _None_ to improve your privacy;
+10. If everything is fine, set `Streaming` setting back to _Disabled_ to improve your privacy;
 11. Additionaly, update `StartSensor` and `StartMQTT` settings to _True_ to enable automated start after reboots;
 12. Restart application;
 13. Read the docs below.
@@ -110,10 +112,12 @@ Application uses MQTT.Net to build MQTT client. The following settings used to c
 #### Startup
 * `StartSensor` - boolean toggle to start sensor on startup. Default _False_
 * `StartMQTT` - boolean toggle to start MQTT client on startup. Default _False_
-* `StreamsAllowed` - defines the steams that will be available from debug page (and through streaming API):
-    * `None` - steaming completely disabled;
-    * `Subtracted` - application will produce the streams starting from _Subtraction_ stage, raw camera stream is inacessible;
-    * `All` - applicaton will produce all the streams including the raw stream from the camera
+#### Streaming
+Application can expose mjpeg streams over HTTP API to simplify setup and debugging. Streams are disabled by default.
+* `Streaming` - setting that controls streaming API. Default is _Disabled_. Options are:
+    * `Disabled` - no streams avaialable;
+    * `OnlyFinal` - application will stream only resulting frames that passed subtraciton, denoising and correction. This steam is unavailable when sensor is stopped;
+    * `Enabled` - application will stream frames from all the stages, starting from raw camera stream. By design, camera stream is available any time application is running, all other streams are available only when sensor is running.
 #### Logging
 This app uses Serilog to capture logs, with `File` and `Console` sinks available. Please refer to the documentation for [Serilog.Settings.Configuration](https://github.com/serilog/serilog-settings-configuration).
 Startup process gets logged to `startup.ndjson` file in the application working directory. Rolling interval is set to 1 day for this log. Application will keep last 10 startup.ndjson log files. This behaviour is hardcoded.

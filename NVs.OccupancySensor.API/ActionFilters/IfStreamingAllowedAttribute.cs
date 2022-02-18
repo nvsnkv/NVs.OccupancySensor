@@ -10,9 +10,9 @@ namespace NVs.OccupancySensor.API.ActionFilters
 {
     internal class IfStreamingAllowedAttribute : Attribute, IFilterFactory
     {
-        private readonly AllowedStreamingType allowed;
+        private readonly Streaming allowed;
 
-        public IfStreamingAllowedAttribute(AllowedStreamingType allowed)
+        public IfStreamingAllowedAttribute(Streaming allowed)
         {
             this.allowed = allowed;
         }
@@ -26,10 +26,10 @@ namespace NVs.OccupancySensor.API.ActionFilters
 
         private class SteamingAllowedActionFilter : IAsyncActionFilter
         {
-            private readonly AllowedStreamingType allowed;
+            private readonly Streaming allowed;
             private readonly IConfiguration configuration;
 
-            public SteamingAllowedActionFilter(AllowedStreamingType allowed, IConfiguration configuration)
+            public SteamingAllowedActionFilter(Streaming allowed, IConfiguration configuration)
             {
                 this.allowed = allowed;
                 this.configuration = configuration;
@@ -37,7 +37,7 @@ namespace NVs.OccupancySensor.API.ActionFilters
 
             public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
             {
-                if (Enum.TryParse(configuration["AllowedStreaming"], out AllowedStreamingType configured) && configured <= allowed)
+                if (Enum.TryParse(configuration["Streaming"], out Streaming configured) && configured >= allowed)
                 {
                     await next();
                 }

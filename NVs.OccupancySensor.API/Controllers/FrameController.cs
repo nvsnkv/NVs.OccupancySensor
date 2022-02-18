@@ -29,14 +29,14 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
-        [IfStreamingAllowed(AllowedStreamingType.Subtracted)]
+        [IfStreamingAllowed(Streaming.Enabled)]
         [Produces("image/jpeg")]
         [Route("frame-denoised.jpg")]
         public async Task<Image<Gray, byte>?> GetDenoisedFrame(CancellationToken ct)
         {
             logger.LogDebug("GetDenoisedFrame called");
 
-            if (!streams.Camera.IsRunning || !IsStreamingAllowed)
+            if (!streams.Camera.IsRunning)
             {
                 return null;
             }
@@ -48,14 +48,14 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
-        [IfStreamingAllowed(AllowedStreamingType.Subtracted)]
+        [IfStreamingAllowed(Streaming.Enabled)]
         [Produces("image/jpeg")]
         [Route("frame-subtracted.jpg")]
         public async Task<Image<Gray,byte>?> GetSubtractedFrame(CancellationToken ct)
         {
             logger.LogDebug("GetSubtractedFrame called");
 
-            if (!streams.Camera.IsRunning || !IsStreamingAllowed)
+            if (!streams.Camera.IsRunning)
             {
                 return null;
             }
@@ -67,14 +67,14 @@ namespace NVs.OccupancySensor.API.Controllers
         }
 
         [HttpGet]
-        [IfStreamingAllowed(AllowedStreamingType.Subtracted)]
+        [IfStreamingAllowed(Streaming.OnlyFinal)]
         [Produces("image/jpeg")]
         [Route("frame-corrected.jpg")]
         public async Task<Image<Gray, byte>?> GetCorrectedFrame(CancellationToken ct)
         {
             logger.LogDebug("GetCorrectedFrame called");
 
-            if (!streams.Camera.IsRunning || !IsStreamingAllowed)
+            if (!streams.Camera.IsRunning)
             {
                 return null;
             }
@@ -87,14 +87,14 @@ namespace NVs.OccupancySensor.API.Controllers
 
         
         [HttpGet]
-        [IfStreamingAllowed(AllowedStreamingType.All)]
+        [IfStreamingAllowed(Streaming.Enabled)]
         [Produces("image/jpeg")]
         [Route("frame-raw.jpg")]
         public async Task<Image<Gray, byte>?> GetRawFrame(CancellationToken ct)
         {
             logger.LogDebug("GetRawFrame called");
 
-            if (!streams.Camera.IsRunning || !IsStreamingAllowed)
+            if (!streams.Camera.IsRunning)
             {
                 return null;
             }
@@ -104,7 +104,5 @@ namespace NVs.OccupancySensor.API.Controllers
                 return await observers.Gray.GetImage(ct);
             }
         }
-
-        private bool IsStreamingAllowed => bool.TryParse(config["StreamingAllowed"], out var b) && b;
     }
 }
