@@ -31,10 +31,11 @@ Nothing special there - just run `dotnet build` and MSBuild will do the rest for
 
 ### Quick Setup
 1. Build application;
-1. Update a few required settings:
+1. Update a few required settings in `appsettings.json` (or supply them as environment variables):
+    1. Check that "Urls" property is correct;
     1. Ensure `CV:Capture:Source` is set to the proper source;
     2. Ensure MQTT settings are correct;
-    3. Set `Streaming` to _Enabled_ to enable video translations on debug page;
+    3. Set `Streaming` to _Enabled_ to enable mjpeg streams on debug page;
 2. Deploy the application (either run [dotnet publish](https://docs.microsoft.com/ru-ru/dotnet/core/tools/dotnet-publish) or just move `NVs.OccupancySensor.API` folder to the preferred location); VS Code users can use "publish" task commited to the repository;
 3. Start the app by running `dotnet occ-sensor.dll` in the target folder. By default app will start listening on port 5000;
 4. Open `/debug.html` URL in your favorite browser. If application was successfully deployed you should see the debug page;
@@ -63,9 +64,10 @@ Application has fair amount of configurable items:
 * Serilog is used to produce the logs;
 * And since it's ASP.Net Core application you can configure it's settings, like "Urls", "AllowedHosts" etc.
 
-App uses .Net Core configuration, so you can change the settings by:
+App uses default .NET configuration providers, so you can change the settings by:
 * updating appsettings.json with the values you need;
 * overriding the properties using environment variables.
+* Please refer to [.NET Configuration](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration) documentation for additional details.
 #### Camera
 * `CV:Capture:Source` - the source for OpenCV capture. Can be either integer value that identifies your local camera, file path or link to the stream. Default is _"0"_. This value is used to create [EmguCV VideoCapture](http://www.emgu.com/wiki/files/4.4.0/document/html/961857d0-b7ba-53d8-253a-5059bb3bc1df.htm)
 * `CV:Capture:FrameInterval` - the timespan that defines how often application will request new frames from the camera. Default is _100 milliseconds_.
