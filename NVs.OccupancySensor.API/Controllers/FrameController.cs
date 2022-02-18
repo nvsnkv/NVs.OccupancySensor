@@ -1,10 +1,8 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NVs.OccupancySensor.API.ActionFilters;
 using NVs.OccupancySensor.API.Models;
@@ -18,14 +16,12 @@ namespace NVs.OccupancySensor.API.Controllers
         private readonly Streams streams;
         private readonly Observers observers;
         private readonly ILogger<StreamsController> logger;
-        private readonly IConfiguration config;
 
-        public FrameController(Streams streams, Observers observers, ILogger<StreamsController> logger, IConfiguration config)
+        public FrameController(Streams streams, Observers observers, ILogger<StreamsController> logger)
         {
-            this.streams = streams ?? throw new ArgumentNullException(nameof(streams));
-            this.observers = observers ?? throw new ArgumentNullException(nameof(observers));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.config = config ?? throw new ArgumentNullException(nameof(config));
+            this.streams = streams;
+            this.observers = observers;
+            this.logger = logger;
         }
 
         [HttpGet]
