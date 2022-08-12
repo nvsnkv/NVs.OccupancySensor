@@ -3,8 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MQTTnet.Client;
-using MQTTnet.Client.Connecting;
-using MQTTnet.Client.Disconnecting;
 
 namespace NVs.OccupancySensor.API.MQTT.Watchdog
 {
@@ -23,7 +21,7 @@ namespace NVs.OccupancySensor.API.MQTT.Watchdog
             this.settings = settings;
             this.logger = logger;
 
-            client.UseDisconnectedHandler(Disconnected);
+            client.DisconnectedAsync += Disconnected;
         }
 
         private async Task Disconnected(MqttClientDisconnectedEventArgs args)
@@ -48,7 +46,7 @@ namespace NVs.OccupancySensor.API.MQTT.Watchdog
 
                         try
                         {
-                            var result = await client.ReconnectAsync(cts.Token);
+                            var result = await client.ConnectAsync(client.Options, cts.Token);
                             if (result.ResultCode == MqttClientConnectResultCode.Success)
                             {
                                 attemptsMade = 0;
@@ -100,7 +98,7 @@ namespace NVs.OccupancySensor.API.MQTT.Watchdog
     public void Dispose()
     {
         cts.Cancel();
-        client.UseDisconnectedHandler((IMqttClientDisconnectedHandler)null!);
+        client.DisconnectedAsync -= Disconnected;
     }
 }
 }

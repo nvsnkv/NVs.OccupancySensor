@@ -9,11 +9,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Client;
-using MQTTnet.Client.Connecting;
-using MQTTnet.Client.Options;
-using MQTTnet.Client.Publishing;
-using MQTTnet.Client.Receiving;
-using MQTTnet.Client.Subscribing;
 using NVs.OccupancySensor.API.MQTT.Watchdog;
 using NVs.OccupancySensor.CV.Sense;
 
@@ -24,7 +19,7 @@ namespace NVs.OccupancySensor.API.MQTT
     /// </summary>
     internal sealed class HomeAssistantMqttAdapter : IMqttAdapter
     {
-        private static readonly IMqttClientFactory ClientFactory = new MqttFactory();
+        private static readonly MqttFactory ClientFactory = new MqttFactory();
 
         private static readonly MqttClientSubscribeResultCode[] SuccessfulSubscriptionResultCodes =
         {
@@ -39,7 +34,7 @@ namespace NVs.OccupancySensor.API.MQTT
         private readonly ILogger<HomeAssistantMqttAdapter> logger;
         private readonly IMqttClient client;
         private readonly IDisposable watchdog;
-        private readonly IMqttClientOptions options;
+        private readonly MqttClientOptions options;
         private readonly Messages messages;
         
         private volatile bool isRunning;
@@ -62,11 +57,10 @@ namespace NVs.OccupancySensor.API.MQTT
                 options = new MqttClientOptionsBuilder()
                     .WithClientId(settings.ClientId)
                     .WithTcpServer(settings.Server, settings.Port)
-                    .WithWillMessage(messages.SensorUnavailable)
                     .WithCredentials(settings.User, settings.Password)
                     .Build();
 
-                client.UseApplicationMessageReceivedHandler(ClientOnMessageReceived);
+                client.ApplicationMessageReceivedAsync += OnApplicaitonMessageReceived;
             }
             catch (Exception e)
             {
@@ -77,11 +71,11 @@ namespace NVs.OccupancySensor.API.MQTT
             sensor.PropertyChanged += SensorOnPropertyChanged;
         }
 
-        private void ClientOnMessageReceived(MqttApplicationMessageReceivedEventArgs args)
+        private Task OnApplicaitonMessageReceived(MqttApplicationMessageReceivedEventArgs args)
         {
             if (!messages.ServiceCommandTopic.Equals(args.ApplicationMessage.Topic))
             {
-                return;
+                return Task.CompletedTask;
             }
 
             using (logger.BeginScope("MQTT Command [{MqttCommand}]", args.GetHashCode().ToString("X")))
@@ -110,6 +104,8 @@ namespace NVs.OccupancySensor.API.MQTT
                     sensor.Stop();
                 }
             }
+
+            return Task.CompletedTask;
         }
 
         private async void SensorOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -122,7 +118,11 @@ namespace NVs.OccupancySensor.API.MQTT
             var messagesToSend = PrepareMessages(e.PropertyName);
             try
             {
-                await client.PublishAsync(messagesToSend);
+                foreach (var message in messagesToSend)
+                {
+                    await client.PublishAsync(message);
+                }
+
                 logger.LogInformation("State change message was published.");
             }
             catch (Exception ex)
@@ -341,7 +341,7 @@ namespace NVs.OccupancySensor.API.MQTT
             sensor.PropertyChanged -= SensorOnPropertyChanged;
             watchdog.Dispose();
 
-            client.UseApplicationMessageReceivedHandler((IMqttApplicationMessageReceivedHandler)null!);
+            client.ApplicationMessageReceivedAsync -= OnApplicaitonMessageReceived;
             client.Dispose();
             
         }

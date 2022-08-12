@@ -6,16 +6,12 @@ using NVs.OccupancySensor.API.MQTT;
 using Microsoft.Extensions.Logging;
 using MQTTnet.Client;
 using Microsoft.Extensions.Configuration;
-using MQTTnet.Client.Options;
 using System.Text;
 using System.Threading.Tasks;
-using MQTTnet.Client.Connecting;
 using MQTTnet;
 using System.Threading;
-using MQTTnet.Client.Publishing;
 using System.Linq;
 using NVs.OccupancySensor.API.Tests.Utils;
-using MQTTnet.Client.Subscribing;
 using System.ComponentModel;
 
 namespace NVs.OccupancySensor.API.Tests
@@ -50,7 +46,7 @@ namespace NVs.OccupancySensor.API.Tests
    
             config.Setup(c => c.GetSection(It.Is<string>(v => "MQTT".Equals(v)))).Returns(section.Object);
             
-            client.Setup(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(new MqttClientConnectResult()));
+            client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(new MqttClientConnectResult()));
             client.Setup(c => c.PublishAsync(It.IsAny<MqttApplicationMessage>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(new MqttClientPublishResult()));
             client.Setup(c => c.SubscribeAsync(It.IsAny<MqttClientSubscribeOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(new MqttClientSubscribeResult()));
         }
@@ -79,10 +75,10 @@ namespace NVs.OccupancySensor.API.Tests
         public async Task ProvideMqttSettingsFromConstructor()
         {
             client.Setup(c => c.ConnectAsync(
-                It.Is<IMqttClientOptions>(
+                It.Is<MqttClientOptions>(
                     o => expectedClientId.Equals(o.ClientId)
-                    && expectedUser.Equals(o.Credentials.Username)
-                    && expectedPassword.Equals(Encoding.UTF8.GetString(o.Credentials.Password))
+                    && expectedUser.Equals(o.Credentials.GetUserName(o))
+                    && expectedPassword.Equals(Encoding.UTF8.GetString(o.Credentials.GetPassword(o)))
                     && o.ChannelOptions is MqttClientTcpOptions
                     && expectedServer.Equals((o.ChannelOptions as MqttClientTcpOptions)!.Server)
                     && expectedPort.Equals((o.ChannelOptions as MqttClientTcpOptions)!.Port)
@@ -103,7 +99,7 @@ namespace NVs.OccupancySensor.API.Tests
             var sensorConfig = expectedMessages.Configs.First();
             var switchConfig = expectedMessages.Configs.Skip(1).First();
 
-            client.Setup(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>()))
+            client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(new MqttClientConnectResult()));
 
             client.Setup(c => c.PublishAsync(It.Is<MqttApplicationMessage>(m => comparer.Equals(sensorConfig, m)), It.IsAny<CancellationToken>()))
@@ -190,7 +186,7 @@ namespace NVs.OccupancySensor.API.Tests
                 : expectedMessages.ServiceDisabled;
 
             sensor.SetupGet(s => s.IsRunning).Returns(state);
-            client.Setup(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(new MqttClientConnectResult()));
+            client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(new MqttClientConnectResult()));
             client.Setup(c => c.PublishAsync(It.Is<MqttApplicationMessage>(m => comparer.Equals(m, expectedMessage)), It.IsAny<CancellationToken>())).Verifiable("Publish was not called");
 
             var adapter = new HomeAssistantMqttAdapter(sensor.Object, logger.Object, CreateClient, new AdapterSettings(config.Object));
@@ -212,7 +208,7 @@ namespace NVs.OccupancySensor.API.Tests
                 : expectedMessages.SensorUnavailable;
             
             sensor.SetupGet(s => s.PresenceDetected).Returns(state);
-            client.Setup(c => c.ConnectAsync(It.IsAny<IMqttClientOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(new MqttClientConnectResult()));
+            client.Setup(c => c.ConnectAsync(It.IsAny<MqttClientOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(new MqttClientConnectResult()));
             client.Setup(c => c.PublishAsync(It.Is<MqttApplicationMessage>(m => comparer.Equals(m, expectedAvailability)), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(new MqttClientPublishResult()))
                 .Verifiable("Publish was not called");
