@@ -42,7 +42,7 @@ namespace NVs.OccupancySensor.CV.Tests
 
             var image = await observer.GetImage(CancellationToken.None);
             Assert.NotNull(image);
-            var actualJpeg = image!.ToJpegData();
+            var actualJpeg = image.ToJpegData();
             Assert.Equal(expectedJpeg, actualJpeg);
         }
 
