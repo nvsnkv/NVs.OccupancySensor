@@ -80,6 +80,11 @@ namespace NVs.OccupancySensor.API
                     }
                 });
             });
+
+            services.AddSingleton(s => new StateKeeper(
+                s.GetService<IOccupancySensor>() ?? throw new InvalidOperationException("OccupancySensor was not resolved!"),
+                s.GetService<ILogger<StateKeeper>>() ?? throw new InvalidOperationException("Logger for StateKeeper was not resolved!")));
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -110,10 +115,24 @@ namespace NVs.OccupancySensor.API
                 endpoints.MapControllers();
             });
 
-            if (bool.TryParse(Configuration["StartSensor"], out var startSensor) && startSensor)
+            var keeper = app.ApplicationServices.GetService<StateKeeper>() ?? throw new InvalidOperationException("Unable to resolve StateKeeper!");
+            var sensor = app.ApplicationServices.GetService<IOccupancySensor>() ?? throw new InvalidOperationException("Unable to resolve OccupancySensor!");
+
+            var previousState = keeper.CheckWasSensorRunning();
+            if (previousState.HasValue)
             {
-                var sensor = app.ApplicationServices.GetService<IOccupancySensor>() ?? throw new InvalidOperationException("Unable to resolve OccupancySensor!");
-                sensor.Start();
+                if (previousState.Value)
+                {
+                    sensor.Start();
+                }
+            }
+            else
+            {
+                if (bool.TryParse(Configuration["StartSensor"], out var startSensor) && startSensor)
+                {
+
+                    sensor.Start();
+                }
             }
 
             if (bool.TryParse(Configuration["StartMQTT"], out var startAdapter) && startAdapter)
