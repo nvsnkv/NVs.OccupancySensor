@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <UserSecretsId>5caab80b-6b86-42e5-b230-6ffbf26ddf4c</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <Version>0.7.0</Version>
+    <Version>0.8.0</Version>
     <DockerfileFastModeStage>base</DockerfileFastModeStage>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
     <AssemblyName>occ-sensor</AssemblyName>
