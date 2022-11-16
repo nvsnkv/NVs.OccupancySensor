@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Divergic.Logging.Xunit" Version="4.2.0" />
-    <PackageReference Include="Emgu.CV" Version="4.5.5.4823" />
+    <PackageReference Include="Emgu.CV" Version="4.6.0.5131" />
     <PackageReference Include="Emgu.CV.runtime.ubuntu.20.04-x64" Version="4.5.5.4823" />
     <PackageReference Include="Emgu.CV.runtime.windows" Version="4.5.5.4823" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
